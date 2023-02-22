@@ -1,0 +1,1 @@
+{"HTTPPort":9090,"HTTPPool":32,"HTTPQueue":1000,"HTTPAutoWork":true,"ConnectSecretkey":"2EEF2D08F5C74327B769493AD7A7B5DA","TokenIntervalSec":0,"WinTaskStart":false,"WinRegisterStart":false}

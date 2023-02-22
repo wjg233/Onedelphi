@@ -1,0 +1,85 @@
+﻿unit DemoOrmController;
+
+interface
+
+uses OneHttpController, OneHttpRouterManage, OneHttpCtxtResult, OneTokenManage,
+  system.Generics.Collections, system.StrUtils, system.SysUtils, Data.DB,
+  FireDAC.Comp.Client, OneControllerResult, OneAttribute;
+
+type
+   emTest = (cmTestA,cmTestB);
+  TTestOrm = class
+  private
+    FName: string;
+    FAge: Integer;
+    Fbit: Boolean;
+  protected
+    FCode: string;
+  public
+    FPublic: string;
+    FDateTime: TDateTime;
+  public
+    constructor Create;
+    destructor Destroy; override;
+  public
+    property Name: string read FName write FName;
+    property Age: Integer read FAge write FAge;
+    property DateTime: TDateTime read FDateTime write FDateTime;
+    property myBit: Boolean read Fbit write Fbit;
+  end;
+
+  TDemoOrmController = class(TOneControllerBase)
+  public
+    // 返回结果格式 {ResultBool: false, ResultCode: "0002", ResultMsg: "", ResultData: "范联满"}
+    function GetResultStr(): TResult<TList<TTestOrm>>;
+  end;
+
+function CreateNewDemoOrmController(QRouterItem: TOneRouterItem): TObject;
+
+implementation
+
+uses OneGlobal, oneOrm;
+
+function CreateNewDemoOrmController(QRouterItem: TOneRouterItem): TObject;
+var
+  lController: TDemoOrmController;
+begin
+  // 自定义创建控制器类，否则会按 TPersistentclass.create
+  // 最好自定义一个好
+  lController := TDemoOrmController.Create;
+  // 挂载RTTI信息
+  lController.RouterItem := QRouterItem;
+  result := lController;
+end;
+
+function TDemoOrmController.GetResultStr(): TResult<TList<TTestOrm>>;
+var
+  lList: TList<TTestOrm>;
+  lTestOrm: TTestOrm;
+begin
+  result := TResult < TList < TTestOrm >>.Create(true, true);
+  lList := TOneOrm<TTestOrm>.Start().Query('select * from test', []).ToList();
+  result.ResultData := lList;
+  // 写法2
+  // TOneOrm<TTestOrm>.Start().Select().SetTableName('test').toCmd().ToList();
+end;
+
+constructor TTestOrm.Create;
+begin
+  inherited Create;
+  self.FName := '-';
+end;
+
+destructor TTestOrm.Destroy;
+begin
+
+end;
+
+initialization
+
+// 单例模式注册
+OneHttpRouterManage.GetInitRouterManage().AddHTTPSingleWork('DemoOrm', TDemoOrmController, 0, CreateNewDemoOrmController);
+
+finalization
+
+end.

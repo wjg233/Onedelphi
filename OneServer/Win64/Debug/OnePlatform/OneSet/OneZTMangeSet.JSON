@@ -1,0 +1,1 @@
+{"AutoWork":false,"ZTSetList":[{"ZTCode":"hm","ZTCaption":"海美","InitPoolCount":10,"MaxPoolCount":10,"PhyDriver":"FB","ConnectionStr":"Database=d:\\data\\himei-erp.fdb;User_Name=sysdba;Password=123$%^zxc;Server=hd.jyiba.cn;Port=3050;CharacterSet=ISO8859_1;DriverID=FB","IsEnable":true,"IsMain":true}]}

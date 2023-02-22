@@ -1,0 +1,65 @@
+﻿unit DemoDataController;
+
+// 结果返回是jsonobject,jsonArray事例
+interface
+
+uses OneHttpController, OneHttpPublic, OneHttpRouterManage, System.SysUtils,
+  System.Generics.Collections, System.Contnrs, System.Classes,
+  FireDAC.Comp.Client, Data.DB, System.JSON;
+
+type
+  TDemoDataController = class(TOneControllerBase)
+  public
+    // 返回结果 [{"name":"flm0"},{"name":"flm1"},{"name":"flm2"}]
+    function GetData(): TFDMemtable;
+    // 返回结果 [{"name":"flm0"},{"name":"flm1"},{"name":"flm2"}]
+    function GetQuery(): TFDQuery;
+  end;
+
+function CreateNewDemoDataController(QRouterItem: TOneRouterItem): TObject;
+
+implementation
+
+function CreateNewDemoDataController(QRouterItem: TOneRouterItem): TObject;
+var
+  lController: TDemoDataController;
+begin
+  // 自定义创建控制器类，否则会按 TPersistentclass.create
+  // 最好自定义一个好
+  lController := TDemoDataController.Create;
+  // 挂载RTTI信息
+  lController.RouterItem := QRouterItem;
+  result := lController;
+end;
+
+function TDemoDataController. GetData(): TFDMemtable;
+begin
+  result := TFDMemtable.Create;
+  result.AddPair('name', 'flm');
+end;
+
+function TDemoDataController.GetQuery(): TFDQuery;
+var
+  lJsonObj: TJsonObject;
+  i: integer;
+begin
+  result := TJsonArray.Create;
+  for i := 0 to 9 do
+  begin
+    lJsonObj := TJsonObject.Create;
+    lJsonObj.AddPair('name', 'flm' + i.ToString);
+    result.Add(lJsonObj);
+  end;
+end;
+
+// 注册到路由
+initialization
+
+// 注意，路由名称 不要一样，否则会判定已注册过，跳过
+// 多例模式注册
+OneHttpRouterManage.GetInitRouterManage().AddHTTPPoolWork('DemoData',
+  TDemoDataController, 10, CreateNewDemoDataController);
+
+finalization
+
+end.

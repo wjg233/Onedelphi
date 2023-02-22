@@ -1,0 +1,159 @@
+﻿unit DataController;
+
+interface
+
+uses OneHttpController, OneHttpRouterManage, OneHttpCtxtResult, OneDataInfo,
+  system.Generics.Collections, OneFileHelper, system.StrUtils, system.SysUtils,
+  OneControllerResult;
+
+type
+  TOneDataController = class(TOneControllerBase)
+  public
+    { 只有这种类型的参数结果才注册到RTTI,防止所有的全注册 }
+    { 打开几个数据 }
+    function OpenDatas(QDataOpens: TList<TOneDataOpen>): TOneDataResult;
+    function ExecStored(QDataOpen: TOneDataOpen): TOneDataResult;
+    function SaveDatas(QSaveDMLDatas: TList<TOneDataSaveDML>): TOneDataResult;
+    // 载文件
+    function DownLoadDataFile(fileID: string): TResult<string>;
+    procedure DelDataFile(fileID: string);
+  end;
+
+function CreateNewOneDataController(QRouterItem: TOneRouterItem): TObject;
+
+implementation
+
+uses OneGlobal, OneSQLCrypto;
+
+function CreateNewOneDataController(QRouterItem: TOneRouterItem): TObject;
+var
+  lController: TOneDataController;
+begin
+  // 自定义创建控制器类，否则会按 TPersistentclass.create
+  // 最好自定义一个好
+  lController := TOneDataController.Create;
+  // 挂载RTTI信息
+  lController.RouterItem := QRouterItem;
+  result := lController;
+end;
+
+function TOneDataController.OpenDatas(QDataOpens: TList<TOneDataOpen>)
+  : TOneDataResult;
+var
+  lOneGlobal: TOneGlobal;
+  i: integer;
+begin
+  result := TOneDataResult.Create;
+  lOneGlobal := TOneGlobal.GetInstance();
+
+  for i := 0 to QDataOpens.Count - 1 do
+  begin
+    // 客户端提交的 SQL还原
+    QDataOpens[i].OpenSQL := OneSQLCrypto.SwapDecodeCrypto
+      (QDataOpens[i].OpenSQL);
+  end;
+  // 打开数据
+  if not lOneGlobal.ZTManage.OpenDatas(QDataOpens, result) then
+  begin
+    exit;
+  end;
+  // 解析相关数据
+  if result.ResultOK then
+  begin
+    result.DoResultitems();
+  end;
+end;
+
+function TOneDataController.ExecStored(QDataOpen: TOneDataOpen): TOneDataResult;
+var
+  lOneGlobal: TOneGlobal;
+  i: integer;
+begin
+  result := TOneDataResult.Create;
+  lOneGlobal := TOneGlobal.GetInstance();
+  // 打开数据
+  if not lOneGlobal.ZTManage.ExecStored(QDataOpen, result) then
+  begin
+    exit;
+  end;
+  // 解析相关数据
+  if result.ResultOK then
+  begin
+    result.DoResultitems();
+  end;
+end;
+
+function TOneDataController.SaveDatas(QSaveDMLDatas: TList<TOneDataSaveDML>)
+  : TOneDataResult;
+var
+  lOneGlobal: TOneGlobal;
+  i: integer;
+begin
+  result := TOneDataResult.Create;
+  lOneGlobal := TOneGlobal.GetInstance();
+  for i := 0 to QSaveDMLDatas.Count - 1 do
+  begin
+    // 客户端提交的 SQL还原
+    QSaveDMLDatas[i].SQL := OneSQLCrypto.SwapDecodeCrypto(QSaveDMLDatas[i].SQL);
+  end;
+  // 保存数据
+  if not lOneGlobal.ZTManage.SaveDatas(QSaveDMLDatas, result) then
+  begin
+    exit;
+  end;
+  // 解析相关数据
+  if result.ResultOK then
+  begin
+    result.DoResultitems();
+  end;
+end;
+
+// 下载文件
+function TOneDataController.DownLoadDataFile(fileID: string): TResult<string>;
+var
+  lFileName: string;
+begin
+  result := TResult<string>.Create(false, false);
+  if fileID.Trim = '' then
+  begin
+    result.ResultMsg := '文件ID为空';
+    exit;
+  end;
+  lFileName := OneFileHelper.CombineExeRunPath('OnePlatform\OneDataTemp\' +
+    fileID + '.data');
+  if not fileExists(lFileName) then
+  begin
+    result.ResultMsg := '文件已不存在';
+    exit;
+  end;
+  result.ResultData := lFileName;
+  // 返回的是文件
+  result.SetResultTrueFile();
+end;
+
+procedure TOneDataController.DelDataFile(fileID: string);
+var
+  lFileName: string;
+begin
+  if fileID.Trim = '' then
+  begin
+    exit;
+  end;
+  lFileName := OneFileHelper.CombineExeRunPath('OnePlatform\OneDataTemp\' +
+    fileID + '.data');
+  if fileExists(lFileName) then
+  begin
+    fileDelete();
+    exit;
+  end;
+end;
+
+initialization
+
+// 单例模式注册
+OneHttpRouterManage.GetInitRouterManage().AddHTTPSingleWork('OneServer/Data',
+  TOneDataController, 0, CreateNewOneDataController);
+
+finalization
+
+end.

@@ -1,0 +1,938 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="OneServer.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="6" Y="30"/>
+        <UsageCount Value="206"/>
+      </Unit>
+      <Unit>
+        <Filename Value="frm_main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13"/>
+        <CursorPos X="57" Y="22"/>
+        <UsageCount Value="206"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\onehttpserver.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneHttpServer"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="304"/>
+        <CursorPos Y="310"/>
+        <UsageCount Value="206"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\logger\oneilog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneILog"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="12" Y="34"/>
+        <UsageCount Value="206"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\logger\onelog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneLog"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="55"/>
+        <CursorPos X="3" Y="74"/>
+        <UsageCount Value="206"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\thread\onethread.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneThread"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="223"/>
+        <CursorPos X="7" Y="250"/>
+        <UsageCount Value="203"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\func\onefilehelper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneFileHelper"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="14"/>
+        <CursorPos X="58" Y="51"/>
+        <FoldState Value=" T3P06114 Pi7iV0$"/>
+        <UsageCount Value="203"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\attribute\oneattribute.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneAttribute"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="38" Y="42"/>
+        <UsageCount Value="202"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\crypto\onecrypto.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneCrypto"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="36" Y="34"/>
+        <UsageCount Value="202"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\crypto\onesqlcrypto.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneSQLCrypto"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="52"/>
+        <CursorPos X="54" Y="69"/>
+        <UsageCount Value="202"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\crypto\onestreamstring.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneStreamString"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="21"/>
+        <UsageCount Value="202"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\func\onedatetimehelper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneDateTimeHelper"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="7"/>
+        <CursorPos X="64" Y="28"/>
+        <UsageCount Value="203"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\func\oneguid.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneGUID"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="49" Y="22"/>
+        <UsageCount Value="203"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\virtualFile\onevirtualfile.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneVirtualFile"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="56"/>
+        <CursorPos X="70" Y="83"/>
+        <UsageCount Value="203"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\token\onetokenmanage.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneTokenManage"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="260"/>
+        <CursorPos X="5" Y="291"/>
+        <UsageCount Value="200"/>
+      </Unit>
+      <Unit>
+        <Filename Value="dbCenter\onedatainfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneDataInfo"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="14"/>
+        <CursorPos X="3" Y="34"/>
+        <UsageCount Value="200"/>
+      </Unit>
+      <Unit>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneZTManage"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="2532"/>
+        <CursorPos X="3" Y="2498"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\func\onemonitor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneMonitor"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3"/>
+        <CursorPos X="5" Y="30"/>
+        <UsageCount Value="218"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\onecontrollerresult.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneControllerResult"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="141"/>
+        <CursorPos Y="167"/>
+        <FoldState Value=" T7cO8113 PbiDN T8iL21S"/>
+        <UsageCount Value="211"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\onehttpconst.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneHttpConst"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="15" Y="6"/>
+        <UsageCount Value="211"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\onehttpcontrollerrtti.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneHttpControllerRtti"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="269"/>
+        <CursorPos X="41" Y="228"/>
+        <FoldState Value=" T3k8091 PMB0)"/>
+        <UsageCount Value="211"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\onehttproutermanage.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneHttpRouterManage"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="226"/>
+        <CursorPos Y="238"/>
+        <UsageCount Value="211"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\onehttpctxtresult.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneHttpCtxtResult"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="211"/>
+        <CursorPos Y="250"/>
+        <UsageCount Value="211"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\func\onestopwatch.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneStopwatch"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="31" Y="23"/>
+        <UsageCount Value="201"/>
+      </Unit>
+      <Unit>
+        <Filename Value="oneglobal.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneGlobal"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="128"/>
+        <CursorPos Y="138"/>
+        <UsageCount Value="201"/>
+      </Unit>
+      <Unit>
+        <Filename Value="dbCenter\oneormrtti.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneOrmRtti"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="179"/>
+        <CursorPos X="65" Y="199"/>
+        <UsageCount Value="201"/>
+      </Unit>
+      <Unit>
+        <Filename Value="dbCenter\oneorm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneOrm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1027"/>
+        <CursorPos X="30" Y="1035"/>
+        <UsageCount Value="201"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\serialization\oneserialization.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneSerialization"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="36" Y="6"/>
+        <FoldState Value=" T0sD8U0521111[44 PbiT8A"/>
+        <UsageCount Value="201"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\onehttpcontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneHttpController"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="783"/>
+        <CursorPos Y="499"/>
+        <FoldState Value=" T0qA85E"/>
+        <UsageCount Value="201"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\demo\democontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DemoController"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="93"/>
+        <CursorPos X="88" Y="109"/>
+        <UsageCount Value="202"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\controller\tokencontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TokenController"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="75"/>
+        <CursorPos X="67" Y="99"/>
+        <UsageCount Value="200"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\controller\datacontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DataController"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="103"/>
+        <CursorPos X="44" Y="118"/>
+        <UsageCount Value="200"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\controller\virtualfilecontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="VirtualFileController"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="246"/>
+        <CursorPos X="26" Y="272"/>
+        <UsageCount Value="200"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\demo\demodatacontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DemoDataController"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="57" Y="10"/>
+        <UsageCount Value="213"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\serialization\onedatajson.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneDataJson"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="74" Y="8"/>
+        <UsageCount Value="212"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\demo\demojsoncontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DemoJsonController"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="9"/>
+        <CursorPos X="70" Y="19"/>
+        <UsageCount Value="204"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\demo\democustresult.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DemoCustResult"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="14"/>
+        <CursorPos X="63" Y="40"/>
+        <UsageCount Value="203"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\demo\demoztcontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DemoZTController"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="67"/>
+        <CursorPos X="46" Y="92"/>
+        <UsageCount Value="200"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\multipart\onemultipart.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OneMultipart"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="6"/>
+        <CursorPos X="40" Y="14"/>
+        <UsageCount Value="172"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="baseLib\rtti\onerttihelper.pas"/>
+        <UnitName Value="OneRttiHelper"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="10"/>
+        <UsageCount Value="168"/>
+      </Unit>
+      <Unit>
+        <Filename Value="neonSerialization\neon.core.typeinfo.pas"/>
+        <UnitName Value="Neon.Core.TypeInfo"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="201"/>
+        <CursorPos X="24" Y="211"/>
+        <UsageCount Value="59"/>
+      </Unit>
+      <Unit>
+        <Filename Value="neonSerialization\neon.core.types.pas"/>
+        <UnitName Value="Neon.Core.Types"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="16" Y="14"/>
+        <UsageCount Value="58"/>
+      </Unit>
+      <Unit>
+        <Filename Value="neonSerialization\neon.core.utils.pas"/>
+        <UnitName Value="Neon.Core.Utils"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="43"/>
+        <CursorPos X="69" Y="52"/>
+        <UsageCount Value="58"/>
+      </Unit>
+      <Unit>
+        <Filename Value="neonSerialization\neon.core.attributes.pas"/>
+        <UnitName Value="Neon.Core.Attributes"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="206"/>
+        <CursorPos Y="216"/>
+        <UsageCount Value="52"/>
+      </Unit>
+      <Unit>
+        <Filename Value="neonSerialization\neon.core.dynamictypes.pas"/>
+        <UnitName Value="Neon.Core.DynamicTypes"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="597"/>
+        <CursorPos X="59" Y="625"/>
+        <UsageCount Value="52"/>
+      </Unit>
+      <Unit>
+        <Filename Value="neonSerialization\neon.core.nullables.pas"/>
+        <UnitName Value="Neon.Core.Nullables"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="55"/>
+        <CursorPos X="5" Y="61"/>
+        <UsageCount Value="52"/>
+      </Unit>
+      <Unit>
+        <Filename Value="neonSerialization\neon.core.serializers.vcl.pas"/>
+        <UnitName Value="Neon.Core.Serializers.VCL"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="54" Y="9"/>
+        <UsageCount Value="50"/>
+      </Unit>
+      <Unit>
+        <Filename Value="neonSerialization\neon.core.persistence.pas"/>
+        <UnitName Value="Neon.Core.Persistence"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1226"/>
+        <CursorPos X="27" Y="1245"/>
+        <UsageCount Value="50"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\fpcsrc\packages\fcl-db\src\base\bufdataset.pas"/>
+        <UnitName Value="BufDataset"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="443"/>
+        <CursorPos X="23" Y="469"/>
+        <UsageCount Value="1"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\fpcsrc\packages\fcl-db\src\sqldb\sqldb.pp"/>
+        <UnitName Value="SQLDB"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3238"/>
+        <CursorPos X="3" Y="3241"/>
+        <UsageCount Value="1"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\fpcsrc\packages\fcl-db\src\base\database.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="56"/>
+        <CursorPos X="3" Y="59"/>
+        <UsageCount Value="3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\lazarus\components\mORMot2-master\src\core\mormot.core.buffers.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8420"/>
+        <CursorPos X="34" Y="8337"/>
+        <UsageCount Value="3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\fpcsrc\rtl\inc\systemh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="546"/>
+        <CursorPos X="3" Y="567"/>
+        <UsageCount Value="3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\lazarus\components\mORMot2-master\src\net\mormot.net.http.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="521"/>
+        <CursorPos X="3" Y="533"/>
+        <UsageCount Value="3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\rtl\objpas\typinfo.pp"/>
+        <UnitName Value="TypInfo"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="87" Y="28"/>
+        <UsageCount Value="26"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\components\mORMot2-master\src\net\mormot.net.http.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="567"/>
+        <CursorPos X="39" Y="581"/>
+        <UsageCount Value="29"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\paszlib\src\zstream.pp"/>
+        <UnitName Value="ZStream"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="68"/>
+        <CursorPos X="19" Y="68"/>
+        <UsageCount Value="1"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\paszlib\src\gzio.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="199"/>
+        <CursorPos X="3" Y="141"/>
+        <UsageCount Value="1"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\fcl-db\src\base\bufdataset.pas"/>
+        <UnitName Value="BufDataset"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3802"/>
+        <CursorPos X="3" Y="3797"/>
+        <UsageCount Value="14"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\fcl-db\src\base\db.pas"/>
+        <UnitName Value="DB"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1697"/>
+        <CursorPos X="22" Y="1715"/>
+        <UsageCount Value="40"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\rtl\objpas\sysutils\syshelph.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="160"/>
+        <CursorPos X="23" Y="175"/>
+        <UsageCount Value="27"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\fcl-db\src\sqldb\sqldb.pp"/>
+        <UnitName Value="SQLDB"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="178"/>
+        <CursorPos X="3" Y="185"/>
+        <UsageCount Value="15"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\rtl\objpas\sysutils\sysencodingh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="65"/>
+        <CursorPos X="26" Y="91"/>
+        <UsageCount Value="3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\fpcsrc\packages\fcl-hash\tests\utestsha512.pp"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="59" Y="8"/>
+        <UsageCount Value="3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\hash\src\hmac.pp"/>
+        <UnitName Value="HMAC"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="160"/>
+        <UsageCount Value="3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\fcl-base\src\base64.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="10"/>
+        <CursorPos Y="10"/>
+        <UsageCount Value="3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\OneClient\oneclientvirtualfile.pas"/>
+        <UnitName Value="OneClientVirtualFile"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8"/>
+        <CursorPos X="55" Y="55"/>
+        <UsageCount Value="7"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\OneClient\oneclientconst.pas"/>
+        <UnitName Value="OneClientConst"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="9"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\OneClient\oneclientconnect.pas"/>
+        <UnitName Value="OneClientConnect"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="31" Y="16"/>
+        <UsageCount Value="37"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\fcl-db\src\base\dataset.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2111"/>
+        <CursorPos X="3" Y="2117"/>
+        <UsageCount Value="14"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\fcl-web\src\base\httpdefs.pp"/>
+        <UnitName Value="HTTPDefs"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="367"/>
+        <CursorPos X="14" Y="345"/>
+        <UsageCount Value="39"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\packages\fcl-db\src\sqldb\odbc\odbcconn.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="57"/>
+        <CursorPos X="3" Y="57"/>
+        <UsageCount Value="27"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\fpc\3.2.2\source\rtl\objpas\sysutils\syshelp.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1369"/>
+        <CursorPos X="36" Y="1393"/>
+        <UsageCount Value="27"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\OneClient\baselib\oneclientdatainfo.pas"/>
+        <UnitName Value="OneClientDataInfo"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="44"/>
+        <CursorPos X="25" Y="54"/>
+        <UsageCount Value="26"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\OneClient\baselib\oneserialization.pas"/>
+        <UnitName Value="OneSerialization"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="79" Y="17"/>
+        <UsageCount Value="26"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\OneClient\baselib\onedatajson.pas"/>
+        <UnitName Value="OneDataJson"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="67"/>
+        <CursorPos X="32" Y="45"/>
+        <UsageCount Value="26"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\components\jcf2\Ui\Settings\frFiles.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="150"/>
+        <CursorPos X="21" Y="167"/>
+        <UsageCount Value="7"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\Lazarus\lcl\lclintf.pas"/>
+        <UnitName Value="LCLIntf"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos X="13" Y="38"/>
+        <UsageCount Value="7"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1821"/>
+        <CursorPos X="14" Y="1835"/>
+        <UsageCount Value="7"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\OneClient\oneclientresult.pas"/>
+        <UnitName Value="OneClientResult"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="85"/>
+        <CursorPos X="22" Y="51"/>
+        <UsageCount Value="11"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\packages\fcl-json\src\fpjson.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="694"/>
+        <CursorPos X="14" Y="707"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\packages\rtl-generics\src\generics.collections.pas"/>
+        <UnitName Value="Generics.Collections"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2219"/>
+        <CursorPos Y="2234"/>
+        <UsageCount Value="8"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\packages\rtl-objpas\src\inc\rtti.pp"/>
+        <UnitName Value="Rtti"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="25"/>
+        <CursorPos Y="4348"/>
+        <UsageCount Value="9"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\packages\rtl-objpas\src\i386\invoke.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="944"/>
+        <CursorPos X="56" Y="956"/>
+        <UsageCount Value="8"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\lazarus\components\Mormot2\src\core\mormot.core.rtti.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2959"/>
+        <CursorPos X="31" Y="2979"/>
+        <UsageCount Value="9"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\lazarus\components\Mormot2\src\core\mormot.core.test.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="9"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\rtl\objpas\typinfo.pp"/>
+        <UnitName Value="TypInfo"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="374"/>
+        <CursorPos X="7" Y="345"/>
+        <UsageCount Value="8"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\rtl\win64\classes.pp"/>
+        <UnitName Value="Classes"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="55" Y="21"/>
+        <UsageCount Value="8"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\rtl\win\sysutils.pp"/>
+        <UnitName Value="SysUtils"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1301"/>
+        <CursorPos X="12" Y="1354"/>
+        <UsageCount Value="8"/>
+      </Unit>
+      <Unit>
+        <Filename Value="httpServer\controller\unidemocontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UniDemoController"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="74"/>
+        <CursorPos X="63" Y="85"/>
+        <FoldState Value=" T3tO0,8"/>
+        <UsageCount Value="25"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\packages\fcl-web\src\base\httpdefs.pp"/>
+        <UnitName Value="HTTPDefs"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="212"/>
+        <CursorPos X="53" Y="231"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Lazarus\fpcsrc\packages\fcl-db\src\sqldb\sqldb.pp"/>
+        <UnitName Value="SQLDB"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="581"/>
+        <CursorPos X="15" Y="595"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="29">
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="314" Column="20" TopLine="298"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1289" Column="26" TopLine="1264"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1232" Column="11" TopLine="1217"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1280" Column="40" TopLine="1258"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1232" Column="3" TopLine="1217"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="32" Column="3" TopLine="16"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1232" Column="11" TopLine="1206"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1276" Column="13" TopLine="1290"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1283" Column="29" TopLine="1268"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="314" Column="20" TopLine="298"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="2540" Column="8" TopLine="2523"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1232" Column="11" TopLine="1217"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1283" Column="29" TopLine="1264"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="314" Column="20" TopLine="298"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="2497" Column="3" TopLine="2474"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1232" Column="11" TopLine="1217"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1283" Column="29" TopLine="1273"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="314" Column="20" TopLine="298"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="2497" Column="3" TopLine="2480"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="315" Column="22" TopLine="298"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1283" Column="20" TopLine="1258"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="1232" Column="11" TopLine="1217"/>
+      </Position>
+      <Position>
+        <Filename Value="httpServer\controller\unidemocontroller.pas"/>
+        <Caret Line="497" Column="37" TopLine="486"/>
+      </Position>
+      <Position>
+        <Filename Value="httpServer\controller\unidemocontroller.pas"/>
+        <Caret Line="446" Column="3" TopLine="430"/>
+      </Position>
+      <Position>
+        <Filename Value="httpServer\controller\unidemocontroller.pas"/>
+        <Caret Line="497" Column="40" TopLine="476"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="211" Column="14" TopLine="196"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="184" Column="5" TopLine="170"/>
+      </Position>
+      <Position>
+        <Filename Value="httpServer\controller\unidemocontroller.pas"/>
+        <Caret Line="508" Column="29" TopLine="482"/>
+      </Position>
+      <Position>
+        <Filename Value="dbCenter\oneztmanage.pas"/>
+        <Caret Line="315" Column="20" TopLine="300"/>
+      </Position>
+      <Position>
+        <Filename Value="httpServer\demo\democontroller.pas"/>
+        <Caret Line="225" Column="8" TopLine="202"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="..\..\..\fpcsrc\packages\fcl-db\src\memds\memds.pp"/>
+        <Line Value="700"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="frm_main.pas"/>
+        <Line Value="883"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="baseLib\crypto\onesqlcrypto.pas"/>
+        <Line Value="1"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="D:\Lazarus\fpc\3.2.2\source\packages\fcl-web\src\base\httpdefs.pp"/>
+        <Line Value="1907"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="frm_main.pas"/>
+        <Line Value="564"/>
+      </Item>
+    </BreakPoints>
+    <Watches>
+      <Item>
+        <Expression Value="lMethodName"/>
+      </Item>
+      <Item>
+        <Expression Value="lVisibility"/>
+      </Item>
+      <Item>
+        <Expression Value="Ctxt.OutContent"/>
+      </Item>
+    </Watches>
+  </Debugging>
+</CONFIG>

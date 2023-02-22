@@ -1,0 +1,56 @@
+﻿unit DemoWebFileController;
+
+interface
+
+uses OneHttpController, OneHttpCtxtResult, OneHttpRouterManage, System.SysUtils,
+  System.Generics.Collections, System.Contnrs, System.Classes, System.IOUtils,
+  FireDAC.Comp.Client, Data.DB, System.JSON, OneControllerResult, OneFileHelper;
+
+type
+  TDemoWebFileController = class(TOneControllerBase)
+  public
+    // OneGet取url参数
+    function OneGetFile(fileName: string): TResult<string>;
+  end;
+
+implementation
+
+function CreateNewDemoWebFileController(QRouterItem: TOneRouterItem): TObject;
+var
+  lController: TDemoWebFileController;
+begin
+  // 自定义创建控制器类，否则会按 TPersistentclass.create
+  // 最好自定义一个好
+  lController := TDemoWebFileController.Create;
+  // 挂载RTTI信息
+  lController.RouterItem := QRouterItem;
+  result := lController;
+end;
+
+function TDemoWebFileController.OneGetFile(fileName: string): TResult<string>;
+var
+  lFileName: string;
+begin
+  result := TResult<string>.Create(true, false);
+  // 比如 D:\test目录下
+  lFileName := OneFileHelper.CombinePath('D:\test', fileName);
+  if not TFile.Exists(lFileName) then
+  begin
+    result.ResultMsg := '文件不存在';
+    exit;
+  end;
+  // 返回的文件物理路径放在这
+  result.ResultData := lFileName;
+  result.SetResultTrueFile();
+end;
+
+// 注册到路由
+initialization
+
+// 注意，路由名称 不要一样，否则会判定已注册过，跳过
+// 多例模式注册
+OneHttpRouterManage.GetInitRouterManage().AddHTTPPoolWork('DemoWebFile', TDemoWebFileController, 10, CreateNewDemoWebFileController);
+
+finalization
+
+end.

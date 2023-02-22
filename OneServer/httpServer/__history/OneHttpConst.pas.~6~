@@ -1,0 +1,14 @@
+﻿unit OneHttpConst;
+
+interface
+
+const
+  HTTP_ResultCode_True = '0001';
+  HTTP_ResultCode_Fail = '0002';
+  HTTP_ResultCode_TokenFail ='TokenFail';
+    HTTP_ResultCode_TokenFail ='TokenFail';
+  HTTP_URL_TokenName = 'token';
+
+implementation
+
+end.

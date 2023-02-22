@@ -1,0 +1,104 @@
+﻿unit OneControllerResult;
+
+interface
+
+uses system.Generics.Collections, system.Rtti, OneRttiHelper, OneHttpConst;
+
+type
+  emOneResultMode = (resultString, OneGet, OnePost, OneForm, OneUpload,
+    OneDownload);
+
+type
+  IControllerResult = interface;
+
+  IControllerResult = interface
+    ['{FBE2DEB1-9319-4DD4-93EC-17FF6E68A2C3}']
+
+  end;
+
+  //
+
+  TResult<T> = class
+  private
+    FResultBool: boolean;
+    FResultCode: string;
+    FResultMsg: string;
+    FResultData: T;
+    FIsFile: boolean; // 是否文件返回
+    FFreeResultData: boolean;
+    FFreeListItem: boolean;
+  private
+    function GetData(): T;
+  public
+    // QFreeResultData 是否释辨 ResultData数据
+    // QFreeListItem是否释放 容器里面的 item对象
+    constructor Create(QFreeResultData: boolean; QFreeListItem: boolean);
+    destructor Destroy; override;
+    procedure SetResultTrue();
+    // 文件相关
+    procedure SetResultTrueFile();
+    function IsResultFile(): boolean;
+  public
+    property ResultBool: boolean read FResultBool write FResultBool;
+    property ResultCode: string read FResultCode write FResultCode;
+    property ResultMsg: string read FResultMsg write FResultMsg;
+    property ResultData: T read FResultData write FResultData;
+  end;
+
+implementation
+
+constructor TResult<T>.Create(QFreeResultData: boolean; QFreeListItem: boolean);
+begin
+  inherited Create;
+  self.FFreeResultData := QFreeResultData;
+  self.FFreeListItem := QFreeListItem;
+  self.FResultBool := false;
+  self.ResultCode := HTTP_ResultCode_Fail;
+  self.FIsFile := false;
+end;
+
+destructor TResult<T>.Destroy;
+var
+  lTValue: TValue;
+begin
+  // 要自动释放类的，需要释放
+  TValue.Make(@self.ResultData, system.TypeInfo(T), lTValue);
+  if FFreeResultData then
+  begin
+    // 判断是不是对象
+    OneRttiHelper.FreeTValue(lTValue, self.FFreeListItem);
+  end
+  else
+  begin
+    if lTValue.IsObject then
+    begin
+
+    end;
+  end;
+  inherited Destroy;
+end;
+
+procedure TResult<T>.SetResultTrue();
+begin
+  self.ResultBool := true;
+  self.ResultCode := HTTP_ResultCode_True;
+end;
+
+procedure TResult<T>.SetResultTrueFile();
+begin
+  self.FIsFile := true;
+  self.ResultBool := true;
+  self.ResultCode := HTTP_ResultCode_True;
+end;
+
+function TResult<T>.GetData(): T;
+begin
+  Result := self.FResultData
+end;
+
+function TResult<T>.IsResultFile(): boolean;
+begin
+  Result := self.FIsFile;
+end;
+
+end.

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2022-11-23 16:28:48.000.139,C:\Users\Administrator\Documents\Embarcadero\Studio\Projects\Package1.dproj=D:\devTool\delphi\project\OneDelphi\OneClient\OneClient.dproj</Transaction>
+    <Transaction>2022-12-03 23:07:08.000.412,D:\devTool\delphi\project\OneDelphi\OneClient\Package\OneClient.dproj=D:\devTool\delphi\project\OneDelphi\OneClient\OneClient.dproj</Transaction>
+  </Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="baseLib"/>
+    <File Path="baseLib\OneClientDataInfo.pas"/>
+    <File Path="baseLib\OneCrypto.pas"/>
+    <File Path="baseLib\OneFileHelper.pas"/>
+    <File Path="baseLib\OneSQLCrypto.pas"/>
+    <File Path="baseLib\OneStreamString.pas"/>
+    <File Path="NeonSerialization"/>
+    <File Path="NeonSerialization\Neon.Core.Attributes.pas"/>
+    <File Path="NeonSerialization\Neon.Core.DynamicTypes.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Nullables.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Persistence.JSON.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Persistence.JSON.Schema.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Persistence.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Serializers.DB.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Serializers.Nullables.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Serializers.RTL.pas"/>
+    <File Path="NeonSerialization\Neon.Core.TypeInfo.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Types.pas"/>
+    <File Path="NeonSerialization\Neon.Core.Utils.pas"/>
+    <File Path="NeonSerialization\OneNeonHelper.pas"/>
+    <File Path="OneClientConnect.pas"/>
+    <File Path="OneClientConst.pas"/>
+    <File Path="OneClientDataSet.pas"/>
+    <File Path="OneClientHelper.pas"/>
+    <File Path="OneClientRegister.pas"/>
+    <File Path="OneClientResult.pas"/>
+    <File Path="OneClientVirtualFile.pas"/>
+    <File Path="dbrtl.dcp"/>
+    <File Path="DesignIDE.dcp"/>
+    <File Path="FireDAC.dcp"/>
+    <File Path="FireDACCommon.dcp"/>
+    <File Path="FireDACCommonDriver.dcp"/>
+    <File Path="RESTComponents.dcp"/>
+    <File Path="rtl.dcp"/>
+    <File Path="soaprtl.dcp"/>
+    <File Path="vcl.dcp"/>
+  </ProjectSortOrder>
+</BorlandProject>

@@ -1,0 +1,17 @@
+﻿unit OneIOrm;
+
+interface
+uses system.Generics.Collections;
+type
+ IOneOrmCmd<T: class> = interface
+    ['{9609C654-2947-4F36-A978-78BF1DD03948}']
+    function ToCount(): integer;
+    function ToFirst(): T;
+    function ToLast(): T;
+    function ToList(): TList<T>;
+    function ToExecCommand(): integer;
+  end;
+
+implementation
+
+end.
