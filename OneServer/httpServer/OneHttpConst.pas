@@ -1,9 +1,8 @@
-unit OneHttpConst;
-
-{$mode ObjFPC}{$H+}
+﻿unit OneHttpConst;
 
 interface
-uses StrUtils,SysUtils;
+
+uses system.StrUtils, system.SysUtils;
 
 const
   HTTP_ResultCode_True = '0001';
@@ -30,7 +29,7 @@ implementation
 
 function TOneOrmRowState.GetRowState(): emRowState;
 begin
-  Result := FRowState_sys;
+  result := FRowState_sys;
 end;
 
 procedure TOneOrmRowState.SetRowState(QRowState: emRowState);

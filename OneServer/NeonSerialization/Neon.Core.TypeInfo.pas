@@ -1,36 +1,55 @@
+{******************************************************************************}
+{                                                                              }
+{  Neon: Serialization Library for Delphi                                      }
+{  Copyright (c) 2018-2021 Paolo Rossi                                         }
+{  https://github.com/paolo-rossi/neon-library                                 }
+{                                                                              }
+{******************************************************************************}
+{                                                                              }
+{  Licensed under the Apache License, Version 2.0 (the "License");             }
+{  you may not use this file except in compliance with the License.            }
+{  You may obtain a copy of the License at                                     }
+{                                                                              }
+{      http://www.apache.org/licenses/LICENSE-2.0                              }
+{                                                                              }
+{  Unless required by applicable law or agreed to in writing, software         }
+{  distributed under the License is distributed on an "AS IS" BASIS,           }
+{  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.    }
+{  See the License for the specific language governing permissions and         }
+{  limitations under the License.                                              }
+{                                                                              }
+{******************************************************************************}
 unit Neon.Core.TypeInfo;
-
-{$mode DELPHI}{$H+}
 
 interface
 
-
 uses
-  Classes, SysUtils, Rtti, TypInfo, Generics.Collections;
+  System.Classes, System.SysUtils, System.Rtti, System.TypInfo,
+  System.Generics.Collections;
 
 type
   INeonTypeInfo = interface
-    ['{DA498D59-E50C-490C-8F7F-4F0B8804D322}']
+  ['{DA498D59-E50C-490C-8F7F-4F0B8804D322}']
   end;
 
   INeonTypeInfoStream = interface(INeonTypeInfo)
-    ['{285B6152-BC07-4195-8A10-B6A9B2A54536}']
+  ['{285B6152-BC07-4195-8A10-B6A9B2A54536}']
     function GetStreamType: TRttiType;
   end;
 
   INeonTypeInfoList = interface(INeonTypeInfo)
-    ['{0432B934-A484-46BE-8AF8-D2207694E1EA}']
+  ['{0432B934-A484-46BE-8AF8-D2207694E1EA}']
     function GetItemType: TRttiType;
   end;
 
   INeonTypeInfoMap = interface(INeonTypeInfo)
-    ['{9788B4FE-8F9E-4284-86F5-6DB5EFF326FC}']
+  ['{9788B4FE-8F9E-4284-86F5-6DB5EFF326FC}']
     function GetKeyType: TRttiType;
     function GetValueType: TRttiType;
   end;
 
   INeonTypeInfoNullable = interface(INeonTypeInfo)
-    ['{20924A89-A952-4048-9A3A-7E209CA7C40D}']
+  ['{20924A89-A952-4048-9A3A-7E209CA7C40D}']
     function GetBaseType: TRttiType;
   end;
 
@@ -129,8 +148,9 @@ begin
 
   LMethodGetEnumerator := AType.GetMethod('GetEnumerator');
   if not Assigned(LMethodGetEnumerator) or
-    (LMethodGetEnumerator.MethodKind <> mkFunction) or
-    (LMethodGetEnumerator.ReturnType.Handle.Kind <> tkClass) then
+     (LMethodGetEnumerator.MethodKind <> mkFunction) or
+     (LMethodGetEnumerator.ReturnType.Handle.Kind <> tkClass)
+  then
     Exit;
 
   if not Assigned(AType.GetMethod('Clear')) then

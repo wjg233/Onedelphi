@@ -40,7 +40,7 @@ begin
   result.FieldDefs.Add('name', ftString, 20, false);
   result.FieldDefs.Add('age', ftInteger, 0, True);
   result.CreateDataSet();
-  for i := 0 to 9 do
+  for i := 0 to 99999 do
   begin
     result.Append;
     result.FieldByName('name').AsString := 'flm' + i.ToString();

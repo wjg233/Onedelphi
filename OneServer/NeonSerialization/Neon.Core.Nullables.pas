@@ -1,15 +1,36 @@
+{******************************************************************************}
+{                                                                              }
+{  Neon: Serialization Library for Delphi                                      }
+{  Copyright (c) 2018-2021 Paolo Rossi                                         }
+{  https://github.com/paolo-rossi/neon-library                                 }
+{                                                                              }
+{******************************************************************************}
+{                                                                              }
+{  Licensed under the Apache License, Version 2.0 (the "License");             }
+{  you may not use this file except in compliance with the License.            }
+{  You may obtain a copy of the License at                                     }
+{                                                                              }
+{      http://www.apache.org/licenses/LICENSE-2.0                              }
+{                                                                              }
+{  Unless required by applicable law or agreed to in writing, software         }
+{  distributed under the License is distributed on an "AS IS" BASIS,           }
+{  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.    }
+{  See the License for the specific language governing permissions and         }
+{  limitations under the License.                                              }
+{                                                                              }
+{******************************************************************************}
 unit Neon.Core.Nullables;
-
-{$mode DELPHI}{$H+}
 
 interface
 
 uses
-  SysUtils, Variants, Classes, Generics.Defaults, Rtti, TypInfo;
+  System.SysUtils, System.Variants, System.Classes, System.Generics.Defaults, System.Rtti,
+  System.TypInfo, System.JSON;
 
 type
   ENullableException = class(Exception);
 
+  {$RTTI EXPLICIT FIELDS([vcPrivate]) METHODS([vcPrivate])}
   Nullable<T> = record
   private
     FValue: T;
@@ -18,31 +39,33 @@ type
     function GetValueType: PTypeInfo;
     function GetValue: T;
     procedure SetValue(const AValue: T);
-    function GetHasValue: boolean;
+    function GetHasValue: Boolean;
   public
-    constructor Create(const Value: T);
-    function Equals(const Value: Nullable<T>): boolean;
+    constructor Create(const Value: T); overload;
+    constructor Create(const Value: Variant); overload;
+    function Equals(const Value: Nullable<T>): Boolean;
     function GetValueOrDefault: T; overload;
     function GetValueOrDefault(const Default: T): T; overload;
 
-    property HasValue: boolean read GetHasValue;
-    function IsNull: boolean;
+    property HasValue: Boolean read GetHasValue;
+    function IsNull: Boolean;
 
     property Value: T read GetValue;
+
     class operator Implicit(const Value: Nullable<T>): T;
-    //class operator Implicit(const Value: Nullable<T>): variant;
-    //class operator Implicit(const Value: Pointer): Nullable<T>;
-    //class operator Implicit(const Value: T): Nullable<T>;
-    //class operator Implicit(const Value: variant): Nullable<T>;
-    class operator Equal(const Left, Right: Nullable<T>): boolean;
-    class operator NotEqual(const Left, Right: Nullable<T>): boolean;
+    class operator Implicit(const Value: Nullable<T>): Variant;
+    class operator Implicit(const Value: Pointer): Nullable<T>;
+    class operator Implicit(const Value: T): Nullable<T>;
+    class operator Implicit(const Value: Variant): Nullable<T>;
+    class operator Equal(const Left, Right: Nullable<T>): Boolean;
+    class operator NotEqual(const Left, Right: Nullable<T>): Boolean;
   end;
 
   NullString = Nullable<string>;
-  NullBoolean = Nullable<boolean>;
-  NullInteger = Nullable<integer>;
-  NullInt64 = Nullable<int64>;
-  NullDouble = Nullable<double>;
+  NullBoolean = Nullable<Boolean>;
+  NullInteger = Nullable<Integer>;
+  NullInt64 = Nullable<Int64>;
+  NullDouble = Nullable<Double>;
   NullDateTime = Nullable<TDateTime>;
 
 implementation
@@ -57,15 +80,24 @@ var
   a: TValue;
 begin
   FValue := Value;
-  FHasValue := 'true';
+  FHasValue := DefaultTrueBoolStr;
 end;
+
+constructor Nullable<T>.Create(const Value: Variant);
+begin
+  if not VarIsNull(Value) and not VarIsEmpty(Value) then
+    Create(TValue.FromVariant(Value).AsType<T>)
+  else
+    Clear;
+end;
+
 procedure Nullable<T>.Clear;
 begin
   FValue := Default(T);
   FHasValue := '';
 end;
 
-function Nullable<T>.Equals(const Value: Nullable<T>): boolean;
+function Nullable<T>.Equals(const Value: Nullable<T>): Boolean;
 begin
   if HasValue and Value.HasValue then
     Result := TEqualityComparer<T>.Default.Equals(Self.Value, Value.Value)
@@ -73,7 +105,7 @@ begin
     Result := HasValue = Value.HasValue;
 end;
 
-function Nullable<T>.GetHasValue: boolean;
+function Nullable<T>.GetHasValue: Boolean;
 begin
   Result := FHasValue <> '';
 end;
@@ -108,43 +140,43 @@ begin
   Result := Value.Value;
 end;
 
-//class operator Nullable<T>.ImplicitA(const Value: Nullable<T>): variant;
-//begin
-//  if Value.HasValue then
-//    Result := TValue.From<T>(Value.Value).AsVariant
-//  else
-//    Result := Null;
-//end;
+class operator Nullable<T>.Implicit(const Value: Nullable<T>): Variant;
+begin
+  if Value.HasValue then
+    Result := TValue.From<T>(Value.Value).AsVariant
+  else
+    Result := Null;
+end;
 
-//class operator Nullable<T>.ImplicitB(const Value: Pointer): Nullable<T>;
-//begin
-//  if Value = nil then
-//    Result.Clear
-//  else
-//    Result := Nullable<T>.Create(T(Value^));
-//end;
+class operator Nullable<T>.Implicit(const Value: Pointer): Nullable<T>;
+begin
+  if Value = nil then
+    Result.Clear
+  else
+    Result := Nullable<T>.Create(T(Value^));
+end;
 
-//class operator Nullable<T>.ImplicitC(const Value: T): Nullable<T>;
-//begin
-//  Result := Nullable<T>.Create(Value);
-//end;
+class operator Nullable<T>.Implicit(const Value: T): Nullable<T>;
+begin
+  Result := Nullable<T>.Create(Value);
+end;
 
-//class operator Nullable<T>.ImplicitD(const Value: variant): Nullable<T>;
-//begin
-//  Result := Nullable<T>.Create(Value);
-//end;
+class operator Nullable<T>.Implicit(const Value: Variant): Nullable<T>;
+begin
+  Result := Nullable<T>.Create(Value);
+end;
 
-function Nullable<T>.IsNull: boolean;
+function Nullable<T>.IsNull: Boolean;
 begin
   Result := FHasValue = '';
 end;
 
-class operator Nullable<T>.Equal(const Left, Right: Nullable<T>): boolean;
+class operator Nullable<T>.Equal(const Left, Right: Nullable<T>): Boolean;
 begin
   Result := Left.Equals(Right);
 end;
 
-class operator Nullable<T>.NotEqual(const Left, Right: Nullable<T>): boolean;
+class operator Nullable<T>.NotEqual(const Left, Right: Nullable<T>): Boolean;
 begin
   Result := not Left.Equals(Right);
 end;
@@ -152,7 +184,7 @@ end;
 procedure Nullable<T>.SetValue(const AValue: T);
 begin
   FValue := AValue;
-  FHasValue := 'true';
+  FHasValue := DefaultTrueBoolStr;
 end;
 
 end.

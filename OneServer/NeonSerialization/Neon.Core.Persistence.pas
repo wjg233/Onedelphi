@@ -1,55 +1,78 @@
+{******************************************************************************}
+{                                                                              }
+{  Neon: Serialization Library for Delphi                                      }
+{  Copyright (c) 2018-2022 Paolo Rossi                                         }
+{  https://github.com/paolo-rossi/neon-library                                 }
+{                                                                              }
+{******************************************************************************}
+{                                                                              }
+{  Licensed under the Apache License, Version 2.0 (the "License");             }
+{  you may not use this file except in compliance with the License.            }
+{  You may obtain a copy of the License at                                     }
+{                                                                              }
+{      http://www.apache.org/licenses/LICENSE-2.0                              }
+{                                                                              }
+{  Unless required by applicable law or agreed to in writing, software         }
+{  distributed under the License is distributed on an "AS IS" BASIS,           }
+{  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.    }
+{  See the License for the specific language governing permissions and         }
+{  limitations under the License.                                              }
+{                                                                              }
+{******************************************************************************}
 unit Neon.Core.Persistence;
-
-{$mode DELPHI}{$H+}
 
 interface
 
 uses
-  SysUtils, Classes, Rtti, SyncObjs, TypInfo, fpjson, Generics.Collections,
-  Generics.Defaults, RegExpr,
-  Neon.Core.Types, Neon.Core.Attributes, Neon.Core.DynamicTypes;
+  System.SysUtils, System.Classes, System.Rtti, System.SyncObjs, System.TypInfo,
+  System.Generics.Collections, System.JSON, System.Generics.Defaults,
+
+  Neon.Core.Types,
+  Neon.Core.Attributes,
+  Neon.Core.DynamicTypes;
+
+{$SCOPEDENUMS ON}
 
 type
   TNeonSerializerRegistry = class;
   TNeonRttiObject = class;
 
   INeonConfiguration = interface
-    ['{F82AB790-1C65-4501-915C-0289EFD9D8CC}']
+  ['{F82AB790-1C65-4501-915C-0289EFD9D8CC}']
     function SetMembers(AValue: TNeonMembersSet): INeonConfiguration;
     function SetMemberCase(AValue: TNeonCase): INeonConfiguration;
     function SetMemberCustomCase(AValue: TCaseFunc): INeonConfiguration;
     function SetVisibility(AValue: TNeonVisibility): INeonConfiguration;
-    function SetIgnoreFieldPrefix(AValue: boolean): INeonConfiguration;
-    function SetUseUTCDate(AValue: boolean): INeonConfiguration;
-    function SetRaiseExceptions(AValue: boolean): INeonConfiguration;
-    function SetPrettyPrint(AValue: boolean): INeonConfiguration;
-    function SetEnumAsInt(AValue: boolean): INeonConfiguration;
+    function SetIgnoreFieldPrefix(AValue: Boolean): INeonConfiguration;
+    function SetUseUTCDate(AValue: Boolean): INeonConfiguration;
+    function SetRaiseExceptions(AValue: Boolean): INeonConfiguration;
+    function SetPrettyPrint(AValue: Boolean): INeonConfiguration;
+    function SetEnumAsInt(AValue: Boolean): INeonConfiguration;
 
-    function GetPrettyPrint: boolean;
-    function GetUseUTCDate: boolean;
-    function GetRaiseExceptions: boolean;
+    function GetPrettyPrint: Boolean;
+    function GetUseUTCDate: Boolean;
+    function GetRaiseExceptions: Boolean;
     function GetSerializers: TNeonSerializerRegistry;
   end;
 
   IConfigurationContext = interface
-    ['{3954FFB5-2D3D-4978-AADA-FEC5C0D73FD0}']
+  ['{3954FFB5-2D3D-4978-AADA-FEC5C0D73FD0}']
     function GetConfiguration: INeonConfiguration;
   end;
 
   ISerializerContext = interface(IConfigurationContext)
-    ['{36A014FC-9E3F-4EBF-9545-CF9DBCBF507C}']
+  ['{36A014FC-9E3F-4EBF-9545-CF9DBCBF507C}']
 
     /// <summary>
     ///   Method to write value from a custom serializer
     /// </summary>
-    function WriteDataMember(const AValue: TValue;
-      ACustomProcess: boolean = True): TJSONData;
+    function WriteDataMember(const AValue: TValue; ACustomProcess: Boolean = True): TJSONValue;
 
     /// <summary>
     ///   Writer for members of objects and records. In a custom serializer can
     ///   be used to process the **same** object or record
     /// </summary>
-    procedure WriteMembers(AType: TRttiType; AInstance: Pointer; AResult: TJSONData);
+    procedure WriteMembers(AType: TRttiType; AInstance: Pointer; AResult: TJSONValue);
 
     /// <summary>
     ///   Useful method to add serialization errors in the serializer's log
@@ -58,20 +81,18 @@ type
   end;
 
   IDeserializerContext = interface(IConfigurationContext)
-    ['{5351D1F9-99B3-4826-B981-4CBF926085D6}']
+  ['{5351D1F9-99B3-4826-B981-4CBF926085D6}']
     /// <summary>
-    ///   Method to convert a TJSONData into a TValue (from a custom
+    ///   Method to convert a TJSONValue into a TValue (from a custom
     ///   serializer)
     /// </summary>
-    function ReadDataMember(AJSONValue: TJSONData; AType: TRttiType;
-      const AData: TValue; ACustomProcess: boolean = True): TValue;
+    function ReadDataMember(AJSONValue: TJSONValue; AType: TRttiType; const AData: TValue; ACustomProcess: Boolean = True): TValue;
 
     /// <summary>
     ///   Reader for members of objects and record. In a custom serializer can
     ///   be used to process the **same** object or record
     /// </summary>
-    procedure ReadMembers(AType: TRttiType; AInstance: Pointer;
-      AJSONObject: TJSONObject);
+    procedure ReadMembers(AType: TRttiType; AInstance: Pointer; AJSONObject: TJSONObject);
 
     /// <summary>
     ///   Useful method to add deserialization errors in the deserializer's log
@@ -82,18 +103,15 @@ type
   TCustomSerializer = class abstract(TObject)
   protected
     class function GetTargetInfo: PTypeInfo; virtual;
-    class function CanHandle(AType: PTypeInfo): boolean; virtual; abstract;
+    class function CanHandle(AType: PTypeInfo): Boolean; virtual; abstract;
   protected
-    class function ClassDistance: integer;
-    class function ClassIs(AClass: TClass): boolean;
-    class function TypeInfoIs(AInfo: PTypeInfo): boolean;
-    class function TypeInfoIsClass(AInfo: PTypeInfo): boolean;
+    class function ClassDistance: Integer;
+    class function ClassIs(AClass: TClass): Boolean;
+    class function TypeInfoIs(AInfo: PTypeInfo): Boolean;
+    class function TypeInfoIsClass(AInfo: PTypeInfo): Boolean;
   public
-    function Serialize(const AValue: TValue; ANeonObject: TNeonRttiObject;
-      AContext: ISerializerContext): TJSONData; virtual; abstract;
-    function Deserialize(AValue: TJSONData; const AData: TValue;
-      ANeonObject: TNeonRttiObject; AContext: IDeserializerContext): TValue;
-      virtual; abstract;
+    function Serialize(const AValue: TValue; ANeonObject: TNeonRttiObject; AContext: ISerializerContext): TJSONValue; virtual; abstract;
+    function Deserialize(AValue: TJSONValue; const AData: TValue; ANeonObject: TNeonRttiObject; AContext: IDeserializerContext): TValue; virtual; abstract;
   end;
 
   TCustomSerializerClass = class of TCustomSerializer;
@@ -101,22 +119,20 @@ type
   TSerializerInfo = record
   public
     SerializerClass: TCustomSerializerClass;
-    Distance: integer;
+    Distance: Integer;
   public
-    class function FromSerializer(ASerializerClass: TCustomSerializerClass):
-      TSerializerInfo; static;
+    class function FromSerializer(ASerializerClass: TCustomSerializerClass): TSerializerInfo; static;
   end;
 
   TNeonSerializerRegistry = class
-  private
-  type
+  private type
     SerializerCacheRegistry = class(TObjectDictionary<PTypeInfo, TCustomSerializer>);
     SerializerClassRegistry = class(TList<TSerializerInfo>);
   private
     FRegistryClass: SerializerClassRegistry;
     FRegistryCache: SerializerCacheRegistry;
     FRegistryCacheLock: TCriticalSection;
-    function GetCount: integer;
+    function GetCount: Integer;
 
     function InternalGetSerializer(ATypeInfo: PTypeInfo): TCustomSerializer;
   public
@@ -127,16 +143,16 @@ type
     procedure ClearCache;
     procedure Assign(ARegistry: TNeonSerializerRegistry);
 
-    function RegisterSerializer(ASerializerClass: TCustomSerializerClass):
-      TNeonSerializerRegistry; overload;
+    function RegisterSerializer(ASerializerClass: TCustomSerializerClass): TNeonSerializerRegistry; overload;
     procedure UnregisterSerializer(ASerializerClass: TCustomSerializerClass);
 
     function GetSerializer<T>: TCustomSerializer; overload;
     function GetSerializer(AValue: TValue): TCustomSerializer; overload;
     function GetSerializer(ATargetClass: TClass): TCustomSerializer; overload;
     function GetSerializer(ATargetInfo: PTypeInfo): TCustomSerializer; overload;
+
   public
-    property Count: integer read GetCount;
+    property Count: Integer read GetCount;
   end;
 
   TCaseAlgorithm = class
@@ -153,12 +169,12 @@ type
     FMembers: TNeonMembersSet;
     FMemberCase: TNeonCase;
     FMemberCustomCase: TCaseFunc;
-    FIgnoreFieldPrefix: boolean;
-    FUseUTCDate: boolean;
-    FPrettyPrint: boolean;
+    FIgnoreFieldPrefix: Boolean;
+    FUseUTCDate: Boolean;
+    FPrettyPrint: Boolean;
     FSerializers: TNeonSerializerRegistry;
-    FRaiseExceptions: boolean;
-    FEnumAsInt: boolean;
+    FRaiseExceptions: Boolean;
+    FEnumAsInt: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -172,25 +188,25 @@ type
     function SetMemberCase(AValue: TNeonCase): INeonConfiguration;
     function SetMemberCustomCase(AValue: TCaseFunc): INeonConfiguration;
     function SetVisibility(AValue: TNeonVisibility): INeonConfiguration;
-    function SetIgnoreFieldPrefix(AValue: boolean): INeonConfiguration;
-    function SetUseUTCDate(AValue: boolean): INeonConfiguration;
-    function SetRaiseExceptions(AValue: boolean): INeonConfiguration;
-    function SetPrettyPrint(AValue: boolean): INeonConfiguration;
-    function SetEnumAsInt(AValue: boolean): INeonConfiguration;
+    function SetIgnoreFieldPrefix(AValue: Boolean): INeonConfiguration;
+    function SetUseUTCDate(AValue: Boolean): INeonConfiguration;
+    function SetRaiseExceptions(AValue: Boolean): INeonConfiguration;
+    function SetPrettyPrint(AValue: Boolean): INeonConfiguration;
+    function SetEnumAsInt(AValue: Boolean): INeonConfiguration;
 
-    function GetUseUTCDate: boolean;
-    function GetPrettyPrint: boolean;
-    function GetRaiseExceptions: boolean;
+    function GetUseUTCDate: Boolean;
+    function GetPrettyPrint: Boolean;
+    function GetRaiseExceptions: Boolean;
     function GetSerializers: TNeonSerializerRegistry;
 
     property Members: TNeonMembersSet read FMembers write FMembers;
     property MemberCase: TNeonCase read FMemberCase write FMemberCase;
     property MemberCustomCase: TCaseFunc read FMemberCustomCase write FMemberCustomCase;
     property Visibility: TNeonVisibility read FVisibility write FVisibility;
-    property IgnoreFieldPrefix: boolean read FIgnoreFieldPrefix write FIgnoreFieldPrefix;
-    property UseUTCDate: boolean read FUseUTCDate write FUseUTCDate;
-    property RaiseExceptions: boolean read FRaiseExceptions write FRaiseExceptions;
-    property EnumAsInt: boolean read FEnumAsInt write FEnumAsInt;
+    property IgnoreFieldPrefix: Boolean read FIgnoreFieldPrefix write FIgnoreFieldPrefix;
+    property UseUTCDate: Boolean read FUseUTCDate write FUseUTCDate;
+    property RaiseExceptions: Boolean read FRaiseExceptions write FRaiseExceptions;
+    property EnumAsInt: Boolean read FEnumAsInt write FEnumAsInt;
     property Serializers: TNeonSerializerRegistry read FSerializers write FSerializers;
   end;
 
@@ -202,17 +218,18 @@ type
     FAttributes: TArray<TCustomAttribute>;
     FNeonMembers: TNeonMembersSet;
     FNeonVisibility: TNeonVisibility;
-    FNeonIgnore: boolean;
+    FNeonIgnore: Boolean;
     FNeonProperty: string;
     FNeonEnumNames: TArray<string>;
     FNeonSerializerName: string;
     FNeonSerializerClass: TClass;
   private
     FTypeAttributes: TArray<TCustomAttribute>;
-    FNeonRawValue: boolean;
+    FNeonRawValue: Boolean;
   protected
     procedure InternalParseAttributes(const AAttr: TArray<TCustomAttribute>); virtual;
     procedure ProcessAttribute(AAttribute: TCustomAttribute); virtual;
+
   public
     constructor Create(ARttiObject: TRttiObject; AOperation: TNeonOperation);
     function AsRttiType: TRttiType;
@@ -220,16 +237,13 @@ type
     procedure ParseAttributes; virtual;
 
     property Attributes: TArray<TCustomAttribute> read FAttributes write FAttributes;
-    property TypeAttributes: TArray<TCustomAttribute>
-      read FTypeAttributes write FTypeAttributes;
+    property TypeAttributes: TArray<TCustomAttribute> read FTypeAttributes write FTypeAttributes;
     // Neon-based properties
-    property NeonIgnore: boolean read FNeonIgnore write FNeonIgnore;
-    property NeonRawValue: boolean read FNeonRawValue write FNeonRawValue;
+    property NeonIgnore: Boolean read FNeonIgnore write FNeonIgnore;
+    property NeonRawValue: Boolean read FNeonRawValue write FNeonRawValue;
     property NeonInclude: TIncludeValue read FNeonInclude write FNeonInclude;
-    property NeonSerializerName: string read FNeonSerializerName
-      write FNeonSerializerName;
-    property NeonSerializerClass: TClass read FNeonSerializerClass
-      write FNeonSerializerClass;
+    property NeonSerializerName: string read FNeonSerializerName write FNeonSerializerName;
+    property NeonSerializerClass: TClass read FNeonSerializerClass write FNeonSerializerClass;
     property NeonProperty: string read FNeonProperty write FNeonProperty;
     property NeonEnumNames: TArray<string> read FNeonEnumNames write FNeonEnumNames;
     property NeonMembers: TNeonMembersSet read FNeonMembers write FNeonMembers;
@@ -251,35 +265,34 @@ type
     FMemberRttiType: TRttiType;
     FMember: TRttiMember;
     FParent: TNeonRttiType;
-    FSerializable: boolean;
-    FNeonUnwrapped: boolean;
+    FSerializable: Boolean;
+    FNeonUnwrapped: Boolean;
 
     function MemberAsProperty: TRttiProperty; inline;
-    function MemberAsField: TRttiProperty; inline;
+    function MemberAsField: TRttiField; inline;
     function GetName: string;
   protected
     FNeonIncludeIf: TNeonIncludeOption;
 
     procedure ProcessAttribute(AAttribute: TCustomAttribute); override;
   public
-    constructor Create(AMember: TRttiMember; AParent: TNeonRttiType;
-      AOperation: TNeonOperation);
+    constructor Create(AMember: TRttiMember; AParent: TNeonRttiType; AOperation: TNeonOperation);
 
     function GetValue: TValue;
     procedure SetValue(const AValue: TValue);
     function RttiType: TRttiType;
     function MemberType: TNeonMemberType;
-    function IsWritable: boolean;
-    function IsReadable: boolean;
+    function IsWritable: Boolean;
+    function IsReadable: Boolean;
     function TypeKind: TTypeKind;
     function Visibility: TMemberVisibility;
-    function IsField: boolean;
-    function IsProperty: boolean;
+    function IsField: Boolean;
+    function IsProperty: Boolean;
     property Name: string read GetName;
 
-    property NeonUnwrapped: boolean read FNeonUnwrapped write FNeonUnwrapped;
+    property NeonUnwrapped: Boolean read FNeonUnwrapped write FNeonUnwrapped;
     property NeonIncludeIf: TNeonIncludeOption read FNeonIncludeIf write FNeonIncludeIf;
-    property Serializable: boolean read FSerializable write FSerializable;
+    property Serializable: Boolean read FSerializable write FSerializable;
   end;
 
   TNeonRttiMembers = class(TObjectList<TNeonRttiMember>)
@@ -289,11 +302,10 @@ type
     FInstance: Pointer;
     FParent: TNeonRttiType;
   private
-    function MatchesVisibility(AVisibility: TMemberVisibility): boolean;
-    function MatchesMemberChoice(AMemberType: TNeonMemberType): boolean;
+    function MatchesVisibility(AVisibility: TMemberVisibility): Boolean;
+    function MatchesMemberChoice(AMemberType: TNeonMemberType): Boolean;
   public
-    constructor Create(AConfig: TNeonConfiguration; AInstance: Pointer;
-      AType: TRttiType; AOperation: TNeonOperation);
+    constructor Create(AConfig: TNeonConfiguration; AInstance: Pointer; AType: TRttiType; AOperation: TNeonOperation);
     destructor Destroy; override;
 
     function NewMember(AMember: TRttiMember): TNeonRttiMember;
@@ -308,7 +320,7 @@ type
     FOperation: TNeonOperation;
     FOriginalInstance: TValue;
     FErrors: TStrings;
-    function IsOriginalInstance(const AValue: TValue): boolean;
+    function IsOriginalInstance(const AValue: TValue): Boolean;
     function GetTypeMembers(AType: TRttiType): TArray<TRttiMember>;
     function GetNeonMembers(AInstance: Pointer; AType: TRttiType): TNeonRttiMembers;
     function GetNameFromMember(AMember: TNeonRttiMember): string; virtual;
@@ -324,14 +336,14 @@ type
   end;
 
   TTypeInfoUtils = class
-    class function EnumToString(ATypeInfo: PTypeInfo; AValue: integer;
-      ANeonObject: TNeonRttiObject): string; static;
+    class function EnumToString(ATypeInfo: PTypeInfo; AValue: Integer; ANeonObject: TNeonRttiObject): string; static;
   end;
 
 
 implementation
 
 uses
+  System.RegularExpressions,
   Neon.Core.Utils;
 
 { TNeonBase }
@@ -363,8 +375,9 @@ begin
   if FConfig.IgnoreFieldPrefix and AMember.IsField then
   begin
 
-    if AMember.Name.StartsWith('F', True) and (AMember.Visibility in
-      [mvPrivate, mvProtected]) then
+    if AMember.Name.StartsWith('F', True) and
+       (AMember.Visibility in [mvPrivate, mvProtected])
+    then
       LMemberName := AMember.Name.Substring(1)
     else
       LMemberName := AMember.Name;
@@ -373,17 +386,16 @@ begin
     LMemberName := AMember.Name;
 
   case FConfig.MemberCase of
-    TNeonCase.LowerCase: Result := system.LowerCase(LMemberName);
-    TNeonCase.UpperCase: Result := system.UpCase(LMemberName);
-    TNeonCase.CamelCase: Result := TCaseAlgorithm.PascalToCamel(LMemberName);
-    TNeonCase.SnakeCase: Result := TCaseAlgorithm.PascalToSnake(LMemberName);
+    TNeonCase.LowerCase : Result := LowerCase(LMemberName);
+    TNeonCase.UpperCase : Result := UpperCase(LMemberName);
+    TNeonCase.CamelCase : Result := TCaseAlgorithm.PascalToCamel(LMemberName);
+    TNeonCase.SnakeCase : Result := TCaseAlgorithm.PascalToSnake(LMemberName);
     TNeonCase.PascalCase: Result := LMemberName;
     TNeonCase.CustomCase: Result := FConfig.MemberCustomCase(LMemberName);
   end;
 end;
 
-function TNeonBase.GetNeonMembers(AInstance: Pointer;
-  AType: TRttiType): TNeonRttiMembers;
+function TNeonBase.GetNeonMembers(AInstance: Pointer; AType: TRttiType): TNeonRttiMembers;
 var
   LFields, LProps: TArray<TRttiMember>;
   LMember: TRttiMember;
@@ -396,14 +408,14 @@ begin
 
   if AType.IsRecord then
   begin
-    LFields := TArray<TRttiMember>(AType.GetProperties);
-    LProps := TArray<TRttiMember>(AType.GetProperties);
+    LFields := TArray<TRttiMember>(AType.AsRecord.GetFields);
+    LProps  := TArray<TRttiMember>(AType.AsRecord.GetProperties);
     // GetIndexedProperties
   end
   else if AType.IsInstance then
   begin
-    LFields := TArray<TRttiMember>(AType.AsInstance.GetProperties);
-    LProps := TArray<TRttiMember>(AType.AsInstance.GetProperties);
+    LFields := TArray<TRttiMember>(AType.AsInstance.GetFields);
+    LProps  := TArray<TRttiMember>(AType.AsInstance.GetProperties);
     // GetIndexedProperties
   end;
 
@@ -426,7 +438,7 @@ begin
   if TNeonMembers.Standard in FConfig.Members then
   begin
     if AType.IsRecord then
-      Result := TArray<TRttiMember>(AType.GetProperties)
+      Result := TArray<TRttiMember>(AType.AsRecord.GetFields)
     else if AType.IsInstance then
       Result := TArray<TRttiMember>(AType.AsInstance.GetProperties);
   end;
@@ -434,7 +446,7 @@ begin
   if TNeonMembers.Properties in FConfig.Members then
   begin
     if AType.IsRecord then
-      Result := TArray<TRttiMember>(AType.GetProperties)
+      Result := TArray<TRttiMember>(AType.AsRecord.GetProperties)
     else if AType.IsInstance then
       Result := TArray<TRttiMember>(AType.AsInstance.GetProperties);
   end;
@@ -442,16 +454,15 @@ begin
   if TNeonMembers.Fields in FConfig.Members then
   begin
     if AType.IsRecord then
-      Result := TArray<TRttiMember>(AType.GetProperties)
+      Result := TArray<TRttiMember>(AType.AsRecord.GetFields)
     else if AType.IsInstance then
-      Result := TArray<TRttiMember>(AType.AsInstance.GetProperties);
+      Result := TArray<TRttiMember>(AType.AsInstance.GetFields);
   end;
 end;
 
-function TNeonBase.IsOriginalInstance(const AValue: TValue): boolean;
+function TNeonBase.IsOriginalInstance(const AValue: TValue): Boolean;
 begin
-  if nativeint(AValue.GetReferenceToRawData^) =
-    nativeint(FOriginalInstance.GetReferenceToRawData^) then
+  if NativeInt(AValue.GetReferenceToRawData^) = NativeInt(FOriginalInstance.GetReferenceToRawData^) then
     Result := True
   else
     Result := False;
@@ -486,12 +497,12 @@ begin
   inherited;
 end;
 
-function TNeonConfiguration.GetPrettyPrint: boolean;
+function TNeonConfiguration.GetPrettyPrint: Boolean;
 begin
   Result := FPrettyPrint;
 end;
 
-function TNeonConfiguration.GetRaiseExceptions: boolean;
+function TNeonConfiguration.GetRaiseExceptions: Boolean;
 begin
   Result := FRaiseExceptions;
 end;
@@ -501,7 +512,7 @@ begin
   Result := FSerializers;
 end;
 
-function TNeonConfiguration.GetUseUTCDate: boolean;
+function TNeonConfiguration.GetUseUTCDate: Boolean;
 begin
   Result := FUseUTCDate;
 end;
@@ -531,31 +542,31 @@ begin
   Result := Self;
 end;
 
-function TNeonConfiguration.SetPrettyPrint(AValue: boolean): INeonConfiguration;
+function TNeonConfiguration.SetPrettyPrint(AValue: Boolean): INeonConfiguration;
 begin
   FPrettyPrint := AValue;
   Result := Self;
 end;
 
-function TNeonConfiguration.SetRaiseExceptions(AValue: boolean): INeonConfiguration;
+function TNeonConfiguration.SetRaiseExceptions(AValue: Boolean): INeonConfiguration;
 begin
   FRaiseExceptions := AValue;
   Result := Self;
 end;
 
-function TNeonConfiguration.SetUseUTCDate(AValue: boolean): INeonConfiguration;
+function TNeonConfiguration.SetUseUTCDate(AValue: Boolean): INeonConfiguration;
 begin
   FUseUTCDate := AValue;
   Result := Self;
 end;
 
-function TNeonConfiguration.SetEnumAsInt(AValue: boolean): INeonConfiguration;
+function TNeonConfiguration.SetEnumAsInt(AValue: Boolean): INeonConfiguration;
 begin
   FEnumAsInt := AValue;
-  Result := Self;
+  result := Self;
 end;
 
-function TNeonConfiguration.SetIgnoreFieldPrefix(AValue: boolean): INeonConfiguration;
+function TNeonConfiguration.SetIgnoreFieldPrefix(AValue: Boolean): INeonConfiguration;
 begin
   FIgnoreFieldPrefix := AValue;
   Result := Self;
@@ -581,8 +592,7 @@ end;
 
 { TNeonRttiMember }
 
-constructor TNeonRttiMember.Create(AMember: TRttiMember; AParent: TNeonRttiType;
-  AOperation: TNeonOperation);
+constructor TNeonRttiMember.Create(AMember: TRttiMember; AParent: TNeonRttiType; AOperation: TNeonOperation);
 begin
   inherited Create(AMember, AOperation);
   FMember := AMember;
@@ -593,10 +603,10 @@ begin
     FMemberType := TNeonMemberType.Prop;
     FMemberRttiType := (FMember as TRttiProperty).PropertyType;
   end
-  else if FMember is TRttiProperty then
+  else if FMember is TRttiField then
   begin
     FMemberType := TNeonMemberType.Field;
-    FMemberRttiType := (FMember as TRttiProperty).PropertyType;
+    FMemberRttiType := (FMember as TRttiField).FieldType;
   end;
 
   if Assigned(FMemberRttiType) then
@@ -613,14 +623,13 @@ end;
 function TNeonRttiMember.GetValue: TValue;
 begin
   case FMemberType of
-    TNeonMemberType.Unknown: raise ENeonException.Create(
-        'Member type must be Field or Property');
-    TNeonMemberType.Prop: Result := MemberAsProperty.GetValue(FParent.Instance);
-    TNeonMemberType.Field: Result := MemberAsField.GetValue(FParent.Instance);
+    TNeonMemberType.Unknown: raise ENeonException.Create('Member type must be Field or Property');
+    TNeonMemberType.Prop   : Result := MemberAsProperty.GetValue(FParent.Instance);
+    TNeonMemberType.Field  : Result := MemberAsField.GetValue(FParent.Instance);
   end;
 end;
 
-function TNeonRttiMember.IsField: boolean;
+function TNeonRttiMember.IsField: Boolean;
 begin
   Result := False;
   case FMemberType of
@@ -628,7 +637,7 @@ begin
   end;
 end;
 
-function TNeonRttiMember.IsProperty: boolean;
+function TNeonRttiMember.IsProperty: Boolean;
 begin
   Result := False;
   case FMemberType of
@@ -636,31 +645,29 @@ begin
   end;
 end;
 
-function TNeonRttiMember.IsReadable: boolean;
+function TNeonRttiMember.IsReadable: Boolean;
 begin
   Result := False;
   case FMemberType of
-    TNeonMemberType.Unknown: raise ENeonException.Create(
-        'Member type must be Field or Property');
-    TNeonMemberType.Prop: Result := MemberAsProperty.IsReadable;
-    TNeonMemberType.Field: Result := True;
+    TNeonMemberType.Unknown: raise ENeonException.Create('Member type must be Field or Property');
+    TNeonMemberType.Prop   : Result := MemberAsProperty.IsReadable;
+    TNeonMemberType.Field  : Result := True;
   end;
 end;
 
-function TNeonRttiMember.IsWritable: boolean;
+function TNeonRttiMember.IsWritable: Boolean;
 begin
   Result := False;
   case FMemberType of
-    TNeonMemberType.Unknown: raise ENeonException.Create(
-        'Member type must be Field or Property');
-    TNeonMemberType.Prop: Result := MemberAsProperty.IsWritable;
-    TNeonMemberType.Field: Result := True;
+    TNeonMemberType.Unknown: raise ENeonException.Create('Member type must be Field or Property');
+    TNeonMemberType.Prop   : Result := MemberAsProperty.IsWritable;
+    TNeonMemberType.Field  : Result := True;
   end;
 end;
 
-function TNeonRttiMember.MemberAsField: TRttiProperty;
+function TNeonRttiMember.MemberAsField: TRttiField;
 begin
-  Result := FMember as TRttiProperty;
+  Result := FMember as TRttiField;
 end;
 
 function TNeonRttiMember.MemberAsProperty: TRttiProperty;
@@ -677,10 +684,9 @@ function TNeonRttiMember.RttiType: TRttiType;
 begin
   Result := nil;
   case FMemberType of
-    TNeonMemberType.Unknown: raise ENeonException.Create(
-        'Member type must be Field or Property');
-    TNeonMemberType.Prop: Result := MemberAsProperty.PropertyType;
-    TNeonMemberType.Field: Result := MemberAsField.PropertyType;
+    TNeonMemberType.Unknown: raise ENeonException.Create('Member type must be Field or Property');
+    TNeonMemberType.Prop   : Result := MemberAsProperty.PropertyType;
+    TNeonMemberType.Field  : Result := MemberAsField.FieldType;
   end;
 end;
 
@@ -709,9 +715,8 @@ begin
       if Assigned(LMethod) then
       begin
         LContext := TNeonIgnoreIfContext.Create(Self.Name, FOperation);
-        LRes := LMethod.Invoke(TObject(FParent.Instance),
-          [TValue.From<TNeonIgnoreIfContext>(LContext)]);
-        case LRes.AsBoolean of
+        LRes := LMethod.Invoke(TObject(FParent.Instance), [TValue.From<TNeonIgnoreIfContext>(LContext)]);
+        case LRes.AsType<Boolean> of
           True: FNeonIncludeIf := TNeonIncludeOption.Include;
           False: FNeonIncludeIf := TNeonIncludeOption.Exclude;
         end;
@@ -723,7 +728,7 @@ end;
 procedure TNeonRttiMember.SetValue(const AValue: TValue);
 begin
   case FMemberType of
-    TNeonMemberType.Prop:
+    TNeonMemberType.Prop :
     begin
       if MemberAsProperty.IsWritable then
         MemberAsProperty.SetValue(FParent.Instance, AValue);
@@ -736,58 +741,59 @@ function TNeonRttiMember.TypeKind: TTypeKind;
 begin
   Result := tkUnknown;
   case FMemberType of
-    TNeonMemberType.Unknown: raise ENeonException.Create(
-        'Member type must be Field or Property');
-    TNeonMemberType.Prop: Result := MemberAsProperty.PropertyType.TypeKind;
-    TNeonMemberType.Field: Result := MemberAsField.PropertyType.TypeKind;
+    TNeonMemberType.Unknown: raise ENeonException.Create('Member type must be Field or Property');
+    TNeonMemberType.Prop   : Result := MemberAsProperty.PropertyType.TypeKind;
+    TNeonMemberType.Field  : Result := MemberAsField.FieldType.TypeKind;
   end;
 end;
 
 function TNeonRttiMember.Visibility: TMemberVisibility;
 begin
-  Result := FMember.Visibility;
+  Result := FMember.Visibility
 end;
 
 { TCaseAlgorithm }
 
 class function TCaseAlgorithm.CamelToPascal(const AString: string): string;
 var
-  LOld, LNew: string;
+  LOld, LNew: Char;
 begin
   Result := AString;
   if Result.IsEmpty then
     Exit;
 
   LOld := Result.Chars[0];
-  LNew := system.UpCase(LOld).Chars[0];
+  LNew := UpperCase(LOld).Chars[0];
 
   Result := Result.Replace(LOld, LNew, []);
 end;
 
 class function TCaseAlgorithm.PascalToCamel(const AString: string): string;
 var
-  LOld, LNew: string;
+  LOld, LNew: Char;
 begin
   Result := AString;
   if Result.IsEmpty then
     Exit;
 
   LOld := Result.Chars[0];
-  LNew := system.LowerCase(LOld).Chars[0];
+  LNew := LowerCase(LOld).Chars[0];
 
   Result := Result.Replace(LOld, LNew, []);
 end;
 
 class function TCaseAlgorithm.PascalToSnake(const AString: string): string;
 begin
-  Result := system.LowerCase(ReplaceRegExpr(
-    AString, '([A-Z][a-z\d]+)(?=([A-Z][A-Z\a-z\d]+))', '$1_', True));
+  Result := LowerCase(
+    TRegEx.Replace(AString,
+    '([A-Z][a-z\d]+)(?=([A-Z][A-Z\a-z\d]+))', '$1_', [])
+  );
 end;
 
 class function TCaseAlgorithm.SnakeToPascal(const AString: string): string;
 var
-  LChar: char;
-  LIndex: integer;
+  LChar: Char;
+  LIndex: Integer;
   LSingleWord: string;
   LWords: TArray<string>;
 begin
@@ -808,8 +814,8 @@ end;
 
 { TNeonRttiMembers }
 
-constructor TNeonRttiMembers.Create(AConfig: TNeonConfiguration;
-  AInstance: Pointer; AType: TRttiType; AOperation: TNeonOperation);
+constructor TNeonRttiMembers.Create(AConfig: TNeonConfiguration; AInstance: Pointer;
+  AType: TRttiType; AOperation: TNeonOperation);
 begin
   inherited Create(True);
 
@@ -831,8 +837,7 @@ var
 begin
   for LMember in Self do
   begin
-    if LMember.NeonInclude.Present and (LMember.NeonInclude.Value =
-      IncludeIf.Always) then
+    if LMember.NeonInclude.Present and (LMember.NeonInclude.Value = IncludeIf.Always) then
     begin
       LMember.Serializable := True;
       Continue;
@@ -845,8 +850,8 @@ begin
       Continue;
 
     if MatchesVisibility(LMember.Visibility) then
-      if MatchesMemberChoice(LMember.MemberType) then
-        LMember.Serializable := True;
+    if MatchesMemberChoice(LMember.MemberType) then
+      LMember.Serializable := True;
   end;
 end;
 
@@ -856,8 +861,7 @@ var
 begin
   for LMember in Self do
   begin
-    if LMember.NeonInclude.Present and (LMember.NeonInclude.Value =
-      IncludeIf.Always) then
+    if LMember.NeonInclude.Present and (LMember.NeonInclude.Value = IncludeIf.Always) then
     begin
       LMember.Serializable := True;
       Continue;
@@ -889,17 +893,17 @@ begin
     if SameText(LMember.Name, 'Owner') then
       Continue;
 
-    if not LMember.IsWritable and not (LMember.TypeKind in
-      [tkClass, tkInterface]) then
+    if not LMember.IsWritable and
+       not (LMember.TypeKind in [tkClass, tkInterface]) then
       Continue;
 
     if MatchesVisibility(LMember.Visibility) then
-      if MatchesMemberChoice(LMember.MemberType) then
-        LMember.Serializable := True;
+    if MatchesMemberChoice(LMember.MemberType) then
+      LMember.Serializable := True;
   end;
 end;
 
-function TNeonRttiMembers.MatchesMemberChoice(AMemberType: TNeonMemberType): boolean;
+function TNeonRttiMembers.MatchesMemberChoice(AMemberType: TNeonMemberType): Boolean;
 var
   LRttiType: TRttiType;
   LMemberChoice: TNeonMembersSet;
@@ -924,13 +928,13 @@ begin
 
   case AMemberType of
     //TNeonMemberType.Unknown: Result := False;
-    TNeonMemberType.Prop: Result := TNeonMembers.Properties in LMemberChoice;
-    TNeonMemberType.Field: Result := TNeonMembers.Fields in LMemberChoice;
+    TNeonMemberType.Prop   :   Result := TNeonMembers.Properties in LMemberChoice;
+    TNeonMemberType.Field  :   Result := TNeonMembers.Fields in LMemberChoice;
     //TNeonMemberType.Indexed: Result := False;
   end;
 end;
 
-function TNeonRttiMembers.MatchesVisibility(AVisibility: TMemberVisibility): boolean;
+function TNeonRttiMembers.MatchesVisibility(AVisibility: TMemberVisibility): Boolean;
 var
   LVisibility: TNeonVisibility;
 begin
@@ -1012,8 +1016,7 @@ end;
 
 { TNeonRttiType }
 
-constructor TNeonRttiType.Create(AInstance: Pointer; AType: TRttiType;
-  AOperation: TNeonOperation);
+constructor TNeonRttiType.Create(AInstance: Pointer; AType: TRttiType; AOperation: TNeonOperation);
 begin
   inherited Create(AType, AOperation);
   FType := AType;
@@ -1079,7 +1082,7 @@ begin
   inherited;
 end;
 
-function TNeonSerializerRegistry.GetCount: integer;
+function TNeonSerializerRegistry.GetCount: Integer;
 begin
   Result := FRegistryClass.Count;
 end;
@@ -1104,12 +1107,11 @@ begin
   Result := InternalGetSerializer(ATargetClass.ClassInfo);
 end;
 
-function TNeonSerializerRegistry.InternalGetSerializer(ATypeInfo:
-  PTypeInfo): TCustomSerializer;
+function TNeonSerializerRegistry.InternalGetSerializer(ATypeInfo: PTypeInfo): TCustomSerializer;
 var
   LInfo: TSerializerInfo;
   LClass: TCustomSerializerClass;
-  LDistanceMax: integer;
+  LDistanceMax: Integer;
 begin
   Result := nil;
   LClass := nil;
@@ -1158,17 +1160,15 @@ begin
   end;
 end;
 
-function TNeonSerializerRegistry.RegisterSerializer(ASerializerClass:
-  TCustomSerializerClass): TNeonSerializerRegistry;
+function TNeonSerializerRegistry.RegisterSerializer(ASerializerClass: TCustomSerializerClass): TNeonSerializerRegistry;
 begin
   FRegistryClass.Add(TSerializerInfo.FromSerializer(ASerializerClass));
   Result := Self;
 end;
 
-procedure TNeonSerializerRegistry.UnregisterSerializer(ASerializerClass:
-  TCustomSerializerClass);
+procedure TNeonSerializerRegistry.UnregisterSerializer(ASerializerClass: TCustomSerializerClass);
 var
-  LIndex: integer;
+  LIndex: Integer;
 begin
   for LIndex := 0 to FRegistryClass.Count - 1 do
     if FRegistryClass[LIndex].SerializerClass = ASerializerClass then
@@ -1181,12 +1181,12 @@ end;
 
 { TCustomSerializer }
 
-class function TCustomSerializer.ClassDistance: integer;
+class function TCustomSerializer.ClassDistance: Integer;
 begin
   Result := TRttiUtils.ClassDistanceFromRoot(GetTargetInfo);
 end;
 
-class function TCustomSerializer.ClassIs(AClass: TClass): boolean;
+class function TCustomSerializer.ClassIs(AClass: TClass): Boolean;
 var
   LType: TRttiType;
 begin
@@ -1202,7 +1202,7 @@ begin
   Result := nil;
 end;
 
-class function TCustomSerializer.TypeInfoIs(AInfo: PTypeInfo): boolean;
+class function TCustomSerializer.TypeInfoIs(AInfo: PTypeInfo): Boolean;
 var
   LType: TRttiType;
 begin
@@ -1212,7 +1212,7 @@ begin
     Result := ClassIs(LType.AsInstance.MetaclassType);
 end;
 
-class function TCustomSerializer.TypeInfoIsClass(AInfo: PTypeInfo): boolean;
+class function TCustomSerializer.TypeInfoIsClass(AInfo: PTypeInfo): Boolean;
 var
   LType: TRttiType;
 begin
@@ -1224,8 +1224,7 @@ end;
 
 { TSerializerInfo }
 
-class function TSerializerInfo.FromSerializer(ASerializerClass:
-  TCustomSerializerClass): TSerializerInfo;
+class function TSerializerInfo.FromSerializer(ASerializerClass: TCustomSerializerClass): TSerializerInfo;
 begin
   Result.SerializerClass := ASerializerClass;
   Result.Distance := ASerializerClass.ClassDistance;
@@ -1233,8 +1232,8 @@ end;
 
 { TTypeInfoUtils }
 
-class function TTypeInfoUtils.EnumToString(ATypeInfo: PTypeInfo;
-  AValue: integer; ANeonObject: TNeonRttiObject): string;
+class function TTypeInfoUtils.EnumToString(ATypeInfo: PTypeInfo; AValue: Integer;
+    ANeonObject: TNeonRttiObject): string;
 var
   LTypeData: PTypeData;
 begin
@@ -1248,8 +1247,8 @@ begin
     if Length(ANeonObject.NeonEnumNames) > 0 then
     begin
       if (AValue >= Low(ANeonObject.NeonEnumNames)) and
-        (AValue <= High(ANeonObject.NeonEnumNames)) then
-        Result := ANeonObject.NeonEnumNames[AValue];
+         (AValue <= High(ANeonObject.NeonEnumNames)) then
+        Result := ANeonObject.NeonEnumNames[AValue]
     end;
   end
   else

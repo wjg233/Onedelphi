@@ -20,9 +20,9 @@ type
     // property PrivateKey: string read FPrivateKey write FPrivateKey;
   end;
 
-  TResult<T> = class
+  TActionResult<T> = class
   private
-    FResultBool: boolean;
+    FResultSuccess: boolean;
     FResultCode: string;
     FResultMsg: string;
     FResultData: T;
@@ -31,7 +31,7 @@ type
   public
     constructor Create();
   public
-    property ResultBool: boolean read FResultBool write FResultBool;
+    property ResultSuccess: boolean read FResultSuccess write FResultSuccess;
     property ResultCode: string read FResultCode write FResultCode;
     property ResultMsg: string read FResultMsg write FResultMsg;
     property ResultData: T read FResultData write FResultData;
@@ -39,10 +39,10 @@ type
 
 implementation
 
-constructor TResult<T>.Create();
+constructor TActionResult<T>.Create();
 begin
   inherited Create;
-  self.FResultBool := false;
+  self.FResultSuccess := false;
 end;
 
 end.

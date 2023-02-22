@@ -16,8 +16,11 @@ const
   HTTP_URL_TokenName = 'token';
   HTTP_URL_TokenTime = 'time';
   HTTP_URL_TokenSign = 'sign';
-  // 常用函数交互
+  // token相关
   URL_HTTP_HTTPServer_TOKEN_ClientConnect = 'OneServer/Token/ClientConnect';
+  URL_HTTP_HTTPServer_TOKEN_ClientDisConnect = 'OneServer/Token/ClientDisConnect';
+  URL_HTTP_HTTPServer_TOKEN_ClientPing = 'OneServer/Token/ClientPing';
+  // 操作数据相关
   URL_HTTP_HTTPServer_DATA_OpenDatas = 'OneServer/Data/OpenDatas';
   URL_HTTP_HTTPServer_DATA_SaveDatas = 'OneServer/Data/SaveDatas';
   URL_HTTP_HTTPServer_DATA_ExecStored = 'OneServer/Data/ExecStored';
@@ -36,6 +39,7 @@ const
   URL_HTTP_HTTPServer_DATA_GetTaskID = 'OneServer/VirtualFile/GetTaskID';
   URL_HTTP_HTTPServer_DATA_UploadChunkFile = 'OneServer/VirtualFile/UploadChunkFile';
   URL_HTTP_HTTPServer_DATA_DownloadChunkFile = 'OneServer/VirtualFile/DownloadChunkFile';
+  URL_HTTP_HTTPServer_DATA_DeleteFile = 'OneServer/VirtualFile/DeleteFile';
 
 type
   OneContentType = (ContentTypeText, ContentTypeHtml, ContentTypeStream, ContentTypeZip);
@@ -91,12 +95,14 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     function DoConnect(qForceConnect: boolean = false): boolean;
+    function DoPing(): boolean;
     procedure DisConnect; overload;
     // 提交bytes返回Bytes
     function PostResultBytes(const QUrl: string; QPostDataBtye: TBytes): TOneResultBytes; overload;
     function PostResultBytes(const QUrl: string; QPostData: RawByteString): TOneResultBytes; overload;
     // 提交字符串，返回JSONValue
     function PostResultJsonValue(const QUrl: string; QPostData: RawByteString; var QErrMsg: string): TJsonValue; overload;
+    function PostResultJsonValue(const QUrl: string; QObject: TObject; var QErrMsg: string): TJsonValue; overload;
     // 提交Bytes，返回JSONValue
     function PostResultJsonValue(const QUrl: string; QPostData: TBytes; var QErrMsg: string): TJsonValue; overload;
     function PostResultContent(const QUrl: string; QPostData: string; var QResultData: string): boolean;
@@ -130,9 +136,11 @@ type
     // 文件上传下载
     function UploadFile(QVirtualInfo: TVirtualInfo): boolean;
     function DownloadFile(QVirtualInfo: TVirtualInfo): boolean;
+    function DeleteVirtualFile(QVirtualInfo: TVirtualInfo): boolean;
     function GetTaskID(QVirtualTask: TVirtualTask): boolean;
     function UploadChunkFile(QVirtualTask: TVirtualTask; QUpDownChunkCallBack: EvenUpDownChunkCallBack): boolean;
     function DownloadChunkFile(QVirtualTask: TVirtualTask; QUpDownChunkCallBack: EvenUpDownChunkCallBack): boolean;
+
     // *********二层事务自由控制***********
     /// <summary>
     /// 事务控制第一步:获取账套连接,标识成事务账套
@@ -149,7 +157,7 @@ type
     function RollbackTran(QTranInfo: TOneTran): boolean;
   published
     /// <param name="Connected">DoConnect连接成功的标识,就是一开始确定服务端HTTP连接是否正常</param>
-    property Connected: boolean read FConnected;
+    property Connected: boolean read FConnected write FConnected;
     /// <param name="ClientIP">DoConnect连接或代上此参数,请自行赋值在连接前，可以为空</param>
     property ClientIP: string read FClientIP write FClientIP;
     /// <param name="ClientMac">DoConnect连接或代上此参数,请自行赋值在连接前，可以为空</param>
@@ -209,7 +217,7 @@ var
   lResultJsonValue: TJsonValue;
   lErrMsg: string;
   lClientConnect: TClientConnect;
-  lServerResult: TResult<TClientConnect>;
+  lServerResult: TActionResult<TClientConnect>;
 begin
   Result := false;
   if (not qForceConnect) then
@@ -225,7 +233,7 @@ begin
     end;
   end;
   lResultJsonValue := nil;
-  lServerResult := TResult<TClientConnect>.Create;
+  lServerResult := TActionResult<TClientConnect>.Create;
   lJsonObj := TJsonObject.Create;
   try
     lJsonObj.AddPair('ClientIP', self.ClientIP);
@@ -243,7 +251,7 @@ begin
       self.FErrMsg := '返回的数据解析成TResult<TClientConnect>出错,无法知道结果,数据:' + lResultJsonValue.ToJSON;
       exit;
     end;
-    if not lServerResult.ResultBool then
+    if not lServerResult.ResultSuccess then
     begin
       self.FErrMsg := '服务端消息:' + lServerResult.ResultMsg;
       exit;
@@ -267,12 +275,72 @@ begin
   end;
 end;
 
+function TOneConnection.DoPing(): boolean;
+var
+  lResultJsonValue: TJsonValue;
+  lErrMsg: string;
+  lClientConnect: TClientConnect;
+  lServerResult: TActionResult<string>;
+begin
+  Result := false;
+  lResultJsonValue := nil;
+  lServerResult := TActionResult<string>.Create;
+  try
+    lResultJsonValue := self.PostResultJsonValue(URL_HTTP_HTTPServer_TOKEN_ClientPing, '', lErrMsg);
+    if not self.IsErrTrueResult(lErrMsg) then
+    begin
+      self.FErrMsg := lErrMsg;
+      exit;
+    end;
+
+    if not OneNeonHelper.JsonToObject(lServerResult, lResultJsonValue, lErrMsg) then
+    begin
+      self.FErrMsg := '返回的数据解析成TResult<string>出错,无法知道结果,数据:' + lResultJsonValue.ToJSON;
+      exit;
+    end;
+    if not lServerResult.ResultSuccess then
+    begin
+      self.FErrMsg := '服务端消息:' + lServerResult.ResultMsg;
+      exit;
+    end;
+    Result := true;
+  finally
+    self.FConnected := Result;
+    if lResultJsonValue <> nil then
+    begin
+      lResultJsonValue.Free;
+    end;
+    lServerResult.Free;
+  end;
+end;
+
 // 断开服务端，本质上是踢除Token，HTTP多是基于短连接
 procedure TOneConnection.DisConnect;
+var
+  lTokenID: string;
+  lJsonObj: TJsonObject;
+  lResultJsonValue: TJsonValue;
+  lErrMsg: string;
+  lClientConnect: TClientConnect;
 begin
+  if self.TokenID = '' then
+    exit;
+  lTokenID := self.TokenID;
   self.TokenID := '';
   self.PrivateKey := '';
   self.FConnected := false;
+  lResultJsonValue := nil;
+  lJsonObj := TJsonObject.Create;
+  try
+    lJsonObj.AddPair('TokenID', lTokenID);
+    lResultJsonValue := self.PostResultJsonValue(URL_HTTP_HTTPServer_TOKEN_ClientDisConnect, lJsonObj.ToJSON(), lErrMsg);
+  finally
+    lJsonObj.Free;
+    if lResultJsonValue <> nil then
+    begin
+      lResultJsonValue.Free;
+    end;
+  end;
 end;
 
 // 调整URL
@@ -293,15 +361,22 @@ begin
       QErrMsg := '服务端地址未设置';
       exit;
     end;
-    if self.FIsHttps then
+    if (self.FHTTPHost.StartsWith('https://')) or (self.FHTTPHost.StartsWith('http://')) then
     begin
-      tempStr := tempStr + 'https://'
+      tempStr := self.FHTTPHost;
     end
     else
     begin
-      tempStr := tempStr + 'http://'
+      if self.FIsHttps then
+      begin
+        tempStr := tempStr + 'https://'
+      end
+      else
+      begin
+        tempStr := tempStr + 'http://'
+      end;
+      tempStr := tempStr + self.FHTTPHost;
     end;
-    tempStr := tempStr + self.FHTTPHost;
     //
     if self.FHTTPPort > 0 then
     begin
@@ -488,6 +563,55 @@ begin
       end;
       self.SetErrTrueResult(QErrMsg);
       Result := lJsonValue;
+    except
+      on e: Exception do
+      begin
+        QErrMsg := '结果转化JSON发生异常:' + e.Message;
+      end;
+    end;
+  finally
+    if lResultBytes <> nil then
+    begin
+      lResultBytes.Free;
+    end;
+  end;
+end;
+
+function TOneConnection.PostResultJsonValue(const QUrl: string; QObject: TObject; var QErrMsg: string): TJsonValue;
+var
+  lTempJson: TJsonValue;
+  lTempStr: string;
+  lPostBytes: TBytes;
+  lResultBytes: TOneResultBytes;
+begin
+  Result := nil;
+  QErrMsg := '';
+  lTempJson := OneNeonHelper.ObjectToJson(QObject, QErrMsg);
+  if lTempJson = nil then
+    exit;
+  try
+    lTempStr := lTempJson.ToJSON();
+  finally
+    lTempJson.Free;
+    lTempJson := nil;
+  end;
+  lPostBytes := TEncoding.UTF8.GetBytes(lTempStr);
+  lResultBytes := self.PostResultBytes(QUrl, lPostBytes);
+  if not lResultBytes.IsOK then
+  begin
+    QErrMsg := lResultBytes.ErrMsg;
+    exit;
+  end;
+  try
+    try
+      lTempJson := TJsonObject.ParseJSONValue(lResultBytes.Bytes, 0, length(lResultBytes.Bytes));
+      if lTempJson = nil then
+      begin
+        QErrMsg := '结果转化JSON发生异常:结果为nil,返回信息:' + TEncoding.UTF8.GetString(lResultBytes.Bytes);
+        exit;
+      end;
+      self.SetErrTrueResult(QErrMsg);
+      Result := lTempJson;
     except
       on e: Exception do
       begin
@@ -1966,7 +2090,7 @@ end;
 function TOneConnection.UploadFile(QVirtualInfo: TVirtualInfo): boolean;
 var
   lPostJsonValue, lResultJsonValue: TJsonValue;
-  lResult: TResult<string>;
+  lResult: TActionResult<string>;
   tempMsg, lFileName: string;
   TempStream: TMemoryStream;
 begin
@@ -2026,7 +2150,7 @@ begin
   end;
   lResultJsonValue := nil;
   lPostJsonValue := nil;
-  lResult := TResult<string>.Create;
+  lResult := TActionResult<string>.Create;
   try
     lPostJsonValue := OneNeonHelper.ObjectToJson(QVirtualInfo, tempMsg);
     if tempMsg <> '' then
@@ -2049,7 +2173,7 @@ begin
     begin
       QVirtualInfo.ErrMsg := '服务端消息:' + lResult.ResultMsg;
     end;
-    if lResult.ResultBool then
+    if lResult.ResultSuccess then
     begin
       // 有可能上传文件名称和最后文件名称不一至
       QVirtualInfo.RemoteFileName := lResult.ResultData;
@@ -2070,7 +2194,7 @@ function TOneConnection.DownloadFile(QVirtualInfo: TVirtualInfo): boolean;
 var
   lPostJsonValue, lJsonValue: TJsonValue;
   lResultBytes: TOneResultBytes;
-  lResult: TResult<string>;
+  lResult: TActionResult<string>;
   lInStream: TMemoryStream;
   tempMsg, lLocalPath, lAFileName: string;
 begin
@@ -2123,7 +2247,7 @@ begin
   lJsonValue := nil;
   lPostJsonValue := nil;
   lResultBytes := nil;
-  lResult := TResult<string>.Create;
+  lResult := TActionResult<string>.Create;
   try
     lPostJsonValue := OneNeonHelper.ObjectToJson(QVirtualInfo, tempMsg);
     if tempMsg <> '' then
@@ -2148,7 +2272,7 @@ begin
       QVirtualInfo.ErrMsg := tempMsg;
       exit;
     end;
-    if not lResult.ResultBool then
+    if not lResult.ResultSuccess then
     begin
       QVirtualInfo.ErrMsg := '服务端消息:' + lResult.ResultMsg;
       exit;
@@ -2187,10 +2311,81 @@ begin
   end;
 end;
 
+function TOneConnection.DeleteVirtualFile(QVirtualInfo: TVirtualInfo): boolean;
+var
+  lPostJsonValue, lResultJsonValue: TJsonValue;
+  lResult: TActionResult<string>;
+  tempMsg: string;
+begin
+  Result := false;
+  QVirtualInfo.ErrMsg := '';
+  if not self.FConnected then
+  begin
+    // 如果已经连接过就不在连接，
+    // 除非主动断掉
+    QVirtualInfo.ErrMsg := '未连接,请先执行DoConnect事件.';
+    exit;
+  end;
+  // 统一用liunx格式
+  // win默认文件路径用\,liun是/ 但win支持/
+  QVirtualInfo.LocalFile := OneFileHelper.FormatPath(QVirtualInfo.LocalFile);
+  QVirtualInfo.RemoteFile := OneFileHelper.FormatPath(QVirtualInfo.RemoteFile);
+  if QVirtualInfo.VirtualCode = '' then
+  begin
+    QVirtualInfo.ErrMsg := '虚拟路径代码[VirtualCode]为空,请检查';
+    exit;
+  end;
+  // 判断有没有要下载的文件
+  if not TPath.HasExtension(QVirtualInfo.RemoteFile) then
+  begin
+    QVirtualInfo.ErrMsg := '要删除的文件[RemoteFile]需指定要删除的文件路径及文件名称';
+    exit;
+  end;
+
+  lResultJsonValue := nil;
+  lPostJsonValue := nil;
+  lResult := TActionResult<string>.Create;
+  try
+    lPostJsonValue := OneNeonHelper.ObjectToJson(QVirtualInfo, tempMsg);
+    if tempMsg <> '' then
+    begin
+      QVirtualInfo.ErrMsg := tempMsg;
+      exit;
+    end;
+    lResultJsonValue := self.PostResultJsonValue(URL_HTTP_HTTPServer_DATA_DeleteFile, lPostJsonValue.ToJSON(), tempMsg);
+    if not self.IsErrTrueResult(tempMsg) then
+    begin
+      QVirtualInfo.ErrMsg := tempMsg;
+      exit;
+    end;
+    if not OneNeonHelper.JsonToObject(lResult, lResultJsonValue, tempMsg) then
+    begin
+      QVirtualInfo.ErrMsg := '返回的数据解析成TOneDataResult出错,无法知道结果,数据:' + lResultJsonValue.ToJSON;
+      exit;
+    end;
+    if lResult.ResultMsg <> '' then
+    begin
+      QVirtualInfo.ErrMsg := '服务端消息:' + lResult.ResultMsg;
+    end;
+    if lResult.ResultSuccess then
+    begin
+      Result := true;
+    end;
+  finally
+    if lResultJsonValue <> nil then
+    begin
+      lResultJsonValue.Free;
+    end;
+    if lPostJsonValue <> nil then
+      lPostJsonValue.Free;
+    lResult.Free;
+  end;
+end;
+
 function TOneConnection.GetTaskID(QVirtualTask: TVirtualTask): boolean;
 var
   lPostJsonValue, lResultJsonValue: TJsonValue;
-  lResult: TResult<TVirtualTask>;
+  lResult: TActionResult<TVirtualTask>;
   tempMsg: string;
   lFileStream: TFileStream;
   lLocalPath, lFileName: string;
@@ -2292,7 +2487,7 @@ begin
 
   lResultJsonValue := nil;
   lPostJsonValue := nil;
-  lResult := TResult<TVirtualTask>.Create;
+  lResult := TActionResult<TVirtualTask>.Create;
   lResult.ResultData := TVirtualTask.Create;
   try
     lPostJsonValue := OneNeonHelper.ObjectToJson(QVirtualTask, tempMsg);
@@ -2316,7 +2511,7 @@ begin
     begin
       QVirtualTask.ErrMsg := '服务端消息:' + lResult.ResultMsg;
     end;
-    if lResult.ResultBool then
+    if lResult.ResultSuccess then
     begin
       // 赋值服务端一些相关属性
       QVirtualTask.TaskID := lResult.ResultData.TaskID;
@@ -2342,7 +2537,7 @@ var
   lFileStream: TFileStream;
   tempMsg: string;
   lPostJsonValue, lResultJsonValue: TJsonValue;
-  lResult: TResult<string>;
+  lResult: TActionResult<string>;
   lBytes: TBytes;
   iChunSize: int64;
   isEnd: boolean;
@@ -2367,7 +2562,7 @@ begin
   end;
   // 开始读取文件上传
   lFileStream := TFileStream.Create(QVirtualTask.LocalFile, fmopenRead);
-  lResult := TResult<string>.Create;
+  lResult := TActionResult<string>.Create;
   try
     QVirtualTask.FileTotalSize := lFileStream.Size;
     if Assigned(QUpDownChunkCallBack) then
@@ -2376,7 +2571,7 @@ begin
     end;
     while QVirtualTask.FilePosition < QVirtualTask.FileTotalSize do
     begin
-      lResult.ResultBool := false;
+      lResult.ResultSuccess := false;
       lResult.ResultMsg := '';
       lResult.ResultCode := '';
       lResult.ResultData := '';
@@ -2417,7 +2612,7 @@ begin
         begin
           QVirtualTask.ErrMsg := '服务端消息:' + lResult.ResultMsg;
         end;
-        if not lResult.ResultBool then
+        if not lResult.ResultSuccess then
         begin
           exit;
         end;
@@ -2428,11 +2623,11 @@ begin
           lResultJsonValue.Free;
         QVirtualTask.StreamBase64 := '';
         // 读取位置加上去
-        if lResult.ResultBool then
+        if lResult.ResultSuccess then
           QVirtualTask.FilePosition := QVirtualTask.FilePosition + iChunSize;
         if Assigned(QUpDownChunkCallBack) then
         begin
-          if lResult.ResultBool then
+          if lResult.ResultSuccess then
           begin
             isEnd := QVirtualTask.FilePosition >= QVirtualTask.FileTotalSize;
             if isEnd then
@@ -2464,7 +2659,7 @@ var
   lFileStream: TFileStream;
   tempMsg: string;
   lPostJsonValue, lResultJsonValue: TJsonValue;
-  lResult: TResult<string>;
+  lResult: TActionResult<string>;
   lBytes: TBytes;
   iChunSize: int64;
   lInStream: TMemoryStream;
@@ -2490,7 +2685,7 @@ begin
   end;
   // 开始读取文件上传
   lFileStream := TFileStream.Create(QVirtualTask.LocalFile, fmCreate or fmOpenReadWrite);
-  lResult := TResult<string>.Create;
+  lResult := TActionResult<string>.Create;
   try
     if Assigned(QUpDownChunkCallBack) then
     begin
@@ -2498,7 +2693,7 @@ begin
     end;
     while QVirtualTask.FilePosition < QVirtualTask.FileTotalSize do
     begin
-      lResult.ResultBool := false;
+      lResult.ResultSuccess := false;
       lResult.ResultMsg := '';
       lResult.ResultCode := '';
       lResult.ResultData := '';
@@ -2530,7 +2725,7 @@ begin
         begin
           QVirtualTask.ErrMsg := '服务端消息:' + lResult.ResultMsg;
         end;
-        if not lResult.ResultBool then
+        if not lResult.ResultSuccess then
         begin
           exit;
         end;
@@ -2547,11 +2742,11 @@ begin
         if lResultJsonValue <> nil then
           lResultJsonValue.Free;
         lInStream.Free;
-        if lResult.ResultBool then
+        if lResult.ResultSuccess then
           QVirtualTask.FilePosition := QVirtualTask.FilePosition + QVirtualTask.FileChunSize;
         if Assigned(QUpDownChunkCallBack) then
         begin
-          if lResult.ResultBool then
+          if lResult.ResultSuccess then
           begin
             isEnd := QVirtualTask.FilePosition >= QVirtualTask.FileTotalSize;
             if isEnd then

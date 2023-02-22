@@ -1,13 +1,14 @@
-unit OneHttpCtxtResult;
-
-{$mode DELPHI}{$H+}
+﻿unit OneHttpCtxtResult;
 
 interface
 
 uses
-  SysUtils, Classes, Generics.Collections, StrUtils, Contnrs, httpprotocol,
-  OneHttpControllerRtti, fpjson,jsonparser, Rtti, OneHttpConst, OneControllerResult,
-  OneSerialization,DB,OneDataJson;
+  System.SysUtils, System.Classes, Web.HTTPApp, System.Generics.Collections,
+  System.StrUtils, System.JSON, System.JSON.Serializers, Rest.JSON,
+  Rest.JsonReflect, Neon.Core.Persistence.JSON, Neon.Core.Persistence,
+  System.Contnrs, OneHttpControllerRtti, Neon.Core.Serializers.DB,
+  Neon.Core.Serializers.RTL, Neon.Core.Serializers.Nullables, OneNeonHelper,
+  System.Rtti, OneRttiHelper, OneHttpConst, OneControllerResult, OneMultipart;
 
 type
   THTTPCtxt = class;
@@ -15,7 +16,7 @@ type
   // 挂载路由函数模式
   TEvenControllerProcedure = procedure(QHTTPCtxt: THTTPCtxt; QHTTPResult: THTTPResult);
   // 创建控制层获取一个对象
-  THTTPResultMode = (ResultJSON, Text, URL, OUTFILE, HTML);
+  THTTPResultMode = (ResultJSON, TEXT, URL, OUTFILE, HTML);
 
   // standResult 字符串，数字，时间，布尔
   // objResult返回的是个对象
@@ -28,23 +29,24 @@ type
   private
     FaName: string;
     FAag: integer;
-  published
-    property Name: string read FaName write FaName;
+  public
+    property name: string read FaName write FaName;
     property age: integer read FAag write FAag;
   end;
 
   TPersonrecord = record
   public
-    Name: string;
+    name: string;
     age: integer;
   end;
 
+  // 与TActionResult保持一至
   THTTPResult = class
   private
     FResultSuccess: boolean;
     FResultStatus: cardinal;
     FResultCode: string;
-    FResultMsg: rawbytestring;
+    FResultMsg: RawByteString;
     FResultOutMode: THTTPResultMode;
     FResultOut: string;
     FResultObj: TObject;
@@ -52,10 +54,10 @@ type
     FResultCount: integer;
     { 服务端返回一个URL重定向 }
     FResultRedirect: string;
-    FResultParams: string;
+    FResultParams: String;
     // 异常捕捉
     FResultException: string;
-
+    //
     FOneMethodRtti: TOneMethodRtti;
   public
     procedure SetHTTPResultTrue();
@@ -67,11 +69,11 @@ type
     property ResultSuccess: boolean read FResultSuccess write FResultSuccess;
     property ResultStatus: cardinal read FResultStatus write FResultStatus;
     property ResultCode: string read FResultCode write FResultCode;
-    property ResultMsg: rawbytestring read FResultMsg write FResultMsg;
+    property ResultMsg: RawByteString read FResultMsg write FResultMsg;
     property ResultOutMode: THTTPResultMode read FResultOutMode write FResultOutMode;
     property ResultOut: string read FResultOut write FResultOut;
     property ResultObj: TObject read FResultObj write FResultObj;
-    //property ResultTValue: TValue read FResultTValue write FResultTValue;
+    property ResultTValue: TValue read FResultTValue write FResultTValue;
     property ResultCount: integer read FResultCount write FResultCount;
     property ResultRedirect: string read FResultRedirect write FResultRedirect;
     property ResultParams: string read FResultParams write FResultParams;
@@ -89,20 +91,20 @@ type
     // 客户端MAC地址
     FClientMAC: string;
     // URL路径
-    FUrl: string;
+    FUrl: String;
     // URL请求的参数
     FUrlParams: TStringList;
     // 头部参数
     FHeadParamList: TStringList;
     // 获取请求数据发起的格式和编码
     FRequestContentType: string;
-    FRequestContentTypeCharset: string;
+    FRequestContentTypeCharset: String;
     // 请求的数据
-    FRequestInContent: rawbytestring;
+    FRequestInContent: String;
     // 请求的头部
-    FRequestInHeaders: string;
+    FRequestInHeaders: RawByteString;
     // HTTP请求的内容
-    FOutContent: rawbytestring;
+    FOutContent: RawByteString;
     // 获取请求返回接受的格式和编码
     FRequestAccept: string;
     FRequestAcceptCharset: string;
@@ -113,24 +115,24 @@ type
     destructor Destroy; override;
     procedure SetUrlParams();
     procedure SetHeadParams();
-    procedure SetInContent(qInContent: rawbytestring);
+    procedure SetInContent(qInContent: RawByteString);
   public
     procedure AddCustomerHead(QHead: string; QConnect: string);
-    property URL: string read FUrl write FUrl;
-    property ClientIP: string read FClientIP write FClientIP;
-    property ClientMAC: string read FClientMAC write FClientMAC;
+    property URL: String read FUrl write FUrl;
+    property ClientIP: String read FClientIP write FClientIP;
+    property ClientMAC: String read FClientMAC write FClientMAC;
     property UrlParams: TStringList read FUrlParams write FUrlParams;
     property HeadParamList: TStringList read FHeadParamList write FHeadParamList;
-    property RequestContentType: string read FRequestContentType write FRequestContentType;
-    property RequestContentTypeCharset: string read FRequestContentTypeCharset write FRequestContentTypeCharset;
-    property RequestInContent: rawbytestring read FRequestInContent write FRequestInContent;
-    property RequestInHeaders: string read FRequestInHeaders write FRequestInHeaders;
-    property OutContent: rawbytestring read FOutContent write FOutContent;
-    property RequestAccept: string read FRequestAccept write FRequestAccept;
-    property ResponCustHeaderList: string read FResponCustHeaderList write FResponCustHeaderList;
-    property TokenUserCode: string read FTokenUserCode write FTokenUserCode;
-    property Method: string read FMethod write FMethod;
-    property ControllerMethodName: string read FControllerMethodName write FControllerMethodName;
+    property RequestContentType: String read FRequestContentType write FRequestContentType;
+    property RequestContentTypeCharset: String read FRequestContentTypeCharset write FRequestContentTypeCharset;
+    property RequestInContent: String read FRequestInContent write FRequestInContent;
+    property RequestInHeaders: RawByteString read FRequestInHeaders write FRequestInHeaders;
+    property OutContent: RawByteString read FOutContent write FOutContent;
+    property RequestAccept: String read FRequestAccept write FRequestAccept;
+    property ResponCustHeaderList: String read FResponCustHeaderList write FResponCustHeaderList;
+    property TokenUserCode: String read FTokenUserCode write FTokenUserCode;
+    property Method: String read FMethod write FMethod;
+    property ControllerMethodName: String read FControllerMethodName write FControllerMethodName;
     property RequestAcceptCharset: string read FRequestAcceptCharset write FRequestAcceptCharset;
   end;
 
@@ -184,11 +186,13 @@ end;
 procedure EndCodeResultOut(QHTTPCtxt: THTTPCtxt; QHTTPResult: THTTPResult);
 var
   vBytes: TBytes;
-  LJSON: TJSONData;
+  LJSON: TJSONValue;
+  LWriter: TNeonSerializerJSON;
   lSerializerObj: TObject;
   lListT: TList<TObject>;
   i: integer;
-  lResultStr: TActionResultString;
+  lNeonConfiguration: INeonConfiguration;
+  lResultStr: TActionResult<string>;
 begin
   if QHTTPResult.ResultRedirect <> '' then
   begin
@@ -200,9 +204,9 @@ begin
   begin
     if (QHTTPResult.ResultOutMode = THTTPResultMode.ResultJSON) then
     begin
-      QHTTPCtxt.OutContent := QHTTPResult.ResultToJson();
+      QHTTPCtxt.OutContent := QHTTPResult.ResultToJson()
     end
-    else if QHTTPResult.ResultOutMode = THTTPResultMode.Text then
+    else if QHTTPResult.ResultOutMode = THTTPResultMode.TEXT then
     begin
       if QHTTPResult.ResultObj <> nil then
       begin
@@ -222,38 +226,29 @@ begin
             lSerializerObj := lListT;
           end;
         end;
-
-        if lSerializerObj is TJSONData then
+        //
+        if lSerializerObj is TJSONValue then
         begin
           // 返回的是JSON对象直接输出JSON
-          QHTTPCtxt.OutContent := TJSONData(lSerializerObj).AsJSON;
+          QHTTPCtxt.OutContent := TJSONValue(lSerializerObj).ToString();
         end
-        else
-        if lSerializerObj is TActionResultBase then
+        else if lSerializerObj is TActionResult<string> then
         begin
-          if lSerializerObj is TActionResultString then
+          lResultStr := TActionResult<string>(lSerializerObj);
+          if (lResultStr.IsResultFile) and (lResultStr.ResultSuccess) then
           begin
-            lResultStr := TActionResultString(lSerializerObj);
-            if (lResultStr.IsResultFile) and (lResultStr.ResultSuccess) then
-            begin
-              QHTTPResult.ResultOutMode := THTTPResultMode.OUTFILE;
-              QHTTPCtxt.OutContent := lResultStr.ResultData;
-            end
-            else
-            begin
-              QHTTPCtxt.OutContent :=
-                OneSerialization.ObjectToJsonString(lSerializerObj);
-            end;
+            QHTTPResult.ResultOutMode := THTTPResultMode.OUTFILE;
+            QHTTPCtxt.OutContent := TActionResult<string>(lSerializerObj).ResultData;
           end
           else
           begin
-            QHTTPCtxt.OutContent := OneSerialization.ObjectToJsonString(lSerializerObj);
+            QHTTPCtxt.OutContent := OneNeonHelper.ObjectToJsonString(lSerializerObj);
           end;
         end
         else
         begin
           try
-            QHTTPCtxt.OutContent := OneSerialization.ObjectToJsonString(lSerializerObj);
+            QHTTPCtxt.OutContent := OneNeonHelper.ObjectToJsonString(lSerializerObj);
           finally
             if lListT <> nil then
             begin
@@ -263,11 +258,10 @@ begin
           end;
         end;
       end
-      else if (not QHTTPResult.FResultTValue.IsEmpty) then
+      else if (not QHTTPResult.ResultTValue.IsEmpty) then
       begin
         // TValue序列化
-        //QHTTPCtxt.OutContent :=
-        //  OneNeonHelper.ValueToJSONString(QHTTPResult.ResultTValue);
+        QHTTPCtxt.OutContent := OneNeonHelper.ValueToJSONString(QHTTPResult.ResultTValue);
       end
       else
       begin
@@ -281,22 +275,22 @@ begin
 
     if QHTTPCtxt.RequestAcceptCharset = 'UTF-8' then
     begin
-      QHTTPCtxt.OutContent := UTF8Encode(QHTTPCtxt.OutContent);
+      QHTTPCtxt.OutContent := RawByteString(UTF8Encode(QHTTPCtxt.OutContent));
     end
-    else if QHTTPCtxt.RequestAcceptCharset = 'GB2312' then
+    ELSE if QHTTPCtxt.RequestAcceptCharset = 'GB2312' then
     begin
       vBytes := TEncoding.UTF8.GetBytes(QHTTPCtxt.OutContent);
-      QHTTPCtxt.OutContent := rawbytestring(TEncoding.getencoding(936).GetString(vBytes));
+      QHTTPCtxt.OutContent := RawByteString(TEncoding.getencoding(936).GetString(vBytes));
     end
     else if QHTTPCtxt.RequestAcceptCharset = 'BIG5' then
-    begin
+    BEGIN
       vBytes := TEncoding.UTF8.GetBytes(QHTTPCtxt.OutContent);
-      QHTTPCtxt.OutContent := rawbytestring(TEncoding.getencoding(950).GetString(vBytes));
-    end
-    else
-    begin
-      QHTTPCtxt.OutContent := rawbytestring(UTF8Encode(QHTTPCtxt.OutContent));
-    end;
+      QHTTPCtxt.OutContent := RawByteString(TEncoding.getencoding(950).GetString(vBytes));
+    END
+    ELSE
+    BEGIN
+      QHTTPCtxt.OutContent := RawByteString(UTF8Encode(QHTTPCtxt.OutContent));
+    END;
   end;
 end;
 
@@ -304,7 +298,7 @@ function CreateNewHTTPResult: THTTPResult;
 begin
   Result := THTTPResult.Create;
   Result.ResultStatus := 200;
-  Result.ResultSuccess := False;
+  Result.ResultSuccess := false;
   Result.ResultCode := HTTP_ResultCode_Fail;
   Result.ResultMsg := '';
   Result.ResultOutMode := THTTPResultMode.ResultJSON;
@@ -315,7 +309,7 @@ begin
 end;
 
 destructor THTTPResult.Destroy;
-  // 对象释放
+// 对象释放
 var
   i: integer;
   lListT: TList<TObject>;
@@ -431,7 +425,7 @@ end;
 
 procedure THTTPResult.SetHTTPResultTrue();
 begin
-  self.FResultSuccess := True;
+  self.FResultSuccess := true;
   self.FResultCode := HTTP_ResultCode_True;
 end;
 
@@ -443,11 +437,12 @@ end;
 function THTTPResult.ResultToJson(): string;
 var
   lJsonObj: TJsonObject;
-  lJsonValue: TJSONData;
+  lJsonValue: TJSONValue;
+  LWriter: TNeonSerializerJSON;
   i: integer;
   lListT: TList<TObject>;
   lSerializerObj: TObject;
-  lErrMsg: string;
+  lNeonConfiguration: INeonConfiguration;
 begin
   if self.ResultOutMode <> THTTPResultMode.ResultJSON then
   begin
@@ -456,10 +451,11 @@ begin
   end;
   lJsonObj := TJsonObject.Create;
   try
-    lJsonObj.Add('ResultSuccess', self.ResultSuccess);
-    lJsonObj.Add('ResultCode', self.ResultCode);
-    lJsonObj.Add('ResultMsg', self.ResultMsg);
-    lJsonObj.Add('ResultCount', self.ResultCount);
+    // 与TActionResult保持一至大小写,前台框架统一也是一样的大小写
+    lJsonObj.AddPair('ResultSuccess', TJSONBool.Create(self.ResultSuccess));
+    lJsonObj.AddPair('ResultCode', self.ResultCode);
+    lJsonObj.AddPair('ResultMsg', self.ResultMsg);
+    lJsonObj.AddPair('ResultCount', TJSONNumber.Create(self.ResultCount));
     if self.ResultObj <> nil then
     begin
       lListT := nil;
@@ -477,28 +473,30 @@ begin
         end;
       end;
       // 序列化对象
+      lNeonConfiguration := OneNeonHelper.GetDefalutNeonConfiguration();
+      LWriter := TNeonSerializerJSON.Create(lNeonConfiguration);
       try
-        lJsonValue := OneSerialization.ObjectToJSON(self.ResultObj, lErrMsg);
+        lJsonValue := LWriter.ObjectToJSON(self.ResultObj);
       finally
+        LWriter.Free;
         if lListT <> nil then
         begin
           lListT.Clear;
           lListT.Free;
         end;
       end;
-      lJsonObj.Add('ResultData', lJsonValue);
+      lJsonObj.AddPair('ResultData', lJsonValue);
     end
     else
     begin
-      lJsonObj.Add('ResultData', self.ResultOut);
+      lJsonObj.AddPair('ResultData', self.ResultOut);
     end;
     if self.ResultException <> '' then
     begin
-      lJsonObj.Add('ResultException', self.ResultException);
+      lJsonObj.AddPair('resultException', self.ResultException);
     end;
-    Result := lJsonObj.AsJSON;
+    Result := lJsonObj.ToString();
   finally
-    lJsonObj.Clear;
     lJsonObj.Free;
     lJsonObj := nil;
   end;
@@ -524,19 +522,19 @@ begin
     begin
       self.FUrlParams.Add(vArr[i]);
     end;
-  end;
+  end
 end;
 
 procedure THTTPCtxt.SetHeadParams();
 var
-  P, S: pansichar;
+  P, S: PAnsiChar;
   vTagchar: string;
-  tempStr: rawbytestring;
+  tempStr: RawByteString;
   vHeadA, vHeadB, vValue: string;
 begin
   P := pointer(self.RequestInHeaders);
   S := P;
-  while not (S^ in [#0]) do
+  while not(S^ in [#0]) do
   begin
     if S^ in [':', '=', ';', #13, #10] then
     begin
@@ -581,7 +579,7 @@ begin
   end;
 end;
 
-procedure THTTPCtxt.SetInContent(qInContent: rawbytestring);
+procedure THTTPCtxt.SetInContent(qInContent: RawByteString);
 var
   vBytes: TBytes;
 begin
@@ -589,6 +587,7 @@ begin
   if IsMultipartForm(self.FRequestContentType) then
   begin
     // 不做处理到自已单元处理
+    FRequestInContent := qInContent;
   end
   else if FRequestContentTypeCharset = 'UTF-8' then
   begin
@@ -596,7 +595,7 @@ begin
   end
   else if FRequestContentTypeCharset = 'UNICODE' then
   begin
-    FRequestInContent := string(qInContent);
+    FRequestInContent := String(qInContent);
   end
   else if FRequestContentTypeCharset = 'GB2312' then
   begin

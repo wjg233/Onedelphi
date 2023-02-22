@@ -1,42 +1,42 @@
-unit OneGlobal;
-
-{$mode DELPHI}{$H+}
-
+﻿unit OneGlobal;
 
 // 一些共用的全局变量统一管理
 interface
 
 uses
-  SysUtils, Generics.Collections, Classes,
+  System.SysUtils, System.IOUtils, System.Generics.Collections, System.Classes,
+  System.JSON, Rest.JSON, System.NetEncoding,
   OneHttpServer, OneZTManage, OneFileHelper,
-  OneTokenManage, OneVirtualFile, OneILog, OneLog, OneSerialization;
+  OneNeonHelper, OneTokenManage, OneVirtualFile,
+  Neon.Core.Persistence, Neon.Core.Persistence.JSON,
+  OneILog, OneLog;
 
 type
 
   // 服务HTTP配置
   TOneServerSet = class
   private
-    FHTTPPort: integer; // HTTP端口
-    FHTTPPool: integer; // HTTP池数量
-    FHTTPQueue: integer; // HTTP队列大小
+    FHTTPPort: Integer; // HTTP端口
+    FHTTPPool: Integer; // HTTP池数量
+    FHTTPQueue: Integer; // HTTP队列大小
     FHTTPAutoWork: boolean; // 是否自启动
     FConnectSecretkey: string; // 连接安全密钥
-    FTokenIntervalSec: integer;
-    // 连接有效安全时间,<=0代表无限长有效,但三天72小时必踢掉，如果没交互
+    FTokenIntervalSec: Integer; // 连接有效安全时间,<=0代表无限长有效,但三天72小时必踢掉，如果没交互
     FWinTaskStart: boolean; // win随开机任务启动,无界面
     FWinRegisterStart: boolean; // win随开机进入界面启动,注册表方式
+    FSuperAdminPass: string;
   public
     constructor Create;
-  published
-    //laz下，发布的属性才会被序列化
-    property HTTPPort: integer read FHTTPPort write FHTTPPort;
-    property HTTPPool: integer read FHTTPPool write FHTTPPool;
-    property HTTPQueue: integer read FHTTPQueue write FHTTPQueue;
+  public
+    property HTTPPort: Integer read FHTTPPort write FHTTPPort;
+    property HTTPPool: Integer read FHTTPPool write FHTTPPool;
+    property HTTPQueue: Integer read FHTTPQueue write FHTTPQueue;
     property HTTPAutoWork: boolean read FHTTPAutoWork write FHTTPAutoWork;
     property ConnectSecretkey: string read FConnectSecretkey write FConnectSecretkey;
-    property TokenIntervalSec: integer read FTokenIntervalSec write FTokenIntervalSec;
+    property TokenIntervalSec: Integer read FTokenIntervalSec write FTokenIntervalSec;
     property WinTaskStart: boolean read FWinTaskStart write FWinTaskStart;
     property WinRegisterStart: boolean read FWinRegisterStart write FWinRegisterStart;
+    property SuperAdminPass: string read FSuperAdminPass write FSuperAdminPass;
   end;
 
   TOneGlobal = class
@@ -60,7 +60,7 @@ type
     FZTManage: TOneZTManage;
     // TOken管理服务
     FTokenManage: TOneTokenManage;
-
+    //
     FVirtualManage: TOneVirtualManage;
   public
     class function GetInstance(): TOneGlobal; static;
@@ -76,7 +76,7 @@ type
     function SaveZTMangeSet(var QErrMsg: string): boolean;
     function LoadVirtualSet(): boolean;
     function SaveVirtualSet(var QErrMsg: string): boolean;
-
+    //
     function HTTPServerStart(var QErrMsg: string): boolean;
     // 开始工作
     function StarWork(var QErrMsg: string): boolean;
@@ -99,7 +99,7 @@ var
 
 implementation
 
-uses OneOrm;
+uses OneOrm, OneSQLCrypto;
 
 constructor TOneServerSet.Create;
 begin
@@ -115,7 +115,7 @@ begin
   begin
     Unit_OneGlobal := TOneGlobal.Create;
   end;
-  Result := Unit_OneGlobal;
+  result := Unit_OneGlobal;
 end;
 
 constructor TOneGlobal.Create();
@@ -207,7 +207,7 @@ const
 var
   tempPath: string;
   lListPath: TList<string>;
-  i: integer;
+  i: Integer;
 begin
   tempPath := OneFileHelper.CombinePath(self.FExeRunPath, const_OnePlatform);
   if not DirectoryExists(tempPath) then
@@ -240,8 +240,7 @@ begin
     lListPath.Add(const_ODBC64);
     for i := 0 to lListPath.Count - 1 do
     begin
-      tempPath := OneFileHelper.CombinePathC(self.FExeRunPath,
-        const_OnePlatform, lListPath[i]);
+      tempPath := OneFileHelper.CombinePathC(self.FExeRunPath, const_OnePlatform, lListPath[i]);
       if not DirectoryExists(tempPath) then
         ForceDirectories(tempPath);
     end;
@@ -255,51 +254,53 @@ function TOneGlobal.LoadLogSet(): boolean;
 var
   lLogSetFileName, lErrMsg: string;
 begin
-  lLogSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath,
-    const_OnePlatform, const_OneSet, 'OneLogSet.JSON');
+  lLogSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath, const_OnePlatform, const_OneSet, 'OneLogSet.JSON');
   // 加载配置
-  OneSerialization.JSONToObjectFormFile(self.FLogSet, lLogSetFileName, lErrMsg);
+  OneNeonHelper.JSONToObjectFormFile(self.FLogSet, lLogSetFileName, lErrMsg);
   // 序列化
-  OneSerialization.ObjectToJsonFile(self.FLogSet, lLogSetFileName, lErrMsg);
+  OneNeonHelper.ObjectToJsonFile(self.FLogSet, lLogSetFileName, lErrMsg);
 end;
 
 function TOneGlobal.SaveLogSet(var QErrMsg: string): boolean;
 var
   lLogSetFileName: string;
 begin
-  lLogSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath,
-    const_OnePlatform, const_OneSet, 'OneLogSet.JSON');
-  Result := OneSerialization.ObjectToJsonFile(self.FLogSet, lLogSetFileName, QErrMsg);
+  lLogSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath, const_OnePlatform, const_OneSet, 'OneLogSet.JSON');
+  result := OneNeonHelper.ObjectToJsonFile(self.FLogSet, lLogSetFileName, QErrMsg);
 end;
 
 function TOneGlobal.LoadServerSet(): boolean;
 var
   lServerSetFileName, lErrMsg: string;
 begin
-  lServerSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath,
-    const_OnePlatform, const_OneSet, 'OneServerSet.JSON');
+  lServerSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath, const_OnePlatform, const_OneSet, 'OneServerSet.JSON');
   // 加载配置
-  OneSerialization.JSONToObjectFormFile(self.FServerSet,
-    lServerSetFileName, lErrMsg);
+  OneNeonHelper.JSONToObjectFormFile(self.FServerSet, lServerSetFileName, lErrMsg);
   // 序列化
-  OneSerialization.ObjectToJsonFile(self.FServerSet, lServerSetFileName, lErrMsg);
+  OneNeonHelper.ObjectToJsonFile(self.FServerSet, lServerSetFileName, lErrMsg);
   // self.SaveServerSet(lErrMsg);
   // 保存
+  self.FServerSet.SuperAdminPass := OneSQLCrypto.SwapDecodeCrypto(self.FServerSet.SuperAdminPass);
 end;
 
 function TOneGlobal.SaveServerSet(var QErrMsg: string): boolean;
 var
   lServerSetFileName: string;
+  lSuperAdminPass: string;
 begin
-  lServerSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath,
-    const_OnePlatform, const_OneSet, 'OneServerSet.JSON');
-  Result := OneSerialization.ObjectToJsonFile(self.FServerSet,
-    lServerSetFileName, QErrMsg);
+  lSuperAdminPass := self.FServerSet.SuperAdminPass;
+  try
+    self.FServerSet.SuperAdminPass := OneSQLCrypto.SwapCrypto(self.FServerSet.SuperAdminPass);
+    lServerSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath, const_OnePlatform, const_OneSet, 'OneServerSet.JSON');
+    result := OneNeonHelper.ObjectToJsonFile(self.FServerSet, lServerSetFileName, QErrMsg);
+  finally
+    self.FServerSet.SuperAdminPass := lSuperAdminPass;
+  end;
 end;
 
 function TOneGlobal.StarWork(var QErrMsg: string): boolean;
 begin
-  Result := False;
+  result := false;
   QErrMsg := '';
 
   if FZTManage <> nil then
@@ -328,68 +329,59 @@ begin
   begin
     FVirtualManage.StarWork(self.FVirtualSet.VirtualSetList);
   end;
-  Result := True;
+  result := true;
 end;
 
 function TOneGlobal.LoadZTMangeSet(): boolean;
 var
   lZTMangeSetFileName, lErrMsg: string;
+
 begin
   // 读取配置
-  lZTMangeSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath,
-    const_OnePlatform, const_OneSet, 'OneZTMangeSet.JSON');
-  OneSerialization.JSONToObjectFormFile(self.FZTMangeSet,
-    lZTMangeSetFileName, lErrMsg);
+  lZTMangeSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath, const_OnePlatform, const_OneSet, 'OneZTMangeSet.JSON');
+  OneNeonHelper.JSONToObjectFormFile(self.FZTMangeSet, lZTMangeSetFileName, lErrMsg);
   // 保存配置
-  OneSerialization.ObjectToJsonFile(self.FZTMangeSet, lZTMangeSetFileName,
-    lErrMsg);
+  OneNeonHelper.ObjectToJsonFile(self.FZTMangeSet, lZTMangeSetFileName, lErrMsg);
 end;
 
 function TOneGlobal.SaveZTMangeSet(var QErrMsg: string): boolean;
 var
   lZTMangeSetFileName: string;
 begin
-  lZTMangeSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath,
-    const_OnePlatform, const_OneSet, 'OneZTMangeSet.JSON');
-  Result := OneSerialization.ObjectToJsonFile(self.FZTMangeSet,
-    lZTMangeSetFileName, QErrMsg);
+  lZTMangeSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath, const_OnePlatform, const_OneSet, 'OneZTMangeSet.JSON');
+  result := OneNeonHelper.ObjectToJsonFile(self.FZTMangeSet, lZTMangeSetFileName, QErrMsg);
 end;
 
 function TOneGlobal.LoadVirtualSet(): boolean;
 var
   lVirtualSetFileName, lErrMsg: string;
+
 begin
   // 读取配置
-  lVirtualSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath,
-    const_OnePlatform, const_OneSet, 'OneVirtualSet.JSON');
-  OneSerialization.JSONToObjectFormFile(self.FVirtualSet,
-    lVirtualSetFileName, lErrMsg);
+  lVirtualSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath, const_OnePlatform, const_OneSet, 'OneVirtualSet.JSON');
+  OneNeonHelper.JSONToObjectFormFile(self.FVirtualSet, lVirtualSetFileName, lErrMsg);
   // 保存配置
-  OneSerialization.ObjectToJsonFile(self.FVirtualSet, lVirtualSetFileName,
-    lErrMsg);
+  OneNeonHelper.ObjectToJsonFile(self.FVirtualSet, lVirtualSetFileName, lErrMsg);
 end;
 
 function TOneGlobal.SaveVirtualSet(var QErrMsg: string): boolean;
 var
   lVirtualSetFileName: string;
 begin
-  lVirtualSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath,
-    const_OnePlatform, const_OneSet, 'OneVirtualSet.JSON');
-  Result := OneSerialization.ObjectToJsonFile(self.FVirtualSet,
-    lVirtualSetFileName, QErrMsg);
+  lVirtualSetFileName := OneFileHelper.CombinePathD(self.FExeRunPath, const_OnePlatform, const_OneSet, 'OneVirtualSet.JSON');
+  result := OneNeonHelper.ObjectToJsonFile(self.FVirtualSet, lVirtualSetFileName, QErrMsg);
 end;
 
 function TOneGlobal.HTTPServerStart(var QErrMsg: string): boolean;
 begin
-  Result := False;
+  result := false;
   QErrMsg := '';
   if FHTTPServer.Started then
   begin
-    QErrMsg := '已运行，无需在运行，当前运行端口:' +
-      FHTTPServer.Port.ToString();
+    QErrMsg := '已运行，无需在运行，当前运行端口:' + FHTTPServer.Port.ToString();
     exit;
   end;
-
+  //
   FHTTPServer.Port := FServerSet.FHTTPPort;
   FHTTPServer.ThreadPoolCount := FServerSet.FHTTPPool;
   FHTTPServer.HttpQueueLength := FServerSet.FHTTPQueue;
@@ -398,7 +390,7 @@ begin
     QErrMsg := FHTTPServer.ErrMsg;
     exit;
   end;
-  Result := True;
+  result := true;
 end;
 
 end.

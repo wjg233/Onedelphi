@@ -64,7 +64,14 @@ uses
   DemoWebFileController in 'httpServer\Controller\Demo\DemoWebFileController.pas',
   DemoVersionController in 'httpServer\Controller\Demo\DemoVersionController.pas',
   OneWinReg in 'basLib\winRegister\OneWinReg.pas',
-  OneMultipart in 'basLib\multipart\OneMultipart.pas';
+  OneMultipart in 'basLib\multipart\OneMultipart.pas',
+  UniLoginController in 'OneUniDemo\UniLoginController.pas',
+  OneFastLoginController in 'OneFastCleint\OneFastLoginController.pas',
+  OneFastAdminController in 'OneFastCleint\OneFastAdminController.pas',
+  UniGoodsController in 'OneUniDemo\UniGoodsController.pas',
+  UniBillSendController in 'OneUniDemo\UniBillSendController.pas',
+  UniClass in 'OneUniDemo\UniClass.pas',
+  UniSendReceivController in 'OneUniDemo\UniSendReceivController.pas';
 
 var
   lpStartupInfo: TStartupInfo;
@@ -94,3 +101,4 @@ begin
   end;
 
 end.
+

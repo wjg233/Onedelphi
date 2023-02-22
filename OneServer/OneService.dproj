@@ -189,6 +189,13 @@
         <DCCReference Include="httpServer\Controller\Demo\DemoVersionController.pas"/>
         <DCCReference Include="basLib\winRegister\OneWinReg.pas"/>
         <DCCReference Include="basLib\multipart\OneMultipart.pas"/>
+        <DCCReference Include="OneUniDemo\UniLoginController.pas"/>
+        <DCCReference Include="OneFastCleint\OneFastLoginController.pas"/>
+        <DCCReference Include="OneFastCleint\OneFastAdminController.pas"/>
+        <DCCReference Include="OneUniDemo\UniGoodsController.pas"/>
+        <DCCReference Include="OneUniDemo\UniBillSendController.pas"/>
+        <DCCReference Include="OneUniDemo\UniClass.pas"/>
+        <DCCReference Include="OneUniDemo\UniSendReceivController.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

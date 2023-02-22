@@ -11,15 +11,15 @@ type
   TDemoCustResultController = class(TOneControllerBase)
   public
     // 返回结果格式 {ResultBool: false, ResultCode: "0002", ResultMsg: "", ResultData: "范联满"}
-    function GetResultStr(): TResult<string>;
+    function GetResultStr(): TActionResult<string>;
     // 返回结果格式 {ResultBool: false, ResultCode: "0002", ResultMsg: "", ResultData: ["范联满","范联满","范联满"]}
-    function GetResultList(): TResult<TList<string>>;
+    function GetResultList(): TActionResult<TList<string>>;
     // 返回结果格式 {ResultBool: false, ResultCode: "0002", ResultMsg: "", ResultData: [{name: "范联满", age: 10},{name: "范联满", age: 10}]}
-    function GetResultListPerson(): TResult<TList<TPerSonDemo>>;
+    function GetResultListPerson(): TActionResult<TList<TPerSonDemo>>;
     // 返回结果格式 {ResultBool: false, ResultCode: "0002", ResultMsg: "", ResultData: {name: "范联满", age: 10}}
-    function GetResultRecord(): TResult<TPersonrecord>;
+    function GetResultRecord(): TActionResult<TPersonrecord>;
     // 返回结果格式 {ResultBool: false, ResultCode: "0002", ResultMsg: "", ResultData: [{name: "范联满", age: 10},{name: "范联满", age: 10}]}
-    function GetResultData(): TResult<TDataSet>;
+    function GetResultData(): TActionResult<TDataSet>;
   end;
 
 function CreateNewDemoCustResultController(QRouterItem: TOneRouterItem)
@@ -42,24 +42,24 @@ begin
   result := lController;
 end;
 
-function TDemoCustResultController.GetResultStr(): TResult<string>;
+function TDemoCustResultController.GetResultStr(): TActionResult<string>;
 var
   i: integer;
 begin
   // 返回的不是对象，第一个参数false无需释放,第二个参数false也没有item无需释放
-  result := TResult<string>.Create(false, false);
+  result := TActionResult<string>.Create(false, false);
   result.ResultData := '我是大傻B';
   // SetResultTrue=>   ResultBool := true; ResultCode := HTTP_ResultCode_True;
   result.SetResultTrue();
 end;
 
-function TDemoCustResultController.GetResultList(): TResult<TList<string>>;
+function TDemoCustResultController.GetResultList(): TActionResult<TList<string>>;
 var
   i: integer;
   lList: TList<string>;
 begin
   // 返回的对象第一个参数true需释放,第二个参数item不是对象无需释放
-  result := TResult < TList < string >>.Create(true, false);
+  result := TActionResult < TList < string >>.Create(true, false);
   lList := TList<string>.Create;
   for i := 0 to 9 do
   begin
@@ -71,7 +71,7 @@ begin
 end;
 
 function TDemoCustResultController.GetResultListPerson()
-  : TResult<TList<TPerSonDemo>>;
+  : TActionResult<TList<TPerSonDemo>>;
 var
   i: integer;
   lList: TList<TPerSonDemo>;
@@ -79,7 +79,7 @@ var
 begin
   // 返回的对象第一个参数true需释放,第二个参数item是对象需释放
   // 当然如果item是全局变量,也可以设成false不释放
-  result := TResult < TList < TPerSonDemo >>.Create(true, true);
+  result := TActionResult < TList < TPerSonDemo >>.Create(true, true);
   lList := TList<TPerSonDemo>.Create;
   for i := 0 to 9 do
   begin
@@ -92,22 +92,22 @@ begin
   result.SetResultTrue();
 end;
 
-function TDemoCustResultController.GetResultRecord(): TResult<TPersonrecord>;
+function TDemoCustResultController.GetResultRecord(): TActionResult<TPersonrecord>;
 var
   lPersonrecord: TPersonrecord;
 begin
-  result := TResult<TPersonrecord>.Create(false, false);
+  result := TActionResult<TPersonrecord>.Create(false, false);
   lPersonrecord.name := '范联满';
   lPersonrecord.age := 10;
   result.ResultData := lPersonrecord;
 end;
 
-function TDemoCustResultController.GetResultData(): TResult<TDataSet>;
+function TDemoCustResultController.GetResultData(): TActionResult<TDataSet>;
 var
   i: integer;
   lFDMemTable: TFDMemTable;
 begin
-  result := TResult<TDataSet>.Create(true, false);
+  result := TActionResult<TDataSet>.Create(true, false);
   lFDMemTable := TFDMemTable.Create(nil);
   lFDMemTable.FieldDefs.Add('name', ftString, 20, false);
   lFDMemTable.FieldDefs.Add('age', ftInteger, 0, true);

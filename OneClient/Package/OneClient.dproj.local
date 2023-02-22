@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>2022-11-23 16:28:48.000.139,C:\Users\Administrator\Documents\Embarcadero\Studio\Projects\Package1.dproj=D:\devTool\delphi\project\OneDelphi\OneClient\OneClient.dproj</Transaction>
-    <Transaction>2022-12-03 23:07:08.000.412,D:\devTool\delphi\project\OneDelphi\OneClient\Package\OneClient.dproj=D:\devTool\delphi\project\OneDelphi\OneClient\OneClient.dproj</Transaction>
+    <Transaction>2022/11/23 16:28:48.000.139,D:\devTool\delphi\project\OneDelphi\OneClient\OneClient.dproj=C:\Users\Administrator\Documents\Embarcadero\Studio\Projects\Package1.dproj</Transaction>
+    <Transaction>2022/12/03 23:07:08.000.412,D:\devTool\delphi\project\OneDelphi\OneClient\OneClient.dproj=D:\devTool\delphi\project\OneDelphi\OneClient\Package\OneClient.dproj</Transaction>
   </Transactions>
 	<ProjectSortOrder AutoSort="0" SortType="0">
     <File Path="baseLib"/>
@@ -11,6 +11,9 @@
     <File Path="baseLib\OneFileHelper.pas"/>
     <File Path="baseLib\OneSQLCrypto.pas"/>
     <File Path="baseLib\OneStreamString.pas"/>
+    <File Path="baseLib\OneLog.pas"/>
+    <File Path="baseLib\OneILog.pas"/>
+    <File Path="baseLib\OneThread.pas"/>
     <File Path="NeonSerialization"/>
     <File Path="NeonSerialization\Neon.Core.Attributes.pas"/>
     <File Path="NeonSerialization\Neon.Core.DynamicTypes.pas"/>

@@ -25,25 +25,25 @@ type
   TDemoOrmController = class(TOneControllerBase)
   public
     // 跟据原生SQL获取数据
-    function GetOrmQueryList(): TResult<TList<TTestOrm>>;
+    function GetOrmQueryList(): TActionResult<TList<TTestOrm>>;
     // 跟据select命令获取数据
-    function GetOrmSelectList(): TResult<TList<TTestOrm>>;
+    function GetOrmSelectList(): TActionResult<TList<TTestOrm>>;
     // 跟据select命令分页获取数据
-    function GetOrmPageList(): TResult<TList<TTestOrm>>;
+    function GetOrmPageList(): TActionResult<TList<TTestOrm>>;
     // 跟据seelct命令获取一条数据,如果获得多条会暴错
-    function GetOrmObject(): TResult<TTestOrm>;
+    function GetOrmObject(): TActionResult<TTestOrm>;
     // 插入一个对象
-    function OrmInsertObject(QTest: TTestOrm): TResult<string>;
+    function OrmInsertObject(QTest: TTestOrm): TActionResult<string>;
     // 插入一个对象列表
-    function OrmInsertList(QList: TList<TTestOrm>): TResult<string>;
+    function OrmInsertList(QList: TList<TTestOrm>): TActionResult<string>;
     // 更新一个对象
-    function OrmUpdateObject(QTest: TTestOrm): TResult<string>;
+    function OrmUpdateObject(QTest: TTestOrm): TActionResult<string>;
     // 更新一个对象列表
-    function OrmUpdateList(QList: TList<TTestOrm>): TResult<string>;
+    function OrmUpdateList(QList: TList<TTestOrm>): TActionResult<string>;
     // 删除一个对象
-    function OrmDeleteObject(QTest: TTestOrm): TResult<string>;
+    function OrmDeleteObject(QTest: TTestOrm): TActionResult<string>;
     // 删除一个对象列表
-    function OrmDeleteList(QList: TList<TTestOrm>): TResult<string>;
+    function OrmDeleteList(QList: TList<TTestOrm>): TActionResult<string>;
   end;
 
 function CreateNewDemoOrmController(QRouterItem: TOneRouterItem): TObject;
@@ -64,116 +64,109 @@ begin
   result := lController;
 end;
 
-function TDemoOrmController.GetOrmQueryList(): TResult<TList<TTestOrm>>;
+function TDemoOrmController.GetOrmQueryList(): TActionResult<TList<TTestOrm>>;
 var
   lList: TList<TTestOrm>;
   lTestOrm: TTestOrm;
 begin
-  result := TResult < TList < TTestOrm >>.Create(true, true);
+  result := TActionResult < TList < TTestOrm >>.Create(true, true);
   lList := TOneOrm<TTestOrm>.Start().Query('select * from test', []).ToList();
   result.ResultData := lList;
   result.SetResultTrue;
 end;
 
-function TDemoOrmController.GetOrmSelectList(): TResult<TList<TTestOrm>>;
+function TDemoOrmController.GetOrmSelectList(): TActionResult<TList<TTestOrm>>;
 var
   lList: TList<TTestOrm>;
 begin
-  result := TResult < TList < TTestOrm >>.Create(true, true);
+  result := TActionResult < TList < TTestOrm >>.Create(true, true);
   lList := TOneOrm<TTestOrm>.Start().Select('test').where('1=1', []).toCmd().ToList();
   result.ResultData := lList;
   result.SetResultTrue;
 end;
 
-function TDemoOrmController.GetOrmPageList(): TResult<TList<TTestOrm>>;
+function TDemoOrmController.GetOrmPageList(): TActionResult<TList<TTestOrm>>;
 var
   lList: TList<TTestOrm>;
 begin
-  result := TResult < TList < TTestOrm >>.Create(true, true);
-  lList := TOneOrm<TTestOrm>.Start().Select('test').where('1=1', []).SetPage(1, 2)
-    .toCmd().ToList();
+  result := TActionResult < TList < TTestOrm >>.Create(true, true);
+  lList := TOneOrm<TTestOrm>.Start().Select('test').where('1=1', []).SetPage(1, 2).toCmd().ToList();
   result.ResultData := lList;
   result.SetResultTrue;
 end;
 
-function TDemoOrmController.GetOrmObject(): TResult<TTestOrm>;
+function TDemoOrmController.GetOrmObject(): TActionResult<TTestOrm>;
 var
   lList: TList<TTestOrm>;
   lTestOrm: TTestOrm;
 begin
-  result := TResult<TTestOrm>.Create(true, true);
+  result := TActionResult<TTestOrm>.Create(true, true);
   lTestOrm := TOneOrm<TTestOrm>.Start().Query('select * from test where name=:name', ['flm']).ToObject();
   result.ResultData := lTestOrm;
 end;
 
-function TDemoOrmController.OrmInsertObject(QTest: TTestOrm): TResult<string>;
+function TDemoOrmController.OrmInsertObject(QTest: TTestOrm): TActionResult<string>;
 var
   i: Integer;
 begin
-  result := TResult<string>.Create(true, true);
-  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name')
-    .Inserter(QTest).toCmd().ToExecCommand();
+  result := TActionResult<string>.Create(true, true);
+  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name').Inserter(QTest).toCmd().ToExecCommand();
   // Fields([]) 什么字段参与,DisableFields什么字段不参与
   // TOneOrm<TTestOrm>.Start().Inserter(QTest).Fields([]).DisableFields([]);
   result.ResultData := '影响行数' + i.ToString();
   result.SetResultTrue;
 end;
 
-function TDemoOrmController.OrmInsertList(QList: TList<TTestOrm>): TResult<string>;
+function TDemoOrmController.OrmInsertList(QList: TList<TTestOrm>): TActionResult<string>;
 var
   i: Integer;
 begin
-  result := TResult<string>.Create(true, true);
-  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name')
-    .Inserter(QList).toCmd().ToExecCommand();
+  result := TActionResult<string>.Create(true, true);
+  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name').Inserter(QList).toCmd().ToExecCommand();
   result.ResultData := '影响行数' + i.ToString();
   result.SetResultTrue;
 end;
 
-function TDemoOrmController.OrmUpdateObject(QTest: TTestOrm): TResult<string>;
+function TDemoOrmController.OrmUpdateObject(QTest: TTestOrm): TActionResult<string>;
 var
   i: Integer;
 begin
-  result := TResult<string>.Create(true, true);
+  result := TActionResult<string>.Create(true, true);
   // Fields(['Age']) 只更新Age字段，否则全部更新
-  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name')
-    .Update(QTest).Fields(['Age']).toCmd().ToExecCommand();
+  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name').Update(QTest).Fields(['Age']).toCmd().ToExecCommand();
   result.ResultData := '影响行数' + i.ToString();
   result.SetResultTrue;
 end;
 
-function TDemoOrmController.OrmUpdateList(QList: TList<TTestOrm>): TResult<string>;
+function TDemoOrmController.OrmUpdateList(QList: TList<TTestOrm>): TActionResult<string>;
 var
   i: Integer;
 begin
-  result := TResult<string>.Create(true, true);
+  result := TActionResult<string>.Create(true, true);
   // Fields(['Age']) 只更新Age字段，否则全部更新
-  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name')
-    .Update(QList).Fields(['Age', 'myBit']).toCmd().ToExecCommand();
+  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name').Update(QList).Fields(['Age', 'myBit']).toCmd().ToExecCommand();
   result.ResultData := '影响行数' + i.ToString();
   result.SetResultTrue;
 end;
 
-function TDemoOrmController.OrmDeleteObject(QTest: TTestOrm): TResult<string>;
+function TDemoOrmController.OrmDeleteObject(QTest: TTestOrm): TActionResult<string>;
 var
   i: Integer;
 begin
-  result := TResult<string>.Create(true, true);
+  result := TActionResult<string>.Create(true, true);
   // Fields(['Age']) 只更新Age字段，否则全部更新
-  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name')
-    .Delete(QTest).toCmd().ToExecCommand();
+  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name').Delete(QTest).toCmd().ToExecCommand();
   result.ResultData := '影响行数' + i.ToString();
   result.SetResultTrue;
 end;
 
-function TDemoOrmController.OrmDeleteList(QList: TList<TTestOrm>): TResult<string>;
+function TDemoOrmController.OrmDeleteList(QList: TList<TTestOrm>): TActionResult<string>;
 var
   i: Integer;
 begin
-  result := TResult<string>.Create(true, true);
+  result := TActionResult<string>.Create(true, true);
   // Fields(['Age']) 只更新Age字段，否则全部更新
-  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name')
-    .Delete(QList).toCmd().ToExecCommand();
+  i := TOneOrm<TTestOrm>.Start().SetTableName('test').SetPrimaryKey('Name').Delete(QList).toCmd().ToExecCommand();
   result.ResultData := '影响行数' + i.ToString();
   result.SetResultTrue;
 end;

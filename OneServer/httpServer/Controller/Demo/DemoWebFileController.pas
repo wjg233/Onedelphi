@@ -11,9 +11,9 @@ type
   TDemoWebFileController = class(TOneControllerBase)
   public
     // OneGet取url参数。通过web预览图片
-    function OneGetFile(fileName: string): TResult<string>;
+    function OneGetFile(fileName: string): TActionResult<string>;
     // 解析 multipart/form-data提交的数据,只需要参数类型是 TOneMultipartDecode就行，其它的交给底程处理解析
-    function WebPostFormData(QFormData: TOneMultipartDecode): TResult<string>;
+    function WebPostFormData(QFormData: TOneMultipartDecode): TActionResult<string>;
   end;
 
 implementation
@@ -30,11 +30,11 @@ begin
   result := lController;
 end;
 
-function TDemoWebFileController.OneGetFile(fileName: string): TResult<string>;
+function TDemoWebFileController.OneGetFile(fileName: string): TActionResult<string>;
 var
   lFileName: string;
 begin
-  result := TResult<string>.Create(true, false);
+  result := TActionResult<string>.Create(true, false);
   // 比如 D:\test目录下
   lFileName := OneFileHelper.CombinePath('D:\test', fileName);
   if not TFile.Exists(lFileName) then
@@ -48,18 +48,18 @@ begin
   result.SetResultTrueFile();
 end;
 
-function TDemoWebFileController.WebPostFormData(QFormData: TOneMultipartDecode): TResult<string>;
+function TDemoWebFileController.WebPostFormData(QFormData: TOneMultipartDecode): TActionResult<string>;
 var
   i: integer;
-  lWebRequestFile: TWebRequestFile;
+  lWebRequestFile: TOneRequestFile;
   tempStream: TCustomMemoryStream;
 begin
-  result := TResult<string>.Create(false, false);
+  result := TActionResult<string>.Create(false, false);
   // 接收到的文件
   for i := 0 to QFormData.Files.count - 1 do
   begin
-    lWebRequestFile := TWebRequestFile(QFormData.Files.items[i]);
-    result.ResultData := result.ResultData + '当前接收到文件参数[' + lWebRequestFile.FieldName + ']' + '文件名称[' + lWebRequestFile.fileName + ']' + #10#13;
+    lWebRequestFile := TOneRequestFile(QFormData.Files.items[i]);
+    result.ResultData := result.ResultData + '当前接收到文件参数[' + lWebRequestFile.FieldName + ']' + '文件名称[' +Utf8Decode( lWebRequestFile.fileName) + ']' + #10#13;
     // 文件流 ,至于要咱样是业务问题
     tempStream := TCustomMemoryStream(lWebRequestFile.Stream);
   end;

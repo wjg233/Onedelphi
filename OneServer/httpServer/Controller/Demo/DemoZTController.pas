@@ -11,8 +11,8 @@ type
   TDemoZTController = class(TOneControllerBase)
   public
     // 返回结果 [{"name":"flm0"},{"name":"flm1"},{"name":"flm2"}]
-    function GetData(): TResult<TFDMemtable>;
-    function SaveData(QPersons: TList<TPersonDemo>): TResult<string>;
+    function GetData(): TActionResult<TFDMemtable>;
+    function SaveData(QPersons: TList<TPersonDemo>): TActionResult<string>;
   end;
 
 function CreateNewDemoZTController(QRouterItem: TOneRouterItem): TObject;
@@ -33,7 +33,7 @@ begin
   result := lController;
 end;
 
-function TDemoZTController.GetData(): TResult<TFDMemtable>;
+function TDemoZTController.GetData(): TActionResult<TFDMemtable>;
 var
   i: integer;
   lOneZTMange: TOneZTManage;
@@ -43,7 +43,7 @@ var
   lFDQuery: TFDQuery;
 begin
   // true:TFDMemtable需要释放,true:无item LIST 这种的，无效
-  result := TResult<TFDMemtable>.Create(true, true);
+  result := TActionResult<TFDMemtable>.Create(true, true);
   lOneZTMange := TOneGlobal.GetInstance().ZTManage;
   // 账套为空时,默认取主账套
   lZTItem := lOneZTMange.LockZTItem('', lErrMsg);
@@ -79,7 +79,7 @@ begin
 end;
 
 function TDemoZTController.SaveData(QPersons: TList<TPersonDemo>)
-  : TResult<string>;
+  : TActionResult<string>;
 var
   i, iErr: integer;
   lOneZTMange: TOneZTManage;
@@ -90,7 +90,7 @@ var
   isCommit: boolean;
 begin
   // true:TFDMemtable需要释放,true:无item LIST 这种的，无效
-  result := TResult<string>.Create(true, true);
+  result := TActionResult<string>.Create(true, true);
   iErr := 0;
   lOneZTMange := TOneGlobal.GetInstance().ZTManage;
   // 账套为空时,默认取主账套

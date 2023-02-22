@@ -42,10 +42,16 @@ type
     Label10: TLabel;
     edNewFileName: TEdit;
     Label11: TLabel;
+    Label12: TLabel;
+    edVirtualCodeC: TEdit;
+    Label13: TLabel;
+    edRemoteFileC: TEdit;
+    tbDelFile: TButton;
     procedure tbClientConnectClick(Sender: TObject);
     procedure tbClientDisConnectClick(Sender: TObject);
     procedure tbDownLoadClick(Sender: TObject);
     procedure tbUpLoadClick(Sender: TObject);
+    procedure tbDelFileClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -58,7 +64,6 @@ var
 implementation
 
 {$R *.dfm}
-
 
 procedure TForm6.tbClientConnectClick(Sender: TObject);
 begin
@@ -84,6 +89,20 @@ end;
 procedure TForm6.tbClientDisConnectClick(Sender: TObject);
 begin
   OneConnection.DisConnect;
+end;
+
+procedure TForm6.tbDelFileClick(Sender: TObject);
+begin
+  OneVirtualFile.VirtualCode := edVirtualCodeC.Text;
+  OneVirtualFile.RemoteFile := edRemoteFileC.Text;
+  if OneVirtualFile.DeleteFile() then
+  begin
+    showMessage('删除文件成功!!!');
+  end
+  else
+  begin
+    showMessage(OneVirtualFile.ErrMsg);
+  end;
 end;
 
 procedure TForm6.tbDownLoadClick(Sender: TObject);

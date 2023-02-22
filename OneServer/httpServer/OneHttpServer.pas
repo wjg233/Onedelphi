@@ -1,14 +1,12 @@
-unit OneHttpServer;
-
-{$mode DELPHI}{$H+}
+﻿unit OneHttpServer;
 
 interface
 
 uses
-  Classes, SysUtils, mormot.Net.server, mormot.Net.http, mormot.Net.async,
-  mormot.core.os,
-  mormot.Net.sock, mormot.core.buffers, oneILog, httpprotocol, URIParser,
-  OneHttpCtxtResult, OneMultipart, OneFileHelper;
+  SysUtils, System.Net.URLClient, System.Classes, OneHttpCtxtResult,
+  System.Diagnostics, Web.HTTPApp,
+  mormot.Net.server, mormot.Net.http, mormot.Net.async, mormot.core.os,
+  mormot.Net.sock, mormot.core.buffers, oneILog, OneFileHelper;
 
 type
   TOneHttpServer = class
@@ -64,32 +62,9 @@ function CreateNewHTTPCtxt(Ctxt: THttpServerRequestAbstract): THTTPCtxt;
 
 implementation
 
-uses OneStopwatch, OneHttpRouterManage, OneHttpController, OneGlobal;
+uses OneHttpRouterManage, OneHttpController, OneGlobal;
 
 { TOneHttpServer }
-
-
-constructor TOneHttpServer.Create(QLog: IOneLog);
-begin
-  inherited Create;
-  self.FLog := QLog;
-  self.FStarted := False;
-  self.FStopRequest := False;
-  self.FPort := 9090;
-  self.FThreadPoolCount := 100;
-  self.FKeepAliveTimeOut := 30000;
-  self.FHttpQueueLength := 1000;
-end;
-
-destructor TOneHttpServer.Destroy;
-begin
-  if FHttpServer <> nil then
-  begin
-    FHttpServer.Free;
-  end;
-  inherited Destroy;
-end;
-
 function TOneHttpServer.OnRequest(Ctxt: THttpServerRequestAbstract): cardinal;
 var
   lErrMsg: string; // 错误消息
@@ -97,19 +72,20 @@ var
   lwatchTimer: TStopwatch; // 时间计数器
   lRequestMilSec: integer;
 
-  lURI: TURI;
+  lURI: System.Net.URLClient.TURI;
   lUrlPath: string; // URL路径
   lRouterUrlPath: TOneRouterUrlPath; // URL路径对应的路由信息
   lRouterItem: TOneRouterItem;
   lWorkObj: TObject; // 控制器对象
   lOneControllerWork: TOneControllerBase; // 控制器对象
+  lEvenControllerProcedure: TEvenControllerProcedure; // 控制器是方法时回调
 
   lHTTPResult: THTTPResult; // HTTP执行结果，统一接口格式化
   lHTTPCtxt: THTTPCtxt; // HTTP请求相关信息,转成内部一个类处理
   // 静态文件输出
   lFileName, lFileCode, lPhy: string;
   tempI: integer;
-  tempMsg: string;
+  lTThreadID:string;
 begin
   lErrMsg := '';
   lIsErr := False;
@@ -122,16 +98,15 @@ begin
     Result := HTTP_NOTFOUND;
     exit;
   end;
-  lURI := ParseURI('http://' + Ctxt.Host + Ctxt.Url);
-  lUrlPath := lURI.Path + lURI.Document;
+  lURI := System.Net.URLClient.TURI.Create('http://' + Ctxt.Host + Ctxt.Url);
+  lUrlPath := lURI.Path;
   lUrlPath := OneHttpCtxtResult.FormatRootName(lUrlPath);
   lwatchTimer := TStopwatch.StartNew;
   try
     try
       // 解析URL调用相关路由方法
       // lUrlPath='/'+注册RootName根路径/控制器方法名称
-      lRouterUrlPath := OneHttpRouterManage.GetInitRouterManage().GetRouterUrlPath(
-        lUrlPath, lErrMsg);
+      lRouterUrlPath := OneHttpRouterManage.GetInitRouterManage().GetRouterUrlPath(lUrlPath, lErrMsg);
       if lRouterUrlPath <> nil then
       begin
         lRouterItem := lRouterUrlPath.RouterItem;
@@ -139,8 +114,7 @@ begin
         lHTTPCtxt := CreateNewHTTPCtxt(Ctxt);
         lHTTPCtxt.ControllerMethodName := lRouterUrlPath.MethodName;
         // 跟据路由模式锁定不同模式干活
-        if (lRouterItem.RouterMode = emRouterMode.pool) or
-          (lRouterItem.RouterMode = emRouterMode.single) then
+        if (lRouterItem.RouterMode = emRouterMode.pool) or (lRouterItem.RouterMode = emRouterMode.single) then
         begin
           lWorkObj := lRouterItem.LockWorkItem(lErrMsg);
           if lErrMsg <> '' then
@@ -161,7 +135,7 @@ begin
               lIsErr := True;
               exit;
             end;
-            if not (lWorkObj is TOneControllerBase) then
+            if not(lWorkObj is TOneControllerBase) then
             begin
               Ctxt.OutContent := UTF8Encode('控制器请继承TOneControllerBase');
               Ctxt.OutContentType := TEXT_CONTENT_TYPE;
@@ -170,8 +144,7 @@ begin
               exit;
             end;
             lOneControllerWork := TOneControllerBase(lWorkObj);
-            Result := lOneControllerWork.DoWork(lHTTPCtxt, lHTTPResult,
-              lRouterItem);
+            Result := lOneControllerWork.DoWork(lHTTPCtxt, lHTTPResult, lRouterItem);
           finally
             // 归还控制器
             lRouterItem.UnLockWorkItem(lWorkObj);
@@ -179,35 +152,34 @@ begin
         end
         else if lRouterItem.RouterMode = emRouterMode.even then
         begin
-          //lEvenControllerProcedure := lRouterItem.LockWorkEven(lErrMsg);
-          //if lErrMsg <> '' then
-          //begin
-          //  Ctxt.OutContent := UTF8Encode(lErrMsg);
-          //  Ctxt.OutContentType := TEXT_CONTENT_TYPE;
-          //  lIsErr := True;
-          //  Result := 500;
-          //  exit;
-          //end;
+          lEvenControllerProcedure := lRouterItem.LockWorkEven(lErrMsg);
+          if lErrMsg <> '' then
+          begin
+            Ctxt.OutContent := UTF8Encode(lErrMsg);
+            Ctxt.OutContentType := TEXT_CONTENT_TYPE;
+            lIsErr := True;
+            Result := 500;
+            exit;
+          end;
 
-          //try
-          //  if not Assigned(lEvenControllerProcedure) then
-          //  begin
-          //    Ctxt.OutContent :=
-          //      UTF8Encode(lUrlPath + '相关路由回调方法已不存在');
-          //    Ctxt.OutContentType := TEXT_CONTENT_TYPE;
-          //    Result := 500;
-          //    lIsErr := True;
-          //    exit;
-          //  end;
-          //  // 进行调用
-          //  lEvenControllerProcedure(lHTTPCtxt, lHTTPResult);
-          //  // 结果处理
-          //  OneHttpCtxtResult.EndCodeResultOut(lHTTPCtxt, lHTTPResult);
-          //  Result := lHTTPResult.ResultStatus;
-          //finally
-          //  // 归还控制器
-          //  lRouterItem.UnLockWorkItem(nil)
-          //end;
+          try
+            if not Assigned(lEvenControllerProcedure) then
+            begin
+              Ctxt.OutContent := UTF8Encode(lUrlPath + '相关路由回调方法已不存在');
+              Ctxt.OutContentType := TEXT_CONTENT_TYPE;
+              Result := 500;
+              lIsErr := True;
+              exit;
+            end;
+            // 进行调用
+            lEvenControllerProcedure(lHTTPCtxt, lHTTPResult);
+            // 结果处理
+            OneHttpCtxtResult.EndCodeResultOut(lHTTPCtxt, lHTTPResult);
+            Result := lHTTPResult.ResultStatus;
+          finally
+            // 归还控制器
+            lRouterItem.UnLockWorkItem(nil)
+          end;
         end
         else
         begin
@@ -221,8 +193,7 @@ begin
       begin
         if (lUrlPath = '') or (lUrlPath = '/one') then
         begin
-          Ctxt.OutContent := '欢迎来到OneLaz世界!!!!';
-          Ctxt.OutContent := UTF8Encode(Ctxt.OutContent);
+          Ctxt.OutContent := UTF8Encode('欢迎来到OneDephi世界!!!!');
           Ctxt.OutContentType := TEXT_CONTENT_TYPE;
           exit;
         end;
@@ -232,11 +203,9 @@ begin
           // 有中文进行解码
           lFileName := HTTPDecode(lFileName);
           lFileName := OneFileHelper.CombineExeRunPathB('OnePlatform\OneWeb', lFileName);
-          Ctxt.OutContent := lFileName;
+          Ctxt.OutContent := UTF8Encode(lFileName);
           Ctxt.OutContentType := STATICFILE_CONTENT_TYPE;
-          Ctxt.OutCustomHeaders :=
-            GetMimeContentTypeHeader('', Ctxt.OutContent) + #13#10 +
-            'OneOutMode: OUTFILE';
+          Ctxt.OutCustomHeaders := GetMimeContentTypeHeader('', Ctxt.OutContent) + #13#10 + 'OneOutMode: OUTFILE';
           Result := HTTP_SUCCESS;
           exit;
         end;
@@ -249,8 +218,7 @@ begin
           lFileCode := lUrlPath.Substring(0, tempI);
           lFileName := lUrlPath.Substring(tempI, lUrlPath.Length - tempI);
 
-          lPhy := TOneGlobal.GetInstance().VirtualManage.GetVirtualPhy(
-            lFileCode, lErrMsg);
+          lPhy := TOneGlobal.GetInstance().VirtualManage.GetVirtualPhy(lFileCode, lErrMsg);
           if lErrMsg <> '' then
           begin
             Ctxt.OutContent := UTF8Encode(lErrMsg);
@@ -259,11 +227,9 @@ begin
           end;
           lFileName := HTTPDecode(lFileName);
           lFileName := OneFileHelper.CombinePath(lPhy, lFileName);
-          Ctxt.OutContent := lFileName;
+          Ctxt.OutContent :=UTF8Encode( lFileName);
           Ctxt.OutContentType := STATICFILE_CONTENT_TYPE;
-          Ctxt.OutCustomHeaders :=
-            GetMimeContentTypeHeader('', Ctxt.OutContent) + #13#10 +
-            'OneOutMode: OUTFILE';
+          Ctxt.OutCustomHeaders := GetMimeContentTypeHeader('', Ctxt.OutContent) + #13#10 + 'OneOutMode: OUTFILE';
           Result := HTTP_SUCCESS;
           exit;
         end;
@@ -289,9 +255,7 @@ begin
         begin
           Ctxt.OutContent := lHTTPCtxt.OutContent;
           Ctxt.OutContentType := STATICFILE_CONTENT_TYPE;
-          Ctxt.OutCustomHeaders :=
-            GetMimeContentTypeHeader('', Ctxt.OutContent) + #13#10 +
-            'OneOutMode: OUTFILE';
+          Ctxt.OutCustomHeaders := GetMimeContentTypeHeader('', Ctxt.OutContent) + #13#10 + 'OneOutMode: OUTFILE';
           Result := HTTP_SUCCESS;
         end
         else if lHTTPResult.ResultOutMode = THTTPResultMode.HTML then
@@ -302,8 +266,7 @@ begin
         end
         else
         begin
-          Ctxt.OutContentType :=
-            'text/plain;charset=' + lHTTPCtxt.RequestAcceptCharset;
+          Ctxt.OutContentType := 'text/plain;charset=' + lHTTPCtxt.RequestAcceptCharset;
           Ctxt.OutCustomHeaders := lHTTPCtxt.ResponCustHeaderList;
           Ctxt.OutContent := lHTTPCtxt.OutContent;
         end;
@@ -340,6 +303,27 @@ begin
   end;
 end;
 
+constructor TOneHttpServer.Create(QLog: IOneLog);
+begin
+  inherited Create;
+  self.FLog := QLog;
+  self.FStarted := False;
+  self.FStopRequest := False;
+  self.FPort := 9090;
+  self.FThreadPoolCount := 100;
+  self.FKeepAliveTimeOut := 30000;
+  self.FHttpQueueLength := 1000;
+end;
+
+destructor TOneHttpServer.Destroy;
+begin
+  if FHttpServer <> nil then
+  begin
+    FHttpServer.Free;
+  end;
+  inherited Destroy;
+end;
+
 // 启动服务
 function TOneHttpServer.ServerStart(): boolean;
 var
@@ -354,8 +338,7 @@ begin
   end;
   if (self.FPort <= 0) then
   begin
-    self.FErrMsg := 'HTTP服务端口未设置,请先设置,当前绑定端口【' +
-      self.FPort.ToString() + '】';
+    self.FErrMsg := 'HTTP服务端口未设置,请先设置,当前绑定端口【' + self.FPort.ToString() + '】';
     exit;
   end;
   if self.FThreadPoolCount > 1000 then
@@ -365,11 +348,13 @@ begin
   // 创建HTTP服务
   try
     // hsoEnableTls开始ssl证书
-    self.FHttpServer := THttpAsyncServer.Create(self.FPort.ToString(),
-      nil, nil, 'oneDelphi', self.FThreadPoolCount, self.FKeepAliveTimeOut,
-      [hsoNoXPoweredHeader]);
+    self.FHttpServer := THttpAsyncServer.Create(self.FPort.ToString(), nil, nil, 'oneDelphi', self.FThreadPoolCount, self.FKeepAliveTimeOut, [hsoNoXPoweredHeader]);
     self.FHttpServer.HttpQueueLength := self.FHttpQueueLength;
     self.FHttpServer.OnRequest := self.OnRequest;
+    // CertificateFile :=
+    // 'D:\devTool\delphi\project\OneDelphi\OneServer\Win64\Debug\callbaba.cn_bundle.crt';
+    // PrivateKeyFile :=
+    // 'D:\devTool\delphi\project\OneDelphi\OneServer\Win64\Debug\callbaba.cn.key';
     self.FHttpServer.WaitStarted();
     // raise exception e.g. on binding issue
     self.FStopRequest := False;
@@ -378,8 +363,7 @@ begin
   except
     on e: Exception do
     begin
-      self.FErrMsg := '启动服务器失败,原因:' + e.Message +
-        ';解决方案可偿试管理员启动程序或换个端口临听（端口重复绑定）。';
+      self.FErrMsg := '启动服务器失败,原因:' + e.Message + ';解决方案可偿试管理员启动程序或换个端口临听（端口重复绑定）。';
       self.FHttpServer.Free;
       self.FHttpServer := nil;
     end;

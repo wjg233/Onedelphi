@@ -18,6 +18,7 @@ object Form1: TForm1
     Height = 80
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 895
     object Label1: TLabel
       Left = 4
       Top = 17
@@ -112,9 +113,11 @@ object Form1: TForm1
     Top = 80
     Width = 899
     Height = 479
-    ActivePage = tabDataSet
+    ActivePage = tabDML
     Align = alClient
     TabOrder = 2
+    ExplicitWidth = 895
+    ExplicitHeight = 478
     object tabDataSet: TTabSheet
       Caption = #25968#25454#38598#22522#26412#25171#24320#20445#23384
       object Label4: TLabel
@@ -514,6 +517,7 @@ object Form1: TForm1
     end
   end
   object OneConnection: TOneConnection
+    Connected = False
     IsHttps = False
     HTTPPort = 0
     ConnectionTimeout = 0
@@ -531,6 +535,7 @@ object Form1: TForm1
     UpdateOptions.CheckRequired = False
     DataInfo.IsDesignGetFields = False
     DataInfo.OpenMode = openData
+    DataInfo.IsPost = False
     DataInfo.SaveMode = saveData
     DataInfo.DataReturnMode = dataStream
     DataInfo.PageSize = -1
@@ -564,6 +569,7 @@ object Form1: TForm1
     DataInfo.IsDesignGetFields = False
     DataInfo.Connection = OneConnection
     DataInfo.OpenMode = openData
+    DataInfo.IsPost = False
     DataInfo.SaveMode = saveData
     DataInfo.DataReturnMode = dataStream
     DataInfo.PageSize = -1
@@ -591,6 +597,7 @@ object Form1: TForm1
     UpdateOptions.CheckRequired = False
     DataInfo.IsDesignGetFields = False
     DataInfo.OpenMode = openData
+    DataInfo.IsPost = False
     DataInfo.SaveMode = saveData
     DataInfo.DataReturnMode = dataStream
     DataInfo.PageSize = -1

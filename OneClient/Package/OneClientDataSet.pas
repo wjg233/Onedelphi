@@ -14,9 +14,10 @@ type
   TOneDataSet = class;
   TOneDataInfo = class;
 
-
   TOneDataInfo = class(TPersistent)
   private
+    //
+    FCreateID: string;
     // 设计时获取相关字段
     FIsDesignGetFields: boolean;
     // 所属数据集
@@ -35,6 +36,8 @@ type
     FOtherKeys: string;
     // 数据集打开数据模式
     FOpenMode: TDataOpenMode;
+    //
+    FIsPost:boolean;
     // 保存数据集模式
     FSaveMode: TDataSaveMode;
     // 服务端返回数据模式
@@ -84,9 +87,9 @@ type
     constructor Create(QDataSet: TOneDataSet); overload;
     destructor Destroy; override;
   published
+    property CreateID: string read FCreateID write FCreateID;
     /// <param name="IsDesignGetFields">设计时获取相关字段,请先设置好连接及SQL</param>
-    property IsDesignGetFields: boolean read FIsDesignGetFields
-      write SetGetFields;
+    property IsDesignGetFields: boolean read FIsDesignGetFields write SetGetFields;
     /// <param name="OwnerDataSet">所属数据集</param>
     property OwnerDataSet: TOneDataSet read FOwnerDataSet;
     /// <param name="Connection">连接OneServer服务器的连接</param>
@@ -103,11 +106,11 @@ type
     property OtherKeys: string read FOtherKeys write FOtherKeys;
     /// <param name="OpenMode">数据集打开模式</param>
     property OpenMode: TDataOpenMode read FOpenMode write FOpenMode;
+    property IsPost:boolean read FIsPost write FIsPost;
     /// <param name="SaveMode">保存数据集模式,数据集delate和DML操作语句</param>
     property SaveMode: TDataSaveMode read FSaveMode write FSaveMode;
     /// <param name="DataReturnMode">数据集返回模式</param>
-    property DataReturnMode: TDataReturnMode read FDataReturnMode
-      write FDataReturnMode;
+    property DataReturnMode: TDataReturnMode read FDataReturnMode write FDataReturnMode;
     /// <param name="PackageName">包名</param>
     property PackageName: string read FPackageName write FPackageName;
     /// <param name="StoredProcName">存储过程名称</param>
@@ -121,11 +124,9 @@ type
     /// <param name="PageTotal">分页 总共条数</param>
     property PageTotal: Integer read FPageTotal write FPageTotal;
     /// <param name="AffectedMaxCount">执行DML语句，最多影响行数，0代表不控制</param>
-    property AffectedMaxCount: Integer read FAffectedMaxCount
-      write FAffectedMaxCount;
+    property AffectedMaxCount: Integer read FAffectedMaxCount write FAffectedMaxCount;
     /// <param name="AffectedMustCount">执行DML语句必需有且几条一定受影响，默认1条，0代表不控制</param>
-    property AffectedMustCount: Integer read FAffectedMustCount
-      write FAffectedMustCount;
+    property AffectedMustCount: Integer read FAffectedMustCount write FAffectedMustCount;
     /// <param name="RowsAffected">执行SQL语句,服务端返回影响行数</param>
     property RowsAffected: Integer read FRowsAffected write FRowsAffected;
     /// <param name="AsynMode">是否异步</param>
@@ -269,7 +270,6 @@ begin
   FCommandText.TrailingLineBreak := False;
   TStringList(FCommandText).OnChange := SQLListChanged;
   FDataInfo := TOneDataInfo.Create(Self);
-
   FMultiData := nil;
   FMultiIndex := 0;
   Self.UpdateOptions.UpdateMode := TUpdateMode.upWhereKeyOnly;
@@ -367,8 +367,7 @@ begin
         LNewFDParam := FParams.Add;
         LNewFDParam.Name := LNewParams[i].Name;
         lNewFDPramsDict.Add(LNewParams[i].Name.ToLower, LNewFDParam);
-        if lOldFDPramsDict.TryGetValue(LNewFDParam.Name.ToLower, LOldFDParam)
-        then
+        if lOldFDPramsDict.TryGetValue(LNewFDParam.Name.ToLower, LOldFDParam) then
         begin
           LNewFDParam.value := LOldFDParam.value;
           LNewFDParam.DataTypeName := LOldFDParam.DataTypeName;

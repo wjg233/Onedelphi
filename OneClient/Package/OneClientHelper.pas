@@ -3,7 +3,8 @@
 interface
 
 uses
-  system.Generics.Collections, OneClientConnect, OneClientDataSet;
+  system.Generics.Collections,
+  OneClientConnect, OneClientDataSet;
 
 type
   TOneConnectionHelper = class helper for TOneConnection
@@ -15,7 +16,8 @@ type
     // 保存数据
     function SaveOneData(Sender: TOneDataSet): Boolean;
     function SaveOneDatas(QObjectList: TList<TOneDataSet>): Boolean; overload;
-    function SaveOneDatas(QObjectArray: array of TOneDataSet): Boolean; overload;
+    function SaveOneDatas(QObjectArray: array of TOneDataSet): Boolean;
+      overload;
   end;
 
 implementation
@@ -25,7 +27,8 @@ begin
   Result := Self.OpenData(Sender);
 end;
 
-function TOneConnectionHelper.OpenOneDatas(QOpenDatas: TList<TOneDataSet>): Boolean;
+function TOneConnectionHelper.OpenOneDatas(QOpenDatas
+  : TList<TOneDataSet>): Boolean;
 var
   QList: TList<TObject>;
   i: Integer;
@@ -50,7 +53,8 @@ begin
   end;
 end;
 
-function TOneConnectionHelper.OpenOneDatas(QOpenDatas: array of TOneDataSet): Boolean;
+function TOneConnectionHelper.OpenOneDatas(QOpenDatas
+  : array of TOneDataSet): Boolean;
 var
   QList: TList<TObject>;
   i: Integer;
@@ -78,7 +82,8 @@ begin
   Result := Self.SaveData(Sender);
 end;
 
-function TOneConnectionHelper.SaveOneDatas(QObjectList: TList<TOneDataSet>): Boolean;
+function TOneConnectionHelper.SaveOneDatas(QObjectList
+  : TList<TOneDataSet>): Boolean;
 var
   QList: TList<TObject>;
   i: Integer;
@@ -101,7 +106,8 @@ begin
   end;
 end;
 
-function TOneConnectionHelper.SaveOneDatas(QObjectArray: array of TOneDataSet): Boolean;
+function TOneConnectionHelper.SaveOneDatas(QObjectArray
+  : array of TOneDataSet): Boolean;
 var
   QList: TList<TObject>;
   i: Integer;
@@ -125,4 +131,3 @@ begin
 end;
 
 end.
-

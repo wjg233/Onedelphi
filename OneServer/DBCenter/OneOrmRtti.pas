@@ -1,18 +1,15 @@
-unit OneOrmRtti;
-
-{$mode DELPHI}{$H+}
-
+﻿unit OneOrmRtti;
 
 interface
 
 uses
-  Rtti, Generics.Collections, StrUtils, SysUtils, TypInfo,
-  OneAttribute, SyncObjs;
+  system.Rtti, system.Generics.Collections, system.StrUtils, system.SysUtils, system.TypInfo,
+  OneAttribute;
 
 type
   TOneFieldRtti = class
   public
-    //FFieldRtti: TRttiField;
+    FFieldRtti: TRttiField;
     FPropertyRtti: TRttiProperty;
     FFieldName: string;
     FDBFieldName: string;
@@ -20,7 +17,7 @@ type
     FDBFieldFormat: string;
     FJsonName: string;
     FJsonFormat: string;
-
+    //
     FIsProperty: boolean;
     // 是否是时间类型字段
     FIsDateTime: boolean;
@@ -31,8 +28,8 @@ type
     destructor Destroy; override;
   end;
 
-  TOneOrmRttiItem = class(TObject)
-  private
+  TOneOrmRttiItem = class(Tobject)
+  Private
     FOrmName: string;
     FTableName: string;
     FPrimaryKey: string;
@@ -53,7 +50,7 @@ type
 
   TOneOrmRtti = class(TInterfacedObject, IOrmRtti)
   private
-    FLockObj: TCriticalSection;
+    FLockObj: Tobject;
     FOrmRttiItemList: TDictionary<string, TOneOrmRttiItem>;
   public
     constructor Create;
@@ -71,16 +68,16 @@ implementation
 constructor TOneFieldRtti.Create;
 begin
   inherited Create;
-  //FFieldRtti := nil;
+  FFieldRtti := nil;
   FPropertyRtti := nil;
   FDBFieldName := '';
   FDBFieldNameLow := '';
   FDBFieldFormat := '';
   FJsonName := '';
   FJsonFormat := '';
-  FIsProperty := False;
-  FIsDateTime := False;
-  FIsBool := False;
+  FIsProperty := false;
+  FIsDateTime := false;
+  FIsBool := false;
 end;
 
 destructor TOneFieldRtti.Destroy;
@@ -94,7 +91,7 @@ begin
   begin
     unit_OrmRtti := TOneOrmRtti.Create;
   end;
-  Result := unit_OrmRtti;
+  result := unit_OrmRtti;
 end;
 
 constructor TOneOrmRttiItem.Create;
@@ -120,7 +117,7 @@ constructor TOneOrmRtti.Create;
 begin
   inherited Create;
   FOrmRttiItemList := TDictionary<string, TOneOrmRttiItem>.Create;
-  FLockObj := TCriticalSection.Create;
+  FLockObj := Tobject.Create;
 end;
 
 destructor TOneOrmRtti.Destroy;
@@ -143,23 +140,23 @@ var
   LRttiType: TRttiType;
   lKey: string;
   lItem: TOneOrmRttiItem;
-  //lFields: TArray<TRttiField>;
-  //lField: TRttiField;
+  lFields: TArray<TRttiField>;
+  lField: TRttiField;
   lProperties: TArray<TRttiProperty>;
   lProper: TRttiProperty;
   lOneFieldRtti: TOneFieldRtti;
   i, iAttr: integer;
   isNotJoin: boolean;
-  lAttributes: TArray<TObject>;
-  lAttribute: TObject;
+  lAttributes: TArray<TCustomAttribute>;
+  lAttribute: TCustomAttribute;
   lAttriDBFieldName: string;
 begin
-  Result := nil;
+  result := nil;
   lItem := nil;
   LRttiContext := TRttiContext.Create;
   LRttiType := LRttiContext.GetType(ATypeInfo);
-  lKey := LRttiType.QualifiedClassName;
-  FLockObj.Enter;
+  lKey := LRttiType.QualifiedName.ToLower;
+  TMonitor.Enter(FLockObj);
   try
     FOrmRttiItemList.TryGetValue(lKey, lItem);
     if lItem = nil then
@@ -168,39 +165,102 @@ begin
     end
     else
     begin
-      Result := lItem;
+      result := lItem;
       exit;
     end;
   finally
-    FLockObj.leave;
+    TMonitor.exit(FLockObj);
   end;
   // 不存在添加
   lItem := TOneOrmRttiItem.Create;
   lItem.FOrmName := LRttiType.Name;
-  //lFields := LRttiType.GetFields();
+  lFields := LRttiType.GetFields();
   lProperties := LRttiType.GetProperties;
+  for i := 0 to length(lFields) - 1 do
+  begin
+    isNotJoin := false;
+    lField := lFields[i];
 
+    if not(lField.Visibility in [mvPublic, mvPublished]) then
+    begin
+      isNotJoin := true;
+      continue;
+    end;
+    // 只支持基本类型
+    case lField.FieldType.TypeKind of
+      tkInteger, tkChar, tkEnumeration, tkFloat,
+        tkString, tkWChar, tkLString, tkWString,
+        tkVariant, tkInt64, tkUString:
+        begin
+
+        end
+    else
+      begin
+        // tkMRecord,tkProcedure,tkPointer,tkClassRef,tkDynArray,tkArray, tkRecord, tkInterface, tkSet, tkClass, tkMethod,
+        isNotJoin := true;
+      end;
+    end;
+    if isNotJoin then
+      continue;
+    lOneFieldRtti := TOneFieldRtti.Create;
+    lItem.FFields.Add(lOneFieldRtti);
+    lOneFieldRtti.FFieldRtti := lField;
+    lOneFieldRtti.FFieldName := lField.Name;
+    lOneFieldRtti.FDBFieldName := lField.Name;
+    case lField.FieldType.TypeKind of
+      tkFloat:
+        begin
+          if lField.FieldType.Handle = system.TypeInfo(TDateTime) then
+          begin
+            lOneFieldRtti.FIsDateTime := true;
+          end;
+        end;
+      tkEnumeration:
+        begin
+          if lField.FieldType.Handle = system.TypeInfo(boolean) then
+          begin
+            lOneFieldRtti.FIsBool := true;
+          end;
+        end;
+    end;
+    // 注解取数据库字段
+    lAttributes := lField.GetAttributes;
+    for iAttr := 0 to length(lAttributes) - 1 do
+    begin
+      lAttribute := lAttributes[iAttr];
+      if lAttribute is TOneDBAttribute then
+      begin
+        lAttriDBFieldName := TOneDBAttribute(lAttribute).FieldName;
+        if lAttriDBFieldName <> '' then
+        begin
+          lOneFieldRtti.FDBFieldName := lAttriDBFieldName;
+          lOneFieldRtti.FDBFieldFormat := TOneDBAttribute(lAttribute).Format;
+        end;
+      end;
+    end;
+    lOneFieldRtti.FDBFieldNameLow := lOneFieldRtti.FDBFieldName.ToLower;
+  end;
   for i := 0 to length(lProperties) - 1 do
   begin
-    isNotJoin := False;
+    isNotJoin := false;
     lProper := lProperties[i];
     // 非公开的直接跳过
-    if not (lProper.Visibility in [mvPublic, mvPublished]) then
+    if not(lProper.Visibility in [mvPublic, mvPublished]) then
     begin
-      isNotJoin := True;
+      isNotJoin := true;
       continue;
     end;
     case lProper.PropertyType.TypeKind of
-      tkInteger, tkEnumeration, tkFloat,
-      tkString, tkAString, tkChar, tkLString, tkUChar, tkUString,
-      tkVariant, tkInt64:
-      begin
+      tkInteger, tkChar, tkEnumeration, tkFloat,
+        tkString, tkWChar, tkLString, tkWString,
+        tkVariant, tkInt64, tkUString:
+        begin
 
-      end
-      else
+        end
+    else
       begin
         // tkMRecord,tkProcedure,tkPointer,tkClassRef,tkDynArray,tkArray, tkRecord, tkInterface, tkSet, tkClass, tkMethod,
-        isNotJoin := True;
+        isNotJoin := true;
       end;
     end;
     if isNotJoin then
@@ -209,46 +269,46 @@ begin
     lOneFieldRtti := TOneFieldRtti.Create;
     lItem.FFields.Add(lOneFieldRtti);
     lOneFieldRtti.FPropertyRtti := lProper;
-    lOneFieldRtti.FIsProperty := True;
+    lOneFieldRtti.FIsProperty := true;
     lOneFieldRtti.FFieldName := lProper.Name;
     lOneFieldRtti.FDBFieldName := lProper.Name;
-
+    //
     case lProper.PropertyType.TypeKind of
       tkFloat:
-      begin
-        if lProper.PropertyType.Handle = system.TypeInfo(TDateTime) then
         begin
-          lOneFieldRtti.FIsDateTime := True;
+          if lProper.PropertyType.Handle = system.TypeInfo(TDateTime) then
+          begin
+            lOneFieldRtti.FIsDateTime := true;
+          end;
         end;
-      end;
       tkEnumeration:
-      begin
-        if lProper.PropertyType.Handle = system.TypeInfo(boolean) then
         begin
-          lOneFieldRtti.FIsBool := True;
+          if lProper.PropertyType.Handle = system.TypeInfo(boolean) then
+          begin
+            lOneFieldRtti.FIsBool := true;
+          end;
         end;
-      end;
     end;
     // 注解取数据库字段
     // lAttribute := lProper.GetAttribute(TOneDBAttribute); 这种用法11版以下没有
-    //lAttributes := lProper.GetAttributes;
-    //for iAttr := 0 to length(lAttributes) - 1 do
-    //begin
-    //  lAttribute := lAttributes[iAttr];
-    //  if lAttribute is TOneDBAttribute then
-    //  begin
-    //    lAttriDBFieldName := TOneDBAttribute(lAttribute).FieldName;
-    //    if lAttriDBFieldName <> '' then
-    //    begin
-    //      lOneFieldRtti.FDBFieldName := lAttriDBFieldName;
-    //      lOneFieldRtti.FDBFieldFormat := TOneDBAttribute(lAttribute).Format;
-    //    end;
-    //  end;
-    //end;
+    lAttributes := lProper.GetAttributes;
+    for iAttr := 0 to length(lAttributes) - 1 do
+    begin
+      lAttribute := lAttributes[iAttr];
+      if lAttribute is TOneDBAttribute then
+      begin
+        lAttriDBFieldName := TOneDBAttribute(lAttribute).FieldName;
+        if lAttriDBFieldName <> '' then
+        begin
+          lOneFieldRtti.FDBFieldName := lAttriDBFieldName;
+          lOneFieldRtti.FDBFieldFormat := TOneDBAttribute(lAttribute).Format;
+        end;
+      end;
+    end;
 
     lOneFieldRtti.FDBFieldNameLow := lOneFieldRtti.FDBFieldName.ToLower;
   end;
-  FLockObj.Enter;
+  TMonitor.Enter(FLockObj);
   try
     if FOrmRttiItemList.ContainsKey(lKey) then
     begin
@@ -263,9 +323,9 @@ begin
       FOrmRttiItemList.Add(lKey, lItem);
     end;
   finally
-    FLockObj.Leave;
+    TMonitor.exit(FLockObj);
   end;
-  Result := lItem;
+  result := lItem;
 end;
 
 end.

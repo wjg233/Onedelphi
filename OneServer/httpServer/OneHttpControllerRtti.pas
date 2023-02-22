@@ -1,21 +1,17 @@
-unit OneHttpControllerRtti;
-
-{$mode DELPHI}{$H+}
-
+﻿unit OneHttpControllerRtti;
 
 // 此单元的作用就是跟据反射解析继承 OneHttpController.TOneHttpController
 // 把控制层类的反射信息相保存起来,放在缓存中
 interface
 
 uses
-  TypInfo, Generics.Collections, Classes, Rtti, SysUtils;
+  System.TypInfo, System.Generics.Collections, System.Classes,
+  System.Rtti, System.SysUtils;
 
 type
   // 标准方法类型一等公民 resultProcedure=TEvenControllerProcedure
   emOneMethodType = (unknow, resultProcedure, sysProcedure, sysFunction);
-  emOneMethodResultType = (unknowResult, numberResult, stringResult, boolResult,
-    objResult, listResult, objListResult, genericsListResult,
-    genericsObjListResult, mapResult, arrayResult, recordResult);
+  emOneMethodResultType = (unknowResult, numberResult, stringResult, boolResult, objResult, listResult, objListResult, genericsListResult, genericsObjListResult, mapResult, arrayResult, recordResult);
   // OneAll代表没有以下面为特殊规则的，不控制什么HTTPMethod可以访问,低版不采用注解
   // 方法头部 OneGetxxxx代表只支持Get方法
   // 方法头部 OnePost代表只支持Post方法
@@ -32,10 +28,11 @@ type
     FMethodType: emOneMethodType;
     FHttpMethodType: emOneHttpMethodMode;
     FRttiMethod: TRttiMethod;
-    FTypeInfo: PTypeInfo;
+    //
     FHaveClassParam: boolean;
     FParamClassList: TList<TClass>;
-
+    FParamIsArryList: TList<boolean>;
+    //
     FResultRtti: TRttiType;
     FResultType: emOneMethodResultType;
     // 容器map key值类型
@@ -52,14 +49,12 @@ type
     property RttiMethod: TRttiMethod read FRttiMethod;
     property HaveClassParam: boolean read FHaveClassParam;
     property ParamClassList: TList<TClass> read FParamClassList;
+    property ParamIsArryList: TList<boolean> read FParamIsArryList;
     property ResultType: emOneMethodResultType read FResultType;
     property ResultRtti: TRttiType read FResultRtti;
-    property ResultCollectionsKeyType: emOneMethodResultType
-      read FResultCollectionsKeyType;
-    property ResultCollectionsValueType: emOneMethodResultType
-      read FResultCollectionsValueType;
+    property ResultCollectionsKeyType: emOneMethodResultType read FResultCollectionsKeyType;
+    property ResultCollectionsValueType: emOneMethodResultType read FResultCollectionsValueType;
     property ErrMsg: string read FErrMsg;
-    property TypeInfo: PTypeInfo read FTypeInfo;
   end;
 
   TOneControllerRtti = class
@@ -70,42 +65,26 @@ type
     FRttiContext: TRttiContext;
     FRttiType: TRttiType;
   private
-
+    function IsJsonArr(QType: TRttiType): boolean;
+    function ResultTypeIsGenericsCollections(qListType: TRttiType; QOneMethodRtti: TOneMethodRtti): boolean;
+    // 判断是不是List容器
+    function ResultTypeIsListCollections(qListType: TRttiType; QOneMethodRtti: TOneMethodRtti): boolean;
+    // 判断是不是map容器
+    function ResultTypeIsMapCollections(QMapType: TRttiType; QOneMethodRtti: TOneMethodRtti): boolean;
   public
     // 判断是不是泛型容器
-    class function GetRttiTypeToResultType(qRttiType: TRttiType;
-      var QResultType: emOneMethodResultType;
-      var QItemResultType: emOneMethodResultType): boolean; static;
-    constructor Create(QInterfaceTypeInfo: PTypeInfo); overload;
+    class function GetRttiTypeToResultType(qRttiType: TRttiType): emOneMethodResultType; static;
+    constructor Create(QPersistentClass: TPersistentClass); overload;
     destructor Destroy; override;
-    function IsGenericsCollections(qListType: TRttiType;
-      QOneMethodRtti: TOneMethodRtti): boolean;
-    // 判断是不是List容器
-    function IsListCollections(qListType: TRttiType;
-      QOneMethodRtti: TOneMethodRtti): boolean;
-    // 判断是不是map容器
-    function IsMapCollections(QMapType: TRttiType;
-      QOneMethodRtti: TOneMethodRtti): boolean;
 
     // 跟据控制层类,获取控制类的方法反射信息
-    procedure GetMethodList(QInterfaceTypeInfo: PTypeInfo);
+    procedure GetMethodList(QPersistentClass: TPersistentClass);
     // 跟据方法名称获取方法的反射信息
     function GetRttiMethod(QMethodName: string): TOneMethodRtti;
+
   public
     property MethodList: TDictionary<string, TOneMethodRtti> read FMethodList;
   end;
-
-function ResultTypeIsGenericsCollections(qListType: TRttiType;
-  var QResultType: emOneMethodResultType;
-  var QItemResultType: emOneMethodResultType): boolean;
-// 判断是不是List容器
-function ResultTypeIsListCollections(qListType: TRttiType;
-  var QResultType: emOneMethodResultType;
-  var QItemResultType: emOneMethodResultType): boolean;
-// 判断是不是map容器
-function ResultTypeIsMapCollections(QMapType: TRttiType;
-  var QResultType: emOneMethodResultType): boolean;
-
 
 implementation
 
@@ -113,11 +92,12 @@ constructor TOneMethodRtti.Create();
 begin
   inherited Create;
   FParamClassList := TList<TClass>.Create;
+  FParamIsArryList := TList<boolean>.Create;
 end;
 
 destructor TOneMethodRtti.Destroy;
 var
-  i: integer;
+  i: Integer;
 begin
   for i := 0 to FParamClassList.Count - 1 do
   begin
@@ -125,14 +105,16 @@ begin
   end;
   FParamClassList.Clear;
   FParamClassList.Free;
+  FParamIsArryList.Clear;
+  FParamIsArryList.Free;
   inherited Destroy;
 end;
 
-constructor TOneControllerRtti.Create(QInterfaceTypeInfo: PTypeInfo);
+constructor TOneControllerRtti.Create(QPersistentClass: TPersistentClass);
 begin
   inherited Create;
   FMethodList := TDictionary<string, TOneMethodRtti>.Create;
-  self.GetMethodList(QInterfaceTypeInfo);
+  self.GetMethodList(QPersistentClass);
 end;
 
 function TOneControllerRtti.GetRttiMethod(QMethodName: string): TOneMethodRtti;
@@ -170,159 +152,184 @@ begin
   inherited Destroy;
 end;
 
-class function TOneControllerRtti.GetRttiTypeToResultType(qRttiType: TRttiType;
-  var QResultType: emOneMethodResultType;
-  var QItemResultType: emOneMethodResultType): boolean;
+class function TOneControllerRtti.GetRttiTypeToResultType(qRttiType: TRttiType): emOneMethodResultType;
 var
   LMethodGetEnumerator, LMethodAdd, LMethodClear: TRttiMethod;
 begin
-  Result := False;
-  QResultType := emOneMethodResultType.unknowResult;
-  QItemResultType := emOneMethodResultType.unknowResult;
+  Result := emOneMethodResultType.unknowResult;
   case qRttiType.TypeKind of
     tkInteger, tkFloat, tkInt64:
-    begin
-      QResultType := emOneMethodResultType.numberResult;
-    end;
-    tkSString, tkLString, tkAString, tkWString, tkWChar, tkUString, tkUChar:
-    begin
-      QResultType := emOneMethodResultType.stringResult;
-    end;
+      begin
+        Result := emOneMethodResultType.numberResult;
+      end;
+    tkString, tkUString, tkWChar, tkLString, tkWString, tkChar:
+      begin
+        Result := emOneMethodResultType.stringResult;
+      end;
     tkClass:
-    begin
-      QResultType := emOneMethodResultType.objResult;
-      if ResultTypeIsGenericsCollections(qRttiType, QResultType, QItemResultType) then
-      else
-      if ResultTypeIsListCollections(qRttiType, QResultType, QItemResultType) then;
-    end;
+      begin
+        Result := emOneMethodResultType.objResult;
+        LMethodGetEnumerator := qRttiType.GetMethod('GetEnumerator');
+        if not Assigned(LMethodGetEnumerator) or (LMethodGetEnumerator.MethodKind <> mkFunction) or (LMethodGetEnumerator.ReturnType.Handle.Kind <> tkClass) then
+          exit;
+        LMethodClear := qRttiType.GetMethod('Clear');
+        if not Assigned(LMethodClear) then
+          exit;
+        LMethodAdd := qRttiType.GetMethod('Add');
+        if not Assigned(LMethodAdd) or (Length(LMethodAdd.GetParameters) <> 1) then
+          exit;
+        if qRttiType.Name.Contains('<') and (qRttiType.Name.Contains('>')) then
+        begin
+          Result := emOneMethodResultType.genericsListResult;
+          // 是否是obj容器
+          if qRttiType.GetProperty('OwnsObjects') <> nil then
+          begin
+            Result := emOneMethodResultType.genericsObjListResult;
+          end;
+        end
+        else
+        begin
+          Result := emOneMethodResultType.listResult;
+          if qRttiType.GetProperty('OwnsObjects') <> nil then
+          begin
+            Result := emOneMethodResultType.objListResult;
+          end;
+        end;
+      end;
     tkRecord:
-    begin
-      QResultType := emOneMethodResultType.recordResult;
-    end;
+      begin
+        Result := emOneMethodResultType.recordResult;
+      end;
     tkArray, tkDynArray:
-    begin
-      QResultType := emOneMethodResultType.arrayResult;
-    end;
+      begin
+        Result := emOneMethodResultType.arrayResult;
+      end;
   end;
-  Result := True;
 end;
 
-function TOneControllerRtti.IsGenericsCollections(qListType: TRttiType;
-  QOneMethodRtti: TOneMethodRtti): boolean;
+function TOneControllerRtti.IsJsonArr(QType: TRttiType): boolean;
 var
-  lClassName: string;
+  LMethodGetEnumerator: TRttiMethod;
 begin
-  Result := False;
-  lClassName := qListType.AsInstance.MetaClassType.ClassName;
-  if not lClassName.Contains('<') then
-  begin
+  Result := false;
+  LMethodGetEnumerator := QType.GetMethod('GetEnumerator');
+  if not Assigned(LMethodGetEnumerator) or (LMethodGetEnumerator.MethodKind <> mkFunction) or (LMethodGetEnumerator.ReturnType.Handle.Kind <> tkClass) then
     exit;
-  end;
-  if not lClassName.Contains('>') then
-  begin
-    exit;
-  end;
-
-  lClassName := lClassName.ToLower;
-  lClassName := lClassName.Replace('system.', '', [rfReplaceAll]);
-  if lClassName.StartsWith('tobjectlist<') then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.genericsObjListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.objResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<tobject>' then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.genericsListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.objResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<string>' then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.genericsListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.stringResult;
-    Result := True;
-  end
-  else
-  if (lClassName = 'tlist<integer>') or (lClassName = 'tlist<longint>') then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.genericsListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.numberResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<int64>' then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.genericsListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.numberResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<double>' then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.genericsListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.numberResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<boolean>' then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.genericsListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.boolResult;
-    Result := True;
-  end
-  else
-  if lClassName.StartsWith('tlist<') then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.genericsListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.objResult;
-    Result := True;
-  end;
+  Result := true;
 end;
 
-function TOneControllerRtti.IsListCollections(qListType: TRttiType;
-  QOneMethodRtti: TOneMethodRtti): boolean;
+function TOneControllerRtti.ResultTypeIsGenericsCollections(qListType: TRttiType; QOneMethodRtti: TOneMethodRtti): boolean;
 var
   LMethodGetEnumerator, LMethodAdd, LMethodClear: TRttiMethod;
   LItemType: TRttiType;
-  lClassName: string;
 begin
-  Result := False;
-  lClassName := qListType.AsInstance.MetaClassType.ClassName;
-  if lClassName.Contains('<') then
+  Result := false;
+  if not qListType.Name.Contains('<') then
   begin
     exit;
   end;
-  if lClassName.Contains('>') then
+  if not qListType.Name.Contains('>') then
   begin
     exit;
   end;
-  lClassName := lClassName.ToLower;
-  if lClassName = 'tobjectList' then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.objListResult;
-    QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.objResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist' then
-  begin
-    QOneMethodRtti.FResultType := emOneMethodResultType.listResult;
-    Result := True;
+  LMethodGetEnumerator := qListType.GetMethod('GetEnumerator');
+  if not Assigned(LMethodGetEnumerator) or (LMethodGetEnumerator.MethodKind <> mkFunction) or (LMethodGetEnumerator.ReturnType.Handle.Kind <> tkClass) then
+    exit;
+
+  LMethodClear := qListType.GetMethod('Clear');
+  if not Assigned(LMethodClear) then
+    exit;
+  LMethodAdd := qListType.GetMethod('Add');
+  if not Assigned(LMethodAdd) or (Length(LMethodAdd.GetParameters) <> 1) then
+    exit;
+  LItemType := LMethodAdd.GetParameters[0].ParamType;
+  case LItemType.TypeKind of
+    tkInteger, tkFloat, tkInt64:
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.numberResult;
+      end;
+    tkString, tkUString, tkWChar, tkLString, tkWString, tkChar:
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.stringResult;
+      end;
+    tkClass:
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.objResult;
+      end
   end;
 
+  //
+  QOneMethodRtti.FResultType := emOneMethodResultType.genericsListResult;
+  // 是否是obj容器
+  if qListType.GetProperty('OwnsObjects') <> nil then
+  begin
+    QOneMethodRtti.FResultType := emOneMethodResultType.genericsObjListResult;
+  end;
+  Result := true;
 end;
 
-function TOneControllerRtti.IsMapCollections(QMapType: TRttiType;
-  QOneMethodRtti: TOneMethodRtti): boolean;
+function TOneControllerRtti.ResultTypeIsListCollections(qListType: TRttiType; QOneMethodRtti: TOneMethodRtti): boolean;
+var
+  LMethodGetEnumerator, LMethodAdd, LMethodClear: TRttiMethod;
+  LItemType: TRttiType;
+begin
+  Result := false;
+  if qListType.Name.Contains('<') then
+  begin
+    exit;
+  end;
+  if qListType.Name.Contains('>') then
+  begin
+    exit;
+  end;
+  LMethodGetEnumerator := qListType.GetMethod('GetEnumerator');
+  if not Assigned(LMethodGetEnumerator) or (LMethodGetEnumerator.MethodKind <> mkFunction) or (LMethodGetEnumerator.ReturnType.Handle.Kind <> tkClass) then
+    exit;
+
+  LMethodClear := qListType.GetMethod('Clear');
+  if not Assigned(LMethodClear) then
+    exit;
+  LMethodAdd := qListType.GetMethod('Add');
+  if not Assigned(LMethodAdd) or (Length(LMethodAdd.GetParameters) <> 1) then
+    exit;
+  LItemType := LMethodAdd.GetParameters[0].ParamType;
+  case LItemType.TypeKind of
+    tkInteger, tkFloat, tkInt64:
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.numberResult;
+      end;
+    tkString, tkUString, tkWChar, tkLString, tkWString, tkChar:
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.stringResult;
+      end;
+    tkClass:
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.objResult;
+        // 有可以判断是不是泛型，不做这么多层处理
+      end
+  end;
+  // 是否是obj容器
+  QOneMethodRtti.FResultType := emOneMethodResultType.listResult;
+  // 是否是obj容器
+  if qListType.GetProperty('OwnsObjects') <> nil then
+  begin
+    QOneMethodRtti.FResultType := emOneMethodResultType.objListResult;
+  end;
+  if (QOneMethodRtti.FResultCollectionsValueType = emOneMethodResultType.objResult) and (QOneMethodRtti.FResultType = emOneMethodResultType.listResult) then
+  begin
+    // TList没办法走进来
+    QOneMethodRtti.FErrMsg := '返回List不能为对象只能为常用类型如字符串,数字等,否则序列化出错';
+  end;
+  Result := true;
+end;
+
+function TOneControllerRtti.ResultTypeIsMapCollections(QMapType: TRttiType; QOneMethodRtti: TOneMethodRtti): boolean;
 var
   LKeyType, LValType: TRttiType;
   LKeyProp, LValProp: TRttiProperty;
   LAddMethod: TRttiMethod;
 begin
-  Result := False;
+  Result := false;
   if not QMapType.Name.Contains('<') then
   begin
     exit;
@@ -347,46 +354,40 @@ begin
   LValType := LAddMethod.GetParameters[1].ParamType;
   case LKeyType.TypeKind of
     tkInteger, tkFloat, tkInt64:
-    begin
-      QOneMethodRtti.FResultCollectionsKeyType :=
-        emOneMethodResultType.numberResult;
-    end;
-    tkString, tkAString, tkChar, tkLString, tkUChar, tkUString, tkVariant:
-    begin
-      QOneMethodRtti.FResultCollectionsKeyType :=
-        emOneMethodResultType.stringResult;
-    end;
+      begin
+        QOneMethodRtti.FResultCollectionsKeyType := emOneMethodResultType.numberResult;
+      end;
+    tkString, tkUString, tkWChar, tkLString, tkWString, tkChar:
+      begin
+        QOneMethodRtti.FResultCollectionsKeyType := emOneMethodResultType.stringResult;
+      end;
     tkClass:
-    begin
-      QOneMethodRtti.FResultCollectionsKeyType :=
-        emOneMethodResultType.objResult;
-      // 有可以判断是不是泛型，不做这么多层处理
-    end
+      begin
+        QOneMethodRtti.FResultCollectionsKeyType := emOneMethodResultType.objResult;
+        // 有可以判断是不是泛型，不做这么多层处理
+      end
   end;
   case LValType.TypeKind of
     tkInteger, tkFloat, tkInt64:
-    begin
-      QOneMethodRtti.FResultCollectionsValueType :=
-        emOneMethodResultType.numberResult;
-    end;
-    tkString, tkAString, tkChar, tkLString, tkUChar, tkUString, tkVariant:
-    begin
-      QOneMethodRtti.FResultCollectionsValueType :=
-        emOneMethodResultType.stringResult;
-    end;
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.numberResult;
+      end;
+    tkString, tkUString, tkWChar, tkLString, tkWString, tkChar:
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.stringResult;
+      end;
     tkClass:
-    begin
-      QOneMethodRtti.FResultCollectionsValueType :=
-        emOneMethodResultType.objResult;
-      // 有可以判断是不是泛型，不做这么多层处理
-    end
+      begin
+        QOneMethodRtti.FResultCollectionsValueType := emOneMethodResultType.objResult;
+        // 有可以判断是不是泛型，不做这么多层处理
+      end
   end;
-
+  //
   QOneMethodRtti.FResultType := emOneMethodResultType.mapResult;
-  Result := True;
+  Result := true;
 end;
 
-procedure TOneControllerRtti.GetMethodList(QInterfaceTypeInfo: PTypeInfo);
+procedure TOneControllerRtti.GetMethodList(QPersistentClass: TPersistentClass);
 var
   lMethodName: string;
   // vRttiType: TRttiType;
@@ -394,45 +395,40 @@ var
   vRttiMethod: TRttiMethod;
   lParameters: TArray<TRttiParameter>;
   lParam: TRttiParameter;
-  i, iMethod, iParam: integer;
+  i, iMethod, iParam: Integer;
   lOneMethodRtti: TOneMethodRtti;
-  lVisibility: TMemberVisibility;
 begin
   FRttiContext := TRttiContext.Create;
-  FRttiType := FRttiContext.GetType(QInterfaceTypeInfo);
-  if FRttiType = nil then
-    exit;
-  lRttiMethods := FRttiType.GetDeclaredMethods;
+  FRttiType := FRttiContext.GetType(QPersistentClass.ClassInfo);
+  lRttiMethods := FRttiType.GetMethods;
   for iMethod := 0 to Length(lRttiMethods) - 1 do
   begin
     vRttiMethod := lRttiMethods[iMethod];
     if vRttiMethod = nil then
       continue;
     lMethodName := vRttiMethod.Name.ToLower;
-    lVisibility := vRttiMethod.Visibility;
-    //if not (vRttiMethod.Visibility = mvPublic) then
-    //begin
-    //  // 非公共方法
-    //  continue;
-    //end;
-    if not (vRttiMethod.MethodKind in [mkProcedure, mkFunction]) then
+    if not(vRttiMethod.Visibility = mvPublic) then
+    begin
+      // 非公共方法
+      continue;
+    end;
+    if not(vRttiMethod.MethodKind in [mkProcedure, mkFunction]) then
     begin
       // 非方法函数
       continue;
     end;
     // vRttiMethod.Package.Name
     // 不把父级方法放出来
-    //if vRttiMethod.Parent.Name <> QPersistentClass.ClassName then
-    // continue;
+    if vRttiMethod.Parent.Name <> QPersistentClass.ClassName then
+      continue;
     // 获取参数
     lParameters := vRttiMethod.GetParameters;
     lOneMethodRtti := TOneMethodRtti.Create;
     lOneMethodRtti.FErrMsg := '';
     lOneMethodRtti.FHttpMethodType := emOneHttpMethodMode.OneAll;
     lOneMethodRtti.FRttiMethod := vRttiMethod;
-    lOneMethodRtti.FHaveClassParam := False;
+    lOneMethodRtti.FHaveClassParam := false;
     lOneMethodRtti.FResultRtti := vRttiMethod.ReturnType;
-    lOneMethodRtti.FTypeInfo := QInterfaceTypeInfo;
     // 分析方法名称
     // emOneHttpMethodMode =(OneAll,OneGet,OnePost,OneForm, OneFile);
     if lMethodName.StartsWith('oneget') then
@@ -461,14 +457,13 @@ begin
         lOneMethodRtti.FMethodType := emOneMethodType.sysProcedure;
       mkFunction:
         lOneMethodRtti.FMethodType := emOneMethodType.sysFunction;
-      else
-        lOneMethodRtti.FMethodType := emOneMethodType.unknow;
+    else
+      lOneMethodRtti.FMethodType := emOneMethodType.unknow;
     end;
     // 分析参数
     if Length(lParameters) = 2 then
     begin
-      if (vRttiMethod.GetParameters[0].ParamType.ToString.ToLower = 'thttpctxt') and
-        (vRttiMethod.GetParameters[1].ParamType.ToString.ToLower = 'thttpresult') then
+      if (vRttiMethod.GetParameters[0].ParamType.ToString.ToLower = 'thttpctxt') and (vRttiMethod.GetParameters[1].ParamType.ToString.ToLower = 'thttpresult') then
       begin
         lOneMethodRtti.FMethodType := emOneMethodType.resultProcedure;
       end;
@@ -477,24 +472,26 @@ begin
     for iParam := Low(lParameters) to High(lParameters) do
     begin
       lOneMethodRtti.FParamClassList.Add(nil);
+      lOneMethodRtti.FParamIsArryList.Add(false);
       lParam := lParameters[iParam];
       case lParam.ParamType.TypeKind of
         tkInteger, tkFloat, tkInt64:
-        begin
-        end;
-        tkString, tkAString, tkChar, tkLString, tkUChar, tkUString, tkVariant:
-        begin
-        end;
+          begin
+          end;
+        tkString, tkUString, tkWChar, tkLString, tkWString, tkChar:
+          begin
+          end;
         tkClass:
-        begin
-          lOneMethodRtti.FParamClassList[iParam] :=
-            lParam.ParamType.AsInstance.MetaclassType;
-          lOneMethodRtti.FHaveClassParam := True;
-        end;
+          begin
+            lOneMethodRtti.FParamClassList[iParam] := lParam.ParamType.AsInstance.MetaclassType;
+            lOneMethodRtti.FHaveClassParam := true;
+            // 判断接收的是不是数组参数
+            lOneMethodRtti.FParamIsArryList[iParam] := self.IsJsonArr(lParam.ParamType);
+          end;
         tkRecord:
-        begin
-          lOneMethodRtti.FHaveClassParam := True;
-        end;
+          begin
+            lOneMethodRtti.FHaveClassParam := true;
+          end;
       end;
     end;
     // 分析返回值类型
@@ -502,27 +499,27 @@ begin
     begin
       case lOneMethodRtti.FResultRtti.TypeKind of
         tkInteger, tkFloat, tkInt64:
-        begin
-          lOneMethodRtti.FResultType := emOneMethodResultType.numberResult;
-        end;
-        tkString, tkAString, tkChar, tkLString, tkUChar, tkUString, tkVariant:
-        begin
-          lOneMethodRtti.FResultType := emOneMethodResultType.stringResult;
-        end;
-        tkClass:
-        begin
-          lOneMethodRtti.FResultType := emOneMethodResultType.objResult;
-          // 判断是否是List<T>泛型
-          if IsGenericsCollections(lOneMethodRtti.FResultRtti, lOneMethodRtti) then
-          // 判断是否是List容器
-          else if IsListCollections(lOneMethodRtti.FResultRtti, lOneMethodRtti) then
-          // 判断是不是字典容器
-          else if IsMapCollections(lOneMethodRtti.FResultRtti, lOneMethodRtti) then
-          else
           begin
+            lOneMethodRtti.FResultType := emOneMethodResultType.numberResult;
           end;
-        end;
-        else
+        tkString, tkUString, tkWChar, tkLString, tkWString, tkChar:
+          begin
+            lOneMethodRtti.FResultType := emOneMethodResultType.stringResult;
+          end;
+        tkClass:
+          begin
+            lOneMethodRtti.FResultType := emOneMethodResultType.objResult;
+            // 判断是否是List<T>泛型
+            if self.ResultTypeIsGenericsCollections(lOneMethodRtti.FResultRtti, lOneMethodRtti) then
+              // 判断是否是List容器
+            else if self.ResultTypeIsListCollections(lOneMethodRtti.FResultRtti, lOneMethodRtti) then
+              // 判断是不是字典容器
+            else if self.ResultTypeIsMapCollections(lOneMethodRtti.FResultRtti, lOneMethodRtti) then
+            else
+            begin
+            end;
+          end;
+      else
         begin
           lOneMethodRtti.FResultType := emOneMethodResultType.unknowResult;
         end;
@@ -541,120 +538,6 @@ begin
       lOneMethodRtti.Free;
     end;
   end;
-end;
-
-function ResultTypeIsGenericsCollections(qListType: TRttiType;
-  var QResultType: emOneMethodResultType;
-  var QItemResultType: emOneMethodResultType): boolean;
-var
-  lClassName: string;
-begin
-  Result := False;
-  lClassName := qListType.AsInstance.MetaClassType.ClassName;
-  if not lClassName.Contains('<') then
-  begin
-    exit;
-  end;
-  if not lClassName.Contains('>') then
-  begin
-    exit;
-  end;
-
-  lClassName := lClassName.ToLower;
-  if lClassName.StartsWith('tobjectList<') then
-  begin
-    QResultType := emOneMethodResultType.genericsObjListResult;
-    QItemResultType := emOneMethodResultType.objResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<tobject>' then
-  begin
-    QResultType := emOneMethodResultType.genericsListResult;
-    QItemResultType := emOneMethodResultType.objResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<string>' then
-  begin
-    QResultType := emOneMethodResultType.genericsListResult;
-    QItemResultType := emOneMethodResultType.stringResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<integer>' then
-  begin
-    QResultType := emOneMethodResultType.genericsListResult;
-    QItemResultType := emOneMethodResultType.numberResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<int64>' then
-  begin
-    QResultType := emOneMethodResultType.genericsListResult;
-    QItemResultType := emOneMethodResultType.numberResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<double>' then
-  begin
-    QResultType := emOneMethodResultType.genericsListResult;
-    QItemResultType := emOneMethodResultType.numberResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist<boolean>' then
-  begin
-    QResultType := emOneMethodResultType.genericsListResult;
-    QItemResultType := emOneMethodResultType.boolResult;
-    Result := True;
-  end
-  else
-  if lClassName.StartsWith('tlist<') then
-  begin
-    QResultType := emOneMethodResultType.genericsListResult;
-    QItemResultType := emOneMethodResultType.objResult;
-    Result := True;
-  end;
-end;
-
-// 判断是不是List容器
-function ResultTypeIsListCollections(qListType: TRttiType;
-  var QResultType: emOneMethodResultType;
-  var QItemResultType: emOneMethodResultType): boolean;
-var
-  lClassName: string;
-begin
-  Result := False;
-  lClassName := qListType.AsInstance.MetaClassType.ClassName;
-  if lClassName.Contains('<') then
-  begin
-    exit;
-  end;
-  if lClassName.Contains('>') then
-  begin
-    exit;
-  end;
-  lClassName := lClassName.ToLower;
-  if lClassName = 'tobjectList' then
-  begin
-    QResultType := emOneMethodResultType.objListResult;
-    QItemResultType := emOneMethodResultType.objResult;
-    Result := True;
-  end
-  else
-  if lClassName = 'tlist' then
-  begin
-    QResultType := emOneMethodResultType.listResult;
-    Result := True;
-  end;
-end;
-
-// 判断是不是map容器
-function ResultTypeIsMapCollections(QMapType: TRttiType;
-  var QResultType: emOneMethodResultType): boolean;
-begin
-
 end;
 
 end.

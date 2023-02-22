@@ -1,90 +1,45 @@
-unit frm_main;
-
-{$IFDEF FPC}
-  {$MODE Delphi}
-
-{$ENDIF}
+﻿unit frm_main;
 
 interface
 
 uses
-  SysUtils, Variants, Classes, Graphics,
-  Generics.Collections, Controls, Forms, Dialogs, StdCtrls, OneHttpServer,
-  ComCtrls, DB, BufDataset, SQLDB, SQLDBLib, memds, IBConnection, SQLite3Conn,
-  PQConnection, oracleconnection, odbcconn, mysql40conn, mysql41conn,
-  mysql50conn, mysql51conn, mysql55conn, mysql56conn, mysql57conn, mysql80conn,
-  MSSQLConn, OneLog, DBCtrls, Menus, OneFileHelper,
-  OneHttpRouterManage, Buttons, ExtCtrls, DBGrids, process,LCLIntf;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, System.Generics.Collections,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, OneHttpServer,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
+  FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Phys, FireDAC.Comp.Client,
+  Vcl.ComCtrls, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, Data.DB,
+  FireDAC.Comp.DataSet, Vcl.ExtCtrls, Vcl.Grids, Vcl.DBGrids,
+  Vcl.Imaging.pngimage, Vcl.Mask, Vcl.DBCtrls, FireDAC.VCLUI.Wait,
+  FireDAC.VCLUI.Login, FireDAC.Comp.UI, FireDAC.Stan.Pool, FireDAC.Stan.Async,
+  FireDAC.Phys.MSSQL, FireDAC.Phys.MSSQLDef, FireDAC.VCLUI.ConnEdit, OneLog,
+  Vcl.Menus, OneFileHelper, Winapi.ShellAPI, OneHttpRouterManage, Vcl.Buttons,
+  FireDAC.DApt;
 
 type
-
-  { TfrmMain }
-
   TfrmMain = class(TForm)
-    BufDataset1: TBufDataset;
-    editDbType: TDBComboBox;
-    editDbDBName1: TDBEdit;
-    editDbVersion: TDBEdit;
-    editDbHost: TDBEdit;
-    editDbPort: TDBEdit;
-    editDbDBName: TDBEdit;
-    editDbDBUser: TDBEdit;
-    editDbDBPass: TDBEdit;
-    editDbOtherParams: TDBEdit;
-    editDbKeeConnect: TDBCheckBox;
-    edLogPath: TEdit;
-    Label10: TLabel;
-    Label13: TLabel;
-    Label14: TLabel;
-    Label15: TLabel;
-    Label16: TLabel;
-    Label17: TLabel;
-    Label18: TLabel;
-    Label19: TLabel;
-    Label20: TLabel;
-    Label21: TLabel;
-    Label22: TLabel;
-    MemDataset1: TMemDataset;
-    qryTokenFConnectionID: TWideStringField;
-    qryTokenFLoginMac: TWideStringField;
-    qryZTSet: TBufDataset;
-    qryZTPool: TBufDataset;
-    qryVirtual: TBufDataset;
-    qryToken: TBufDataset;
-    qryRouter: TBufDataset;
-    ImageList1: TImageList;
     pageMain: TPageControl;
-    qryZTSetDBCharSet: TWideStringField;
-    qryZTSetDBHostName: TWideStringField;
-    qryZTSetDBHostPort: TLongintField;
-    qryZTSetDBKeepConnect: TBooleanField;
-    qryZTSetDBName: TWideStringField;
-    qryZTSetDBOtherParams: TWideStringField;
-    qryZTSetDBType: TWideStringField;
-    qryZTSetDBUserName: TWideStringField;
-    qryZTSetDBUserPass: TWideStringField;
-    qryZTSetDBVersion: TWideStringField;
-    SQLConnector: TSQLConnector;
-    SQLDBLibraryLoader1: TSQLDBLibraryLoader;
-    SQLQuery1: TSQLQuery;
     tabServerReamk: TTabSheet;
     tabZTManage: TTabSheet;
     Memo1: TMemo;
+    qryZTSet: TFDMemTable;
     dsZTSet: TDataSource;
     tabLog: TTabSheet;
     tabToken: TTabSheet;
     qryZTSetFZTCode: TWideStringField;
     qryZTSetFZTCaption: TWideStringField;
-    qryZTSetFInitPoolCount: TLongintField;
-    qryZTSetFMaxPoolCount: TLongintField;
+    qryZTSetFInitPoolCount: TIntegerField;
+    qryZTSetFMaxPoolCount: TIntegerField;
     qryZTSetFIsEnable: TBooleanField;
     qryZTSetFConnectionStr: TWideStringField;
     qryZTSetFPhyDriver: TWideStringField;
-    qryZTSetFIsMain: TBooleanField;
     tabHTTPServer: TTabSheet;
     plTop: TPanel;
     Image1: TImage;
-
+    FDGUIxWaitCursor1: TFDGUIxWaitCursor;
+    FDGUIxLoginDialog1: TFDGUIxLoginDialog;
+    FDConnection1: TFDConnection;
+    qryZTSetFIsMain: TBooleanField;
     groupHTTP: TGroupBox;
     tbStart: TButton;
     tbStop: TButton;
@@ -122,6 +77,7 @@ type
     dbInitPoolCount: TDBEdit;
     dbMaxPoolCount: TDBEdit;
     dbConnectionStr: TDBEdit;
+    tbZTConnectSet: TButton;
     dbIsEnable: TDBCheckBox;
     tbZTSetOK: TButton;
     tbZTPing: TButton;
@@ -130,17 +86,21 @@ type
     pnZTPool: TPanel;
     tbGetZTPool: TButton;
     tbZTMangeStarWork: TButton;
+    qryZTPool: TFDMemTable;
     dsZTPool: TDataSource;
     qryZTPoolFZTCode: TWideStringField;
-    qryZTPoolFInitPoolCount: TLongintField;
-    qryZTPoolFMaxPoolCount: TLongintField;
-    qryZTPoolFPoolCreateCount: TLongintField;
-    qryZTPoolFPoolWorkCount: TLongintField;
+    qryZTPoolFInitPoolCount: TIntegerField;
+    qryZTPoolFMaxPoolCount: TIntegerField;
+    qryZTPoolFPoolCreateCount: TIntegerField;
+    qryZTPoolFPoolWorkCount: TIntegerField;
     qryZTPoolFStop: TBooleanField;
     dbGridZTPool: TDBGrid;
     tbZTNotStop: TButton;
     tbZTStop: TButton;
+    dbPhyDriver: TDBEdit;
     pnLogSet: TPanel;
+    Label10: TLabel;
+    edLogPath: TEdit;
     Label11: TLabel;
     edLogSec: TEdit;
     edHTTPLog: TCheckBox;
@@ -161,6 +121,7 @@ type
     plVirtualFile: TPanel;
     tbFileAdd: TButton;
     tbFileDel: TButton;
+    qryVirtual: TFDMemTable;
     dsVirtual: TDataSource;
     grdVirtualFile: TDBGrid;
     qryVirtualFVirtualCode: TWideStringField;
@@ -177,20 +138,24 @@ type
     tbRouterSelect: TButton;
     GroupBox6: TGroupBox;
     edRouterErrMsg: TMemo;
+    qryRouter: TFDMemTable;
     dsRouter: TDataSource;
-    qryRouterFOrderNumber: TLongintField;
+    qryRouterFOrderNumber: TIntegerField;
     qryRouterFRootName: TWideStringField;
     qryRouterFClassName: TWideStringField;
-    qryRouterFPoolMaxCount: TLongintField;
-    qryRouterFWorkingCount: TLongintField;
+    qryRouterFPoolMaxCount: TIntegerField;
+    qryRouterFWorkingCount: TIntegerField;
     Panel4: TPanel;
     tbTokenSelect: TButton;
     tbTokenDelete: TButton;
+    qryToken: TFDMemTable;
     dsToken: TDataSource;
     gridToken: TDBGrid;
+    qryTokenFConnectionID: TWideStringField;
     qryTokenFTokenID: TWideStringField;
     qryTokenFPrivateKey: TWideStringField;
     qryTokenFLoginIP: TWideStringField;
+    qryTokenFLoginMac: TWideStringField;
     qryTokenFLoginTime: TDateTimeField;
     qryTokenFLoginPlatform: TWideStringField;
     qryTokenFLoginUserCode: TWideStringField;
@@ -206,6 +171,9 @@ type
     chWinRegisterStart: TCheckBox;
     Label12: TLabel;
     edTokenOutSec: TEdit;
+    FDMetaInfoQuery1: TFDMetaInfoQuery;
+    Label13: TLabel;
+    edSuperAdminPass: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure tbStartClick(Sender: TObject);
     procedure tbStopClick(Sender: TObject);
@@ -220,6 +188,7 @@ type
     procedure tbZTOpenClick(Sender: TObject);
     procedure tbZTSetOKClick(Sender: TObject);
     procedure dbGridZTSetDblClick(Sender: TObject);
+    procedure tbZTConnectSetClick(Sender: TObject);
     procedure tbZTPingClick(Sender: TObject);
     procedure tbZTMangeStarWorkClick(Sender: TObject);
     procedure tbBuildConnectSecretkeyClick(Sender: TObject);
@@ -246,24 +215,25 @@ type
   private
     { Private declarations }
     FIsClose: boolean;
-    function YesNoMsg(QTitel: string; QMsg: string): boolean;
+    function YesNoMsg(QTitel: string; QMsg: String): boolean;
     procedure MsgCallBack(const QMsg: string);
     procedure OpenZTMange();
     procedure OpenVirtualMange();
     procedure OpenZTPool();
+  public
+    { Public declarations }
   end;
 
 var
   frmMain: TfrmMain;
   // 加一个重启标志
-  Restart_Flag: boolean = False;
+  Restart_Flag: boolean = false;
 
 implementation
 
-{$R *.lfm}
+{$R *.dfm}
 
-
-uses OneGlobal, OneZTManage, OneGUID, OneVirtualFile, OneTokenManage;
+uses OneGlobal, OneZTManage, OneGUID, OneVirtualFile, OneTokenManage, OneWinReg;
 
 procedure TfrmMain.tbRouterSelectClick(Sender: TObject);
 var
@@ -279,7 +249,7 @@ begin
   for lRouterItem in lRouterItems.values do
   begin
     qryRouter.Append;
-    qryRouterFOrderNumber.AsInteger := qryRouter.RecNo + 2;
+    qryRouterFOrderNumber.AsInteger := qryRouter.recordcount + 2;
     qryRouterFRootName.AsString := lRouterItem.RootName;
     qryRouterFClassName.AsString := lRouterItem.RootClassName;
     qryRouterFPoolMaxCount.AsInteger := lRouterItem.PoolMaxCount;
@@ -295,7 +265,7 @@ var
 begin
   if qryToken.IsEmpty then
   begin
-    ShowMessage('请先选中一条Token数据');
+    showMessage('请先选中一条Token数据');
     exit;
   end;
   if not YesNoMsg('删除提醒', '确定删除当前TokenID' + qryTokenFTokenID.AsString + '的记录') then
@@ -306,16 +276,12 @@ begin
 end;
 
 procedure TfrmMain.BtnResClick(Sender: TObject);
-var
-  aProcess: TProcess; //TProcess is crossplatform is best way
 begin
-  if not YesNoMsg('重启提醒', '确定重启服务') then
-    exit;
-  aProcess := TProcess.Create(nil);
-  aProcess.CommandLine := '"' + Application.ExeName + '"';
-  aProcess.Execute;
-  aProcess.Free;
-  Application.Terminate;
+  if YesNoMsg('提醒', '是否真的要重启服务端程序？') then
+  begin
+    Restart_Flag := True;
+    self.Close;
+  end;
 end;
 
 procedure TfrmMain.chWinRegisterStartClick(Sender: TObject);
@@ -323,14 +289,13 @@ var
   lErrMsg: string;
   lOneGlobal: TOneGlobal;
 begin
-  //lOneGlobal := TOneGlobal.GetInstance();
-  //OneWinReg.WinAutoStart(OneFileHelper.GetExeName(), Application.ExeName,
-  //  chWinRegisterStart.Checked);
-  //lOneGlobal.ServerSet.WinRegisterStart := chWinRegisterStart.Checked;
-  //if not lOneGlobal.SaveServerSet(lErrMsg) then
-  //begin
-  //  ShowMessage(lErrMsg);
-  //end;
+  lOneGlobal := TOneGlobal.GetInstance();
+  OneWinReg.WinAutoStart(OneFileHelper.GetExeName(), Application.ExeName, chWinRegisterStart.Checked);
+  lOneGlobal.ServerSet.WinRegisterStart := chWinRegisterStart.Checked;
+  if not lOneGlobal.SaveServerSet(lErrMsg) then
+  begin
+    showMessage(lErrMsg);
+  end;
 end;
 
 procedure TfrmMain.chWinTaskStartClick(Sender: TObject);
@@ -338,14 +303,13 @@ var
   lErrMsg: string;
   lOneGlobal: TOneGlobal;
 begin
-  //lOneGlobal := TOneGlobal.GetInstance();
-  //OneWinReg.WinTaskStart(OneFileHelper.GetExeName(), Application.ExeName,
-  //  chWinTaskStart.Checked);
-  //lOneGlobal.ServerSet.WinTaskStart := chWinTaskStart.Checked;
-  //if not lOneGlobal.SaveServerSet(lErrMsg) then
-  //begin
-  //  ShowMessage(lErrMsg);
-  //end;
+  lOneGlobal := TOneGlobal.GetInstance();
+  OneWinReg.WinTaskStart(OneFileHelper.GetExeName(), Application.ExeName, chWinTaskStart.Checked);
+  lOneGlobal.ServerSet.WinTaskStart := chWinTaskStart.Checked;
+  if not lOneGlobal.SaveServerSet(lErrMsg) then
+  begin
+    showMessage(lErrMsg);
+  end;
 end;
 
 procedure TfrmMain.dbGridZTSetDblClick(Sender: TObject);
@@ -359,7 +323,7 @@ procedure TfrmMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if (not FIsClose) and (not Restart_Flag) then
   begin
-    Action := TCloseAction.caNone;
+    Action := caNone;
     self.Hide;
     TrayIcon1.BalloonTitle := 'OneDelphi服务';
     TrayIcon1.BalloonHint := '最小化至托盘';
@@ -372,7 +336,7 @@ var
   lErrMsg: string;
   lOneGlobal: TOneGlobal;
 begin
-  FIsClose := False;
+  FIsClose := false;
   self.pageMain.ActivePageIndex := 0;
   lOneGlobal := TOneGlobal.GetInstance();
   lOneGlobal.StarWork(lErrMsg);
@@ -385,6 +349,7 @@ begin
   edTokenOutSec.Text := lOneGlobal.ServerSet.TokenIntervalSec.ToString;
   chWinTaskStart.Checked := lOneGlobal.ServerSet.WinTaskStart;
   chWinRegisterStart.Checked := lOneGlobal.ServerSet.WinRegisterStart;
+  edSuperAdminPass.Text := lOneGlobal.ServerSet.SuperAdminPass;
   // 账套自动工作
   edZTAutoStart.Checked := lOneGlobal.ZTMangeSet.AutoWork;
   // 日记配置加载
@@ -396,7 +361,7 @@ begin
   self.OpenZTMange();
   // 虚拟文件加载
   self.OpenVirtualMange();
-
+  //
   self.OpenZTPool();
   if lOneGlobal.HttpServer.Started then
     lbServerHint.Caption := 'HTTP运行状态:端口[' + lOneGlobal.HttpServer.Port.ToString + '],状态[启动]'
@@ -410,12 +375,11 @@ begin
 
 end;
 
-
 procedure TfrmMain.OpenZTMange();
 var
   lOneGlobal: TOneGlobal;
   lZTSet: TOneZTSet;
-  i: integer;
+  i: Integer;
 begin
   lOneGlobal := TOneGlobal.GetInstance();
   if qryZTSet.Active then
@@ -433,16 +397,6 @@ begin
     qryZTSetFConnectionStr.AsString := lZTSet.ConnectionStr;
     qryZTSetFIsEnable.AsBoolean := lZTSet.IsEnable;
     qryZTSetFIsMain.AsBoolean := lZTSet.IsMain;
-    qryZTSetDBType.AsString := lZTSet.DBType;
-    qryZTSetDBVersion.AsString := lZTSet.DBVersion;
-    qryZTSetDBHostName.AsString := lZTSet.DBHostName;
-    qryZTSetDBCharSet.AsString := lZTSet.DBCharSet;
-    qryZTSetDBHostPort.AsInteger := lZTSet.DBHostPort;
-    qryZTSetDBName.AsString := lZTSet.DBName;
-    qryZTSetDBUserName.AsString := lZTSet.DBUserName;
-    qryZTSetDBUserPass.AsString := lZTSet.DBUserPass;
-    qryZTSetDBKeepConnect.AsBoolean := lZTSet.DBKeepConnect;
-    qryZTSetDBOtherParams.AsString := lZTSet.DBOtherParams;
     qryZTSet.Post;
   end;
   qryZTSet.MergeChangeLog;
@@ -452,7 +406,7 @@ procedure TfrmMain.OpenVirtualMange();
 var
   lOneGlobal: TOneGlobal;
   lVirtualSet: TOneVirtualItem;
-  i: integer;
+  i: Integer;
 begin
   lOneGlobal := TOneGlobal.GetInstance();
   if qryVirtual.Active then
@@ -477,7 +431,7 @@ var
   lOneGlobal: TOneGlobal;
   lZTPool: TOneZTPool;
 begin
-
+  //
   if qryZTPool.Active then
     qryZTPool.Close;
   qryZTPool.CreateDataSet;
@@ -516,7 +470,7 @@ end;
 
 procedure TfrmMain.tbFileAddClick(Sender: TObject);
 begin
-
+  //
   qryVirtual.Append;
   qryVirtualFVirtualCaption.AsString := '新增虚拟目录';
   qryVirtual.Post;
@@ -535,7 +489,7 @@ end;
 
 procedure TfrmMain.tbGetZTPoolClick(Sender: TObject);
 begin
-
+  //
   self.OpenZTPool();
 end;
 
@@ -545,34 +499,32 @@ var
   lFilePath: string;
 begin
   lOneGlobal := TOneGlobal.GetInstance();
-  lFilePath := (lOneGlobal.Log as TOneLog).LogPath;
-  OpenDocument(lFilePath);
+  lFilePath := TOneLog(lOneGlobal.Log).LogPath;
+  ShellExecute(Handle, 'open', PWideChar(lFilePath), PChar(GetCurrentDir), nil, SW_SHOW);
 end;
 
 procedure TfrmMain.tbOutLogClearClick(Sender: TObject);
 begin
-
+  //
   edLog.Lines.Clear;
 end;
 
 procedure TfrmMain.tbOutLogStartClick(Sender: TObject);
 var
   lOneGlobal: TOneGlobal;
-  lOneLog: TOneLog;
 begin
-
+  //
   lOneGlobal := TOneGlobal.GetInstance();
-  lOneLog := lOneGlobal.Log as TOneLog;
-  if not lOneLog.IsOut then
+  if not TOneLog(lOneGlobal.Log).IsOut then
   begin
-    lOneLog.CallBack := self.MsgCallBack;
-    lOneLog.IsOut := True;
+    TOneLog(lOneGlobal.Log).CallBack := self.MsgCallBack;
+    TOneLog(lOneGlobal.Log).IsOut := True;
     tbOutLogStart.Caption := '关闭即时日记';
   end
   else
   begin
-    lOneLog.IsOut := False;
-    lOneLog.CallBack := nil;
+    TOneLog(lOneGlobal.Log).IsOut := false;
+    TOneLog(lOneGlobal.Log).CallBack := nil;
     tbOutLogStart.Caption := '开启即时日记';
   end;
 end;
@@ -580,12 +532,10 @@ end;
 procedure TfrmMain.MsgCallBack(const QMsg: string);
 var
   lTimeString: string;
-  i: integer;
+  i: Integer;
 begin
-  {$IFDEF FPC}
-   {$ELSE}
   TThread.Synchronize(nil,
-    procedure ()
+    procedure()
     begin
       lTimeString := FormatDateTime('yyyy-mm-dd hh:mm:ss', Now);
       edLog.Lines.BeginUpdate;
@@ -597,8 +547,7 @@ begin
       finally
         edLog.Lines.EndUpdate;
       end;
-    end);
-  {$ENDIF}
+    end)
 end;
 
 procedure TfrmMain.pmiShowMainClick(Sender: TObject);
@@ -618,11 +567,11 @@ begin
   end;
   if lOneGlobal.HttpServer.ServerStopRequest() then
   begin
-    ShowMessage('禁止服务请求成功');
+    showMessage('禁止服务请求成功');
   end
   else
   begin
-    ShowMessage(lOneGlobal.HttpServer.ErrMsg);
+    showMessage(lOneGlobal.HttpServer.ErrMsg);
   end;
 end;
 
@@ -630,26 +579,26 @@ procedure TfrmMain.tbSaveHTTPSetClick(Sender: TObject);
 var
   tempStr: string;
   lErrMsg: string;
-  lPort, lPool, lQueue, lTokenSec: integer;
+  lPort, lPool, lQueue, lTokenSec: Integer;
   lOneGlobal: TOneGlobal;
 begin
-
+  //
   tempStr := edHTTPPort.Text;
   if not tryStrToInt(tempStr, lPort) then
   begin
-    ShowMessage('请输入正确的端口');
+    showMessage('请输入正确的端口');
     exit;
   end;
   tempStr := edHTTPPool.Text;
   if not tryStrToInt(tempStr, lPool) then
   begin
-    ShowMessage('请输入正确的HTTP工作线程数');
+    showMessage('请输入正确的HTTP工作线程数');
     exit;
   end;
   tempStr := edHTTPQueue.Text;
   if not tryStrToInt(tempStr, lQueue) then
   begin
-    ShowMessage('请输入正确的队列大小');
+    showMessage('请输入正确的队列大小');
     exit;
   end;
   if lPool <= 0 then
@@ -663,24 +612,25 @@ begin
   lOneGlobal.ServerSet.HTTPQueue := lQueue;
   lOneGlobal.ServerSet.HTTPAutoWork := edHTTPAutoStart.Checked;
   lOneGlobal.ServerSet.ConnectSecretkey := edConnectSecretkey.Text;
-
+  lOneGlobal.ServerSet.SuperAdminPass := edSuperAdminPass.Text;
+  //
   lOneGlobal.ServerSet.WinTaskStart := chWinTaskStart.Checked;
   lOneGlobal.ServerSet.WinRegisterStart := chWinRegisterStart.Checked;
-
+  //
   tempStr := edTokenOutSec.Text;
   if not tryStrToInt(tempStr, lTokenSec) then
   begin
     lTokenSec := 0;
   end;
   lOneGlobal.ServerSet.TokenIntervalSec := lTokenSec;
-
+  //
   if lOneGlobal.SaveServerSet(lErrMsg) then
   begin
-    ShowMessage('保存服务端配置成功');
+    showMessage('保存服务端配置成功');
   end
   else
   begin
-    ShowMessage(lErrMsg);
+    showMessage(lErrMsg);
   end;
 end;
 
@@ -688,7 +638,7 @@ procedure TfrmMain.tbSaveLogSetClick(Sender: TObject);
 var
   lOneGlobal: TOneGlobal;
   tempStr, lErrMsg: string;
-  tempI: integer;
+  tempI: Integer;
 begin
   lOneGlobal := TOneGlobal.GetInstance();
   lOneGlobal.LogSet.LogPath := edLogPath.Text;
@@ -703,11 +653,11 @@ begin
   lOneGlobal.LogSet.SQLLog := edSQLLog.Checked;
   if lOneGlobal.SaveLogSet(lErrMsg) then
   begin
-    ShowMessage('保存日志配置成功');
+    showMessage('保存日志配置成功');
   end
   else
   begin
-    ShowMessage(lErrMsg);
+    showMessage(lErrMsg);
   end;
 end;
 
@@ -724,11 +674,11 @@ begin
   try
     if lOneGlobal.HTTPServerStart(lErrMsg) then
     begin
-      ShowMessage('启动服务成功,当前启动HTTP服务端口:' + lOneGlobal.HttpServer.Port.ToString);
+      showMessage('启动服务成功,当前启动HTTP服务端口:' + lOneGlobal.HttpServer.Port.ToString);
     end
     else
     begin
-      ShowMessage(lErrMsg);
+      showMessage(lErrMsg);
     end;
   finally
     if lOneGlobal.HttpServer.Started then
@@ -749,11 +699,11 @@ begin
   end;
   if lOneGlobal.HttpServer.ServerStop() then
   begin
-    ShowMessage('停止服务成功');
+    showMessage('停止服务成功');
   end
   else
   begin
-    ShowMessage(lOneGlobal.HttpServer.ErrMsg);
+    showMessage(lOneGlobal.HttpServer.ErrMsg);
   end;
 end;
 
@@ -764,7 +714,7 @@ var
 begin
   lOneGlobal := TOneGlobal.GetInstance();
   lOneGlobal.TokenManage.SaveToken;
-  ShowMessage('保存Token信息成功');
+  showMessage('保存Token信息成功');
 end;
 
 procedure TfrmMain.tbTokenSelectClick(Sender: TObject);
@@ -777,7 +727,7 @@ begin
     if qryToken.Active then
       qryToken.Close;
     qryToken.CreateDataSet;
-
+    //
     lOneGlobal := TOneGlobal.GetInstance();
     for lTokenItem in lOneGlobal.TokenManage.TokenList.values do
     begin
@@ -800,7 +750,7 @@ begin
   finally
     qryToken.EnableControls;
   end;
-  ShowMessage('查看Token信息成功');
+  showMessage('查看Token信息成功');
 end;
 
 procedure TfrmMain.tbVirtualSaveClick(Sender: TObject);
@@ -808,9 +758,9 @@ var
   lOneGlobal: TOneGlobal;
   lVirtualItem: TOneVirtualItem;
   lErrMsg: string;
-  i: integer;
+  i: Integer;
 begin
-
+  //
   if qryVirtual.State in dsEditModes then
     qryVirtual.Post;
   lOneGlobal := TOneGlobal.GetInstance();
@@ -823,7 +773,7 @@ begin
   try
     qryVirtual.DisableControls;
     qryVirtual.First;
-    while not qryVirtual.EOF do
+    while not qryVirtual.Eof do
     begin
       lVirtualItem := TOneVirtualItem.Create;
       lOneGlobal.VirtualSet.VirtualSetList.Add(lVirtualItem);
@@ -840,7 +790,7 @@ begin
   lOneGlobal := TOneGlobal.GetInstance();
   if lOneGlobal.SaveVirtualSet(lErrMsg) then
   begin
-    ShowMessage('保存成功,如要要立即生效,记得重新加载按钮扭下');
+    showMessage('保存成功,如要要立即生效,记得重新加载按钮扭下');
   end;
 end;
 
@@ -856,7 +806,7 @@ begin
   end;
   lOneGlobal := TOneGlobal.GetInstance();
   lOneGlobal.VirtualManage.StarWork(lOneGlobal.VirtualSet.VirtualSetList);
-  ShowMessage('重新加载虚拟文件配置成功');
+  showMessage('重新加载虚拟文件配置成功')
 end;
 
 procedure TfrmMain.tbZTAddClick(Sender: TObject);
@@ -867,13 +817,32 @@ begin
   qryZTSet.Post;
 end;
 
-function TfrmMain.YesNoMsg(QTitel: string; QMsg: string): boolean;
+procedure TfrmMain.tbZTConnectSetClick(Sender: TObject);
 begin
-  Result := False;
+  if qryZTSet.IsEmpty then
+    exit;
+  //
+  FDConnection1.ConnectionString := qryZTSetFConnectionStr.AsString;
+  if TfrmFDGUIxFormsConnEdit.Execute(FDConnection1, '账套连接编辑') then
+  begin
+    try
+      qryZTSet.Edit;
+      qryZTSetFPhyDriver.AsString := FDConnection1.DriverName;
+      qryZTSetFConnectionStr.AsString := FDConnection1.ConnectionString;
+      qryZTSetFIsEnable.AsBoolean := false;
+      qryZTSetFIsMain.AsBoolean := false;
+      qryZTSet.Post;
+    except
+      showMessage('连接失败,请验证服务器是否存在或账号密码是否错误');
+    end;
+  end;
+end;
+
+function TfrmMain.YesNoMsg(QTitel: string; QMsg: String): boolean;
+begin
   if QTitel = '' then
     QTitel := '信息提示';
-  if MessageDlg(QTitel, QMsg, mtInformation, [mbOK, mbCancel], 0) = mrOk then
-    Result := True;
+  Result := (MessageBox(Handle, PWideChar(QMsg), PWideChar(QTitel), MB_OKCANCEL + MB_ICONQUESTION) = IDOK);
 end;
 
 procedure TfrmMain.tbZTDelClick(Sender: TObject);
@@ -882,7 +851,7 @@ var
 begin
   if qryZTSet.IsEmpty then
   begin
-    ShowMessage('数据为空,无需删除');
+    showMessage('数据为空,无需删除');
     exit;
   end;
   lErrMsg := '确定删除当前账套[' + qryZTSetFZTCode.AsString + ']?';
@@ -906,11 +875,11 @@ begin
   lOneGlobal := TOneGlobal.GetInstance();
   if not lOneGlobal.ZTManage.StarWork(lOneGlobal.ZTMangeSet.ZTSetList, lErrMsg) then
   begin
-    ShowMessage('重载账套管理失败,原因:' + lErrMsg);
+    showMessage('重载账套管理失败,原因:' + lErrMsg);
   end
   else
   begin
-    ShowMessage('重载账套管理成功');
+    showMessage('重载账套管理成功');
   end;
 end;
 
@@ -922,14 +891,14 @@ var
 begin
   if qryZTPool.IsEmpty then
   begin
-    ShowMessage('无相关运行账套，请先查看运行账套');
+    showMessage('无相关运行账套，请先查看运行账套');
     exit;
   end;
   lZTCode := qryZTPoolFZTCode.AsString;
   lZTCode := lZTCode.Trim;
   if lZTCode.Trim = '' then
   begin
-    ShowMessage('账套代码为空,无法操作数据');
+    showMessage('账套代码为空,无法操作数据');
     exit;
   end;
   lErrMsg := '确定开始运行当前账套[' + lZTCode + '],请确保账套管理已加载此账套?';
@@ -939,79 +908,58 @@ begin
   end;
   // 找到账套，打上标识stop
   lOneGlobal := TOneGlobal.GetInstance();
-  if lOneGlobal.ZTManage.StopZT(lZTCode, False, lErrMsg) then
+  if lOneGlobal.ZTManage.StopZT(lZTCode, false, lErrMsg) then
   begin
     qryZTPool.Edit;
-    qryZTPoolFStop.AsBoolean := False;
+    qryZTPoolFStop.AsBoolean := false;
     qryZTPool.Post;
-    ShowMessage('账套代码[' + lZTCode + ']开始运行');
+    showMessage('账套代码[' + lZTCode + ']开始运行');
   end
   else
   begin
-    ShowMessage('账套代码[' + lZTCode + ']' + lErrMsg);
+    showMessage('账套代码[' + lZTCode + ']' + lErrMsg);
   end;
 end;
 
 procedure TfrmMain.tbZTOpenClick(Sender: TObject);
 begin
-
+  //
+  self.OpenZTMange();
 end;
 
 procedure TfrmMain.tbZTPingClick(Sender: TObject);
 var
   vSQLConnection: string;
-  lList: TStringList;
-  i: integer;
 begin
   if qryZTSetFConnectionStr.AsString.Trim = '' then
   begin
-    ShowMessage('当前账套' + qryZTSetFZTCode.AsString + '连接字符串为空');
+    showMessage('当前账套' + qryZTSetFZTCode.AsString + '连接字符串为空');
     exit;
   end;
-  if SQLConnector.Connected then
-    SQLConnector.Close();
-  lList := TStringList.Create;
+  if FDConnection1.Connected then
+    FDConnection1.Close;
+  FDConnection1.ConnectionString := qryZTSetFConnectionStr.AsString;
   try
-    lList.LineBreak := ';';
-    try
-      SQLConnector.ConnectorType := qryZTSetFPhyDriver.AsString;
-      SQLConnector.HostName := qryZTSetDBHostName.AsString;
-      SQLConnector.DatabaseName := qryZTSetDBName.AsString;
-      SQLConnector.CharSet := qryZTSetDBCharSet.AsString;
-      //SQLConnector.Port := qryZTSetDBHostPort.AsInteger;
-      SQLConnector.UserName := qryZTSetDBUserName.AsString;
-      SQLConnector.Password := qryZTSetDBUserPass.AsString;
-      lList.Text := qryZTSetDBOtherParams.AsString;
-      for i := 0 to lList.Count - 1 do
-      begin
-        SQLConnector.Params.Add(lList[i]);
-      end;
-      SQLConnector.Connected := True;
-      if SQLConnector.Connected then
-      begin
-        ShowMessage('连接成功');
-      end;
-    except
-      on e: Exception do
-      begin
-        ShowMessage('连接失败,返回原因:' + e.Message);
-      end;
+    FDConnection1.Connected := True;
+    if FDConnection1.Connected then
+    begin
+      FDConnection1.Ping;
+      showMessage('连接成功');
     end;
-  finally
-    lList.Free;
+  except
+    showMessage('连接失败,请验证服务器是否存在或账号密码是否错误');
   end;
-
 end;
 
 procedure TfrmMain.tbZTSaveClick(Sender: TObject);
 var
   lErrMsg: string;
   lOneGlobal: TOneGlobal;
-  i: integer;
+  i: Integer;
   lZTSet: TOneZTSet;
   IsMain: boolean;
 begin
-
+  //
   if qryZTSet.State in dsEditModes then
     qryZTSet.Post;
   lOneGlobal := TOneGlobal.GetInstance();
@@ -1025,14 +973,14 @@ begin
   try
     qryZTSet.DisableControls;
     qryZTSet.First;
-    IsMain := False;
-    while not qryZTSet.EOF do
+    IsMain := false;
+    while not qryZTSet.Eof do
     begin
       if qryZTSetFIsMain.AsBoolean then
       begin
         if IsMain then
         begin
-          ShowMessage('主账套有且只能有一个,请检查');
+          showMessage('主账套有且只能有一个,请检查');
           exit;
         end;
         IsMain := qryZTSetFIsMain.AsBoolean;
@@ -1040,7 +988,7 @@ begin
       qryZTSet.Next;
     end;
     qryZTSet.First;
-    while not qryZTSet.EOF do
+    while not qryZTSet.Eof do
     begin
       lZTSet := TOneZTSet.Create;
       lOneGlobal.ZTMangeSet.ZTSetList.Add(lZTSet);
@@ -1053,16 +1001,6 @@ begin
       lZTSet.ConnectionStr := qryZTSetFConnectionStr.AsString;
       lZTSet.IsEnable := qryZTSetFIsEnable.AsBoolean;
       lZTSet.IsMain := qryZTSetFIsMain.AsBoolean;
-      lZTSet.DBType := qryZTSetDBType.AsString;
-      lZTSet.DBVersion := qryZTSetDBVersion.AsString;
-      lZTSet.DBHostName := qryZTSetDBHostName.AsString;
-      lZTSet.DBCharSet := qryZTSetDBCharSet.AsString;
-      lZTSet.DBHostPort := qryZTSetDBHostPort.AsInteger;
-      lZTSet.DBName := qryZTSetDBName.AsString;
-      lZTSet.DBUserName := qryZTSetDBUserName.AsString;
-      lZTSet.DBUserPass := qryZTSetDBUserPass.AsString;
-      lZTSet.DBKeepConnect := qryZTSetDBKeepConnect.AsBoolean;
-      lZTSet.DBOtherParams := qryZTSetDBOtherParams.AsString;
       qryZTSet.Next;
     end;
   finally
@@ -1070,42 +1008,17 @@ begin
   end;
   if lOneGlobal.SaveZTMangeSet(lErrMsg) then
   begin
-    ShowMessage('保存账套配置成功!!!');
+    showMessage('保存账套配置成功!!!');
   end
   else
   begin
-    ShowMessage(lErrMsg);
+    showMessage(lErrMsg);
   end;
 end;
 
 procedure TfrmMain.tbZTSetOKClick(Sender: TObject);
-var
-  lDBType: string;
 begin
-  lDBType := qryZTSetDBType.AsString;
-  if lDBType.StartsWith('MySQL') then
-  begin
-    if qryZTSetDBVersion.AsString = '' then
-    begin
-      ShowMessage('当驱动为[MySQL],请填写MySQL版本号,参考下面红色提示!!!');
-      exit;
-    end;
-    lDBType := lDBType + ' ' + qryZTSetDBVersion.AsString;
-  end;
-  if lDBType.StartsWith('MSSQLServer') then
-  begin
-    if qryZTSetDBVersion.AsString = '' then
-    begin
-      ShowMessage('当驱动为[MSSQLServer],请填写MSSQLServer版本号,参考下面红色提示!!!');
-      exit;
-    end;
-  end;
-  qryZTSet.Edit;
-  qryZTSetFPhyDriver.AsString := lDBType;
-  qryZTSetFConnectionStr.AsString :=
-    'HostName=' + qryZTSetDBHostName.AsString + ';UserName=' + qryZTSetDBUserName.AsString;
-  qryZTSet.Post;
-  plZTSet.Visible := False;
+  plZTSet.Visible := false;
 end;
 
 procedure TfrmMain.tbZTStopClick(Sender: TObject);
@@ -1116,14 +1029,14 @@ var
 begin
   if qryZTPool.IsEmpty then
   begin
-    ShowMessage('无相关运行账套，请先查看运行账套');
+    showMessage('无相关运行账套，请先查看运行账套');
     exit;
   end;
   lZTCode := qryZTPoolFZTCode.AsString;
   lZTCode := lZTCode.Trim;
   if lZTCode.Trim = '' then
   begin
-    ShowMessage('账套代码为空,无法操作数据');
+    showMessage('账套代码为空,无法操作数据');
     exit;
   end;
   lErrMsg := '确定停止运行当前账套[' + lZTCode + ']?';
@@ -1138,11 +1051,11 @@ begin
     qryZTPool.Edit;
     qryZTPoolFStop.AsBoolean := True;
     qryZTPool.Post;
-    ShowMessage('账套代码[' + lZTCode + ']停止运行');
+    showMessage('账套代码[' + lZTCode + ']停止运行');
   end
   else
   begin
-    ShowMessage('账套代码[' + lZTCode + ']' + lErrMsg);
+    showMessage('账套代码[' + lZTCode + ']' + lErrMsg);
   end;
 end;
 

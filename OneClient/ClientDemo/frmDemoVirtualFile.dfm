@@ -153,6 +153,7 @@ object Form6: TForm6
       Width = 241
       Height = 23
       TabOrder = 0
+      Text = 'TEST'
     end
     object edRemoteFileA: TEdit
       Left = 96
@@ -160,6 +161,7 @@ object Form6: TForm6
       Width = 241
       Height = 23
       TabOrder = 1
+      Text = '\aa\123.txt'
     end
     object edLocalFileA: TEdit
       Left = 96
@@ -167,6 +169,7 @@ object Form6: TForm6
       Width = 241
       Height = 23
       TabOrder = 2
+      Text = 'D:\123.txt'
     end
     object tbUpLoad: TButton
       Left = 216
@@ -199,55 +202,97 @@ object Form6: TForm6
     Caption = #19979#36733
     TabOrder = 2
     object Label7: TLabel
-      Left = 22
-      Top = 32
+      Left = 30
+      Top = 16
       Width = 52
       Height = 15
       Caption = #34394#25311#20195#30721
     end
     object Label8: TLabel
-      Left = 22
-      Top = 71
+      Left = 30
+      Top = 45
       Width = 52
       Height = 15
       Caption = #36828#31243#25991#20214
     end
     object Label9: TLabel
-      Left = 22
-      Top = 110
+      Left = 30
+      Top = 74
       Width = 52
       Height = 15
       Caption = #26412#22320#25991#20214
     end
+    object Label12: TLabel
+      Left = 30
+      Top = 136
+      Width = 52
+      Height = 15
+      Caption = #34394#25311#20195#30721
+    end
+    object Label13: TLabel
+      Left = 30
+      Top = 165
+      Width = 52
+      Height = 15
+      Caption = #36828#31243#25991#20214
+    end
     object edVirtualCodeB: TEdit
-      Left = 104
-      Top = 29
+      Left = 112
+      Top = 13
       Width = 241
       Height = 23
       TabOrder = 0
+      Text = 'TEST'
     end
     object edRemoteFileB: TEdit
-      Left = 104
-      Top = 68
+      Left = 112
+      Top = 42
       Width = 241
       Height = 23
       TabOrder = 1
+      Text = '\aa\123.txt'
     end
     object edLocalFileB: TEdit
-      Left = 104
-      Top = 107
+      Left = 112
+      Top = 71
       Width = 241
       Height = 23
       TabOrder = 2
+      Text = 'd:\123.txt'
     end
     object tbDownLoad: TButton
-      Left = 224
-      Top = 145
+      Left = 232
+      Top = 100
       Width = 121
       Height = 25
       Caption = #19979#36733
       TabOrder = 3
       OnClick = tbDownLoadClick
+    end
+    object edVirtualCodeC: TEdit
+      Left = 112
+      Top = 133
+      Width = 241
+      Height = 23
+      TabOrder = 4
+      Text = 'TEST'
+    end
+    object edRemoteFileC: TEdit
+      Left = 112
+      Top = 162
+      Width = 241
+      Height = 23
+      TabOrder = 5
+      Text = '\aa\123.txt'
+    end
+    object tbDelFile: TButton
+      Left = 232
+      Top = 191
+      Width = 121
+      Height = 25
+      Caption = #21024#38500
+      TabOrder = 6
+      OnClick = tbDelFileClick
     end
   end
   object edRemark: TMemo
@@ -264,6 +309,7 @@ object Form6: TForm6
     ExplicitWidth = 855
   end
   object OneConnection: TOneConnection
+    Connected = False
     IsHttps = False
     HTTPPort = 0
     ConnectionTimeout = 0

@@ -1,13 +1,10 @@
-unit OneOrm;
-
-{$mode DELPHI}{$H+}
-
+﻿unit OneOrm;
 
 interface
 
 uses
-  Generics.Collections, Variants, SysUtils, Classes,
-  OneZTManage, Rtti, DB, TypInfo;
+  system.Generics.Collections, system.Variants, system.SysUtils, system.Classes,
+  OneZTManage, FireDAC.Comp.Client, system.Rtti, Data.DB, system.NetEncoding, system.TypInfo;
 
 type
   emOneOrmCmd = (cmdNull, cmdQuery, cmdExecSQL, cmdSelect, cmdInsert, cmdUpdate, cmdDelete);
@@ -26,10 +23,10 @@ type
     function SetPrimaryKey(QFieldName: string): IOneOrm<T>;
     function SetPage(iPageIndex: integer; iPageSize: integer): IOneOrm<T>;
     // 执行原生SQL,查询数据
-    function Query(QSQL: string; QParams: array of variant): IOneOrmCmd<T>;
+    function Query(QSQL: string; QParams: array of Variant): IOneOrmCmd<T>;
     // 执行原生SQL,进行update,insert,del
-    function ExecSQL(QSQL: string; QParams: array of variant): IOneOrmCmd<T>;
-
+    function ExecSQL(QSQL: string; QParams: array of Variant): IOneOrmCmd<T>;
+    //
     function Select(QTableName: string = ''): IOneOrm<T>;
     function Inserter(QValue: T): IOneOrm<T>; overload;
     function Update(QValue: T): IOneOrm<T>; overload;
@@ -40,42 +37,42 @@ type
     // 字段
     function Fields(QFields: array of string): IOneOrm<T>;
     function DisableFields(QFields: array of string): IOneOrm<T>;
-
-    function where(QWhereSQL: string; QParams: array of variant): IOneOrm<T>;
+    //
+    function where(QWhereSQL: string; QParams: array of Variant): IOneOrm<T>;
     function OrderBy(QOrderBySQL: string): IOneOrm<T>;
-
+    //
     function toCmd(): IOneOrmCmd<T>;
   end;
 
-  TOneOrm<T: class> = class(TInterfacedObject, IOneOrm<T>, IOneOrmCmd<T>)
+  TOneOrm<T: class, constructor> = class(TInterfacedObject, IOneOrm<T>, IOneOrmCmd<T>)
   private
     FZTCode: string;
     FCmd: emOneOrmCmd;
     // 最终组装的SQL语句
     FCmdSQL: string;
-    FCmdParams: array of variant;
-
+    FCmdParams: array of Variant;
+    //
     FTableName: string;
     FPrimaryKey: string;
     FPageIndex: integer;
     FPageSize: integer;
     // Query原生SQL用法
     FQuerySQL: string;
-    FQueryParams: array of variant;
+    FQueryParams: array of Variant;
     // 查询的字段或update set字段
     FFields: array of string;
     FDisableFields: array of string;
     // update set value值
-    FFieldValues: array of variant;
+    FFieldValues: array of Variant;
     // where 条件SQL
     FWhereSQLs: array of string;
     // where 条件参数值
-    FWhereSQLParams: array of variant;
-
+    FWhereSQLParams: array of Variant;
+    //
     FOrderBySQL: string;
-
+    //
     FListValue: TList<T>;
-
+    //
     FErrMsg: string;
   private
     function buildSQL(): boolean;
@@ -84,14 +81,14 @@ type
     destructor Destroy; override;
     class function Start(): IOneOrm<T>; static;
   public
-
+    //
     function ZTCode(QZTCode: string): IOneOrm<T>;
     function SetTableName(QTableName: string): IOneOrm<T>;
     function SetPrimaryKey(QFieldName: string): IOneOrm<T>;
     function SetPage(iPageIndex: integer; iPageSize: integer): IOneOrm<T>;
     // 执行原生SQL
-    function Query(QSQL: string; QParams: array of variant): IOneOrmCmd<T>;
-    function ExecSQL(QSQL: string; QParams: array of variant): IOneOrmCmd<T>;
+    function Query(QSQL: string; QParams: array of Variant): IOneOrmCmd<T>;
+    function ExecSQL(QSQL: string; QParams: array of Variant): IOneOrmCmd<T>;
     // 执行SQL
     function Select(QTableName: string = ''): IOneOrm<T>;
     // 插入语句，插入单个
@@ -109,17 +106,17 @@ type
     // 字段
     function Fields(QFields: array of string): IOneOrm<T>;
     function DisableFields(QFields: array of string): IOneOrm<T>;
-
-    function where(QWhereSQL: string; QParams: array of variant): IOneOrm<T>;
+    //
+    function where(QWhereSQL: string; QParams: array of Variant): IOneOrm<T>;
     function OrderBy(QOrderBySQL: string): IOneOrm<T>;
-
+    //
     function toCmd(): IOneOrmCmd<T>;
-
+    //
     function ToCount(): integer;
     function ToList(): TList<T>;
     function ToObject(): T;
     function ToExecCommand(): integer;
-
+    //
     function DataSetToList(QDataSet: TFDMemtable): TList<T>;
   end;
 
@@ -133,7 +130,7 @@ uses OneDataInfo, OneOrmRtti;
 
 class function TOneOrm<T>.Start(): IOneOrm<T>;
 begin
-  Result := TOneOrm<T>.Create;
+  result := TOneOrm<T>.Create;
 end;
 
 constructor TOneOrm<T>.Create;
@@ -154,34 +151,34 @@ end;
 
 function TOneOrm<T>.ZTCode(QZTCode: string): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   self.FZTCode := QZTCode;
 end;
 
 function TOneOrm<T>.SetTableName(QTableName: string): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   self.FTableName := QTableName;
 end;
 
 function TOneOrm<T>.SetPrimaryKey(QFieldName: string): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   self.FPrimaryKey := QFieldName;
 end;
 
 function TOneOrm<T>.SetPage(iPageIndex: integer; iPageSize: integer): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   self.FPageIndex := iPageIndex;
   self.FPageSize := iPageSize;
 end;
 
-function TOneOrm<T>.Query(QSQL: string; QParams: array of variant): IOneOrmCmd<T>;
+function TOneOrm<T>.Query(QSQL: string; QParams: array of Variant): IOneOrmCmd<T>;
 var
   iParam, iParamLen: integer;
 begin
-  Result := self;
+  result := self;
   // 说明有其它命令，在语法就是错了
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
@@ -199,11 +196,11 @@ begin
   end;
 end;
 
-function TOneOrm<T>.ExecSQL(QSQL: string; QParams: array of variant): IOneOrmCmd<T>;
+function TOneOrm<T>.ExecSQL(QSQL: string; QParams: array of Variant): IOneOrmCmd<T>;
 var
   iParam, iParamLen: integer;
 begin
-  Result := self;
+  result := self;
   // 说明有其它命令，在语法就是错了
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
@@ -223,7 +220,7 @@ end;
 
 function TOneOrm<T>.Select(QTableName: string = ''): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   // 说明有其它命令，在语法就是错了
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
@@ -236,7 +233,7 @@ end;
 
 function TOneOrm<T>.Inserter(QValue: T): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
     raise Exception.Create('已设置命令模式,不可在设置命令模式[cmdInsert]');
@@ -248,7 +245,7 @@ end;
 
 function TOneOrm<T>.Update(QValue: T): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
     raise Exception.Create('已设置命令模式,不可在设置命令模式[cmdUpdate]');
@@ -260,7 +257,7 @@ end;
 
 function TOneOrm<T>.Delete(QValue: T): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
     raise Exception.Create('已设置命令模式,不可在设置命令模式[cmdDelete]');
@@ -274,7 +271,7 @@ function TOneOrm<T>.Inserter(QValues: TList<T>): IOneOrm<T>;
 var
   i: integer;
 begin
-  Result := self;
+  result := self;
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
     raise Exception.Create('已设置命令模式,不可在设置命令模式[cmdInsert]');
@@ -291,7 +288,7 @@ function TOneOrm<T>.Update(QValues: TList<T>): IOneOrm<T>;
 var
   i: integer;
 begin
-  Result := self;
+  result := self;
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
     raise Exception.Create('已设置命令模式,不可在设置命令模式[cmdUpdate]');
@@ -308,7 +305,7 @@ function TOneOrm<T>.Delete(QValues: TList<T>): IOneOrm<T>;
 var
   i: integer;
 begin
-  Result := self;
+  result := self;
   if self.FCmd <> emOneOrmCmd.cmdNull then
   begin
     raise Exception.Create('已设置命令模式,不可在设置命令模式[cmdDelete]');
@@ -325,7 +322,7 @@ function TOneOrm<T>.Fields(QFields: array of string): IOneOrm<T>;
 var
   i, iSourceLen, iLen: integer;
 begin
-  Result := self;
+  result := self;
   iSourceLen := length(self.FFields);
   iLen := length(QFields);
   setLength(self.FFields, iSourceLen + iLen);
@@ -339,7 +336,7 @@ function TOneOrm<T>.DisableFields(QFields: array of string): IOneOrm<T>;
 var
   i, iSourceLen, iLen: integer;
 begin
-  Result := self;
+  result := self;
   iSourceLen := length(self.FDisableFields);
   iLen := length(QFields);
   setLength(self.FFields, iSourceLen + iLen);
@@ -361,15 +358,15 @@ end;
 // self.FFieldValues[iValueLen - 1] := QValue;
 // end;
 
-function TOneOrm<T>.where(QWhereSQL: string; QParams: array of variant): IOneOrm<T>;
+function TOneOrm<T>.where(QWhereSQL: string; QParams: array of Variant): IOneOrm<T>;
 var
   iParam, iSourceWhereLen, iSourceParamLen, iParamLen: integer;
 begin
-  Result := self;
+  result := self;
   iSourceWhereLen := length(FWhereSQLs);
   setLength(FWhereSQLs, iSourceWhereLen + 1);
   FWhereSQLs[iSourceWhereLen] := QWhereSQL;
-
+  //
   iParamLen := length(QParams);
   if iParamLen = 0 then
     exit;
@@ -383,18 +380,18 @@ end;
 
 function TOneOrm<T>.OrderBy(QOrderBySQL: string): IOneOrm<T>;
 begin
-  Result := self;
+  result := self;
   FOrderBySQL := QOrderBySQL;
 end;
 
 function TOneOrm<T>.toCmd(): IOneOrmCmd<T>;
 begin
-  Result := self;
+  result := self;
 end;
 
 function TOneOrm<T>.ToCount(): integer;
 var
-  LParams: TList<variant>;
+  LParams: TList<Variant>;
   iParam, iParamLen: integer;
 begin
   if (self.FCmd <> emOneOrmCmd.cmdQuery) and (self.FCmd <> emOneOrmCmd.cmdSelect) then
@@ -410,7 +407,7 @@ var
   lErrMsg: string;
   lDataSet: TFDMemtable;
 begin
-  Result := nil;
+  result := nil;
   if unit_OrmZTManage = nil then
   begin
     raise Exception.Create('orm账套未初始化[unit_OrmZTManage]');
@@ -441,7 +438,7 @@ begin
       exit;
     end;
     // 把数据集转成List
-    Result := self.DataSetToList(lDataSet)
+    result := self.DataSetToList(lDataSet)
   finally
     lDataOpen.Free;
     if lDataSet <> nil then
@@ -456,7 +453,7 @@ var
   lDataSet: TFDMemtable;
   lList: TList<T>;
 begin
-  Result := nil;
+  result := nil;
   if unit_OrmZTManage = nil then
   begin
     raise Exception.Create('orm账套未初始化[unit_OrmZTManage]');
@@ -499,7 +496,7 @@ begin
     lList := TList<T>.Create;
     try
       lList := self.DataSetToList(lDataSet);
-      Result := lList[0];
+      result := lList[0];
     finally
       lList.Clear;
       lList.Free;
@@ -528,8 +525,8 @@ var
   isCommit: boolean;
   lTValue: TValue;
 begin
-
-  Result := -1;
+  //
+  result := -1;
   lErrMsg := '';
   if unit_OrmZTManage = nil then
   begin
@@ -549,132 +546,178 @@ begin
 
   case self.FCmd of
     cmdExecSQL:
-    begin
-      lDataSaveDML := TOneDataSaveDML.Create;
-      try
-        lDataSaveDML.ZTCode := self.FZTCode;
-        lDataSaveDML.SQL := self.FCmdSQL;
-        Result := unit_OrmZTManage.ExecSQL(lDataSaveDML, self.FCmdParams, lErrMsg);
-        if lErrMsg <> 'true' then
-        begin
-          raise Exception.Create(lErrMsg);
-          exit;
-        end;
-      finally
-        lDataSaveDML.Free;
-      end;
-    end;
-    cmdInsert, cmdUpdate, cmdDelete:
-    begin
-      lDictFieldRtti := TDictionary<string, TOneFieldRtti>.Create;
-      try
-        // 获取Rtti信息
-        lOrmRtti := TOneOrmRtti.GetInstance();
-        lOrmRttiItem := lOrmRtti.GetOrmRtti(system.TypeInfo(T));
-        for iField := 0 to lOrmRttiItem.Fields.Count - 1 do
-        begin
-          lFieldRtti := lOrmRttiItem.Fields[iField];
-          lDictFieldRtti.Add(lFieldRtti.FFieldName, lFieldRtti);
-        end;
-
-        lZTItem := unit_OrmZTManage.LockZTItem(self.FZTCode, lErrMsg);
-        if lZTItem = nil then
-        begin
-          raise Exception.Create(lErrMsg);
-          exit;
-        end;
-        isCommit := False;
-        iCommit := 0;
-        lZTItem.ADTransaction.TranStart;
+      begin
+        lDataSaveDML := TOneDataSaveDML.Create;
         try
+          lDataSaveDML.ZTCode := self.FZTCode;
+          lDataSaveDML.SQL := self.FCmdSQL;
+          result := unit_OrmZTManage.ExecSQL(lDataSaveDML, self.FCmdParams, lErrMsg);
+          if lErrMsg <> 'true' then
+          begin
+            raise Exception.Create(lErrMsg);
+            exit;
+          end;
+        finally
+          lDataSaveDML.Free;
+        end;
+      end;
+    cmdInsert, cmdUpdate, cmdDelete:
+      begin
+        lDictFieldRtti := TDictionary<string, TOneFieldRtti>.Create;
+        try
+          // 获取Rtti信息
+          lOrmRtti := TOneOrmRtti.GetInstance();
+          lOrmRttiItem := lOrmRtti.GetOrmRtti(system.TypeInfo(T));
+          for iField := 0 to lOrmRttiItem.Fields.Count - 1 do
+          begin
+            lFieldRtti := lOrmRttiItem.Fields[iField];
+            lDictFieldRtti.Add(lFieldRtti.FFieldName, lFieldRtti);
+          end;
+          //
+          lZTItem := unit_OrmZTManage.LockZTItem(self.FZTCode, lErrMsg);
+          if lZTItem = nil then
+          begin
+            raise Exception.Create(lErrMsg);
+            exit;
+          end;
+          isCommit := false;
+          iCommit := 0;
+          lZTItem.ADConnection.StartTransaction;
           try
-            lQuery := lZTItem.ADQuery;
-            lQuery.SQL.Text := self.FCmdSQL;
-
-            if (self.FCmd = cmdUpdate) or (self.FCmd = cmdInsert) then
-            begin
-              for iArrValue := 0 to self.FListValue.Count - 1 do
+            try
+              lQuery := lZTItem.ADQuery;
+              lQuery.SQL.Text := self.FCmdSQL;
+              //
+              if (self.FCmd = cmdInsert) then
               begin
-                lValue := self.FListValue[iArrValue];
-                for iField := 0 to length(self.FFields) - 1 do
+                lQuery.Params.ArraySize := self.FListValue.Count;
+                for iArrValue := 0 to self.FListValue.Count - 1 do
                 begin
-                  // 最新主键是放在 FFields 最后一个 在buildSQL处理好了
-                  lFieldName := self.FFields[iField];
+                  lValue := self.FListValue[iArrValue];
+                  for iField := 0 to length(self.FFields) - 1 do
+                  begin
+                    // 最新主键是放在 FFields 最后一个 在buildSQL处理好了
+                    lFieldName := self.FFields[iField];
+                    if lDictFieldRtti.TryGetValue(lFieldName, lFieldRtti) then
+                    begin
+                      if lFieldRtti.FFieldRtti <> nil then
+                      begin
+                        lTValue := lFieldRtti.FFieldRtti.GetValue(TObject(lValue));
+                      end;
+                      if lFieldRtti.FPropertyRtti <> nil then
+                      begin
+                        lTValue := lFieldRtti.FPropertyRtti.GetValue(TObject(lValue));
+                      end;
+                      lQuery.Params[iField].Values[iArrValue] := lTValue.AsVariant;
+                    end
+                    else
+                      lQuery.Params[iField].Clear(iArrValue);
+                  end;
+                end;
+                // 批量插入
+                lQuery.Execute(self.FListValue.Count);
+                iCommit := lQuery.RowsAffected;
+                if iCommit <> self.FListValue.Count then
+                begin
+                  raise Exception.Create('影响行数不一至:当前影响行数[' + iCommit.ToString
+                    + ']与实际数据行数不一至[' + self.FListValue.Count.ToString + ']');
+                  exit;
+                end;
+              end;
+              if (self.FCmd = cmdUpdate) then
+              begin
+                for iArrValue := 0 to self.FListValue.Count - 1 do
+                begin
+                  lValue := self.FListValue[iArrValue];
+                  for iField := 0 to length(self.FFields) - 1 do
+                  begin
+                    // 最新主键是放在 FFields 最后一个 在buildSQL处理好了
+                    lFieldName := self.FFields[iField];
+                    if lDictFieldRtti.TryGetValue(lFieldName, lFieldRtti) then
+                    begin
+                      if lFieldRtti.FFieldRtti <> nil then
+                      begin
+                        lTValue := lFieldRtti.FFieldRtti.GetValue(TObject(lValue));
+                      end;
+                      if lFieldRtti.FPropertyRtti <> nil then
+                      begin
+                        lTValue := lFieldRtti.FPropertyRtti.GetValue(TObject(lValue));
+                      end;
+                      lQuery.Params[iField].Value := lTValue.AsVariant;
+                    end
+                    else
+                      lQuery.Params[iField].Clear();
+                  end;
+                  // 遍历更新
+                  lQuery.ExecSQL();
+                  iCommit := lQuery.RowsAffected;
+                  if iCommit <> 1 then
+                  begin
+                    raise Exception.Create('第[' + (iArrValue + 1).ToString() + ']条数据,更新失败, 当前影响行数[' + iCommit.ToString
+                      + ']');
+                    exit;
+                  end;
+                end;
+              end;
+              // 删除只跟据主键来
+              if (self.FCmd = cmdDelete) then
+              begin
+                lFieldName := self.FPrimaryKey;
+                for iArrValue := 0 to self.FListValue.Count - 1 do
+                begin
                   if lDictFieldRtti.TryGetValue(lFieldName, lFieldRtti) then
                   begin
+                    lValue := self.FListValue[iArrValue];
+                    if lFieldRtti.FFieldRtti <> nil then
+                    begin
+                      lTValue := lFieldRtti.FFieldRtti.GetValue(TObject(lValue));
+                    end;
                     if lFieldRtti.FPropertyRtti <> nil then
                     begin
                       lTValue := lFieldRtti.FPropertyRtti.GetValue(TObject(lValue));
                     end;
-                    //lQuery.Params[iField].Value := lTValue.as ;
+                    lQuery.Params[0].Value := lTValue.AsVariant;
                   end
                   else
-                    lQuery.Params[iField].Clear();
-                end;
-                // 遍历更新
-                lQuery.ExecSQL();
-                iCommit := lQuery.RowsAffected;
-                if iCommit <> 1 then
-                begin
-                  raise Exception.Create('第[' + (iArrValue + 1).ToString() + ']条数据,更新失败, 当前影响行数[' + iCommit.ToString + ']');
-                  exit;
-                end;
-              end;
-            end;
-            // 删除只跟据主键来
-            if (self.FCmd = cmdDelete) then
-            begin
-              lFieldName := self.FPrimaryKey;
-              for iArrValue := 0 to self.FListValue.Count - 1 do
-              begin
-                if lDictFieldRtti.TryGetValue(lFieldName, lFieldRtti) then
-                begin
-                  lValue := self.FListValue[iArrValue];
-                  if lFieldRtti.FPropertyRtti <> nil then
                   begin
-                    lTValue := lFieldRtti.FPropertyRtti.GetValue(TObject(lValue));
+                    lQuery.Params[0].Clear();
                   end;
-                  //lQuery.Params[0].Value := lTValue.AsVariant;
-                end
-                else
-                begin
-                  lQuery.Params[0].Clear();
-                end;
-                // 遍历更新
-                lQuery.ExecSQL();
-                iCommit := lQuery.RowsAffected;
-                if iCommit <> 1 then
-                begin
-                  raise Exception.Create('第[' + (iArrValue + 1).ToString() + ']条数据,删除失败,当前影响行数[' + iCommit.ToString + ']');
-                  exit;
+                  // 遍历更新
+                  lQuery.ExecSQL();
+                  iCommit := lQuery.RowsAffected;
+                  if iCommit <> 1 then
+                  begin
+                    raise Exception.Create('第[' + (iArrValue + 1).ToString() + ']条数据,删除失败,当前影响行数[' + iCommit.ToString
+                      + ']');
+                    exit;
+                  end;
                 end;
               end;
+              lZTItem.ADConnection.Commit;
+              isCommit := true;
+              result := self.FListValue.Count;
+            except
+              on e: Exception do
+              begin
+                raise Exception.Create('提交数据发生异常:' + e.Message);
+                isCommit := false;
+              end;
             end;
-            lZTItem.ADTransaction.TranCommit;
-            isCommit := True;
-            Result := self.FListValue.Count;
-          except
-            on e: Exception do
+          finally
+            if not isCommit then
             begin
-              raise Exception.Create('提交数据发生异常:' + e.Message);
-              isCommit := False;
+              lZTItem.ADConnection.Rollback;
             end;
+            lZTItem.UnLockWork;
           end;
         finally
-          if not isCommit then
-          begin
-            lZTItem.ADTransaction.TranRollback;
-          end;
-          lZTItem.UnLockWork;
+          lDictFieldRtti.Clear;
+          lDictFieldRtti.Free;
         end;
-      finally
-        lDictFieldRtti.Clear;
-        lDictFieldRtti.Free;
       end;
-    end;
-    else
+  else
     begin
-      raise Exception.Create('未设计的cmd命令' + GetEnumName(system.TypeInfo(emOneOrmCmd), Ord(self.FCmd)));
+      raise Exception.Create('未设计的cmd命令' + GetEnumName(system.TypeInfo(emOneOrmCmd), ord(self.FCmd)));
       exit;
     end;
   end;
@@ -682,12 +725,12 @@ end;
 
 function TOneOrm<T>.buildSQL(): boolean;
 var
-  LParams: TList<variant>;
+  LParams: TList<Variant>;
   iField, iFieldLen, iParam, iParamLen: integer;
   lWhere: string;
   iWhere, iWhereLen: integer;
   lSQL: string;
-
+  //
   lOrmRtti: IOrmRtti;
   lOrmRttiItem: TOneOrmRttiItem;
   lFieldRtti: TOneFieldRtti;
@@ -696,12 +739,12 @@ var
   lDict: TDictionary<string, boolean>;
   lDictFieldRtti: TDictionary<string, TOneFieldRtti>;
 begin
-  Result := False;
+  result := false;
   self.FCmdSQL := '';
   setLength(self.FCmdParams, 0);
   self.FErrMsg := '';
   // 开始组装SQL
-  LParams := TList<variant>.Create;
+  LParams := TList<Variant>.Create;
   try
     self.FCmdSQL := '';
     if self.FCmd = emOneOrmCmd.cmdQuery then
@@ -738,7 +781,7 @@ begin
       end
       else
       begin
-
+        //
         for iField := 0 to iFieldLen - 1 do
         begin
           lSQL := lSQL + ' ' + self.FFields[iField] + ' ';
@@ -755,7 +798,7 @@ begin
       iWhereLen := length(self.FWhereSQLs);
       for iWhere := 0 to iWhereLen - 1 do
       begin
-
+        //
         lWhere := self.FWhereSQLs[iWhere];
         lWhere := lWhere.Trim; // 去掉两边空格
         if lWhere.StartsWith('where ') then
@@ -794,7 +837,8 @@ begin
       end;
       self.FCmdSQL := lSQL;
     end
-    else if (self.FCmd = emOneOrmCmd.cmdInsert) or (self.FCmd = emOneOrmCmd.cmdUpdate) or (self.FCmd = emOneOrmCmd.cmdDelete) then
+    else if (self.FCmd = emOneOrmCmd.cmdInsert) or (self.FCmd = emOneOrmCmd.cmdUpdate)
+      or (self.FCmd = emOneOrmCmd.cmdDelete) then
     begin
       lDBPrimaryField := '';
       // 组装字段
@@ -835,13 +879,13 @@ begin
           exit;
         end;
 
-
+        //
         if length(self.FDisableFields) > 0 then
         begin
           lDict.Clear;
           for iField := 0 to length(self.FDisableFields) - 1 do
           begin
-            lDict.Add(self.FDisableFields[iField].ToLower, True);
+            lDict.Add(self.FDisableFields[iField].ToLower, true);
           end;
           for iField := lList.Count - 1 downto 0 do
           begin
@@ -859,7 +903,7 @@ begin
           lDict.Clear;
           for iField := 0 to length(self.FFields) - 1 do
           begin
-            lDict.Add(self.FFields[iField].ToLower, True);
+            lDict.Add(self.FFields[iField].ToLower, true);
           end;
           for iField := lList.Count - 1 downto 0 do
           begin
@@ -954,7 +998,7 @@ begin
       end;
     end;
 
-
+    //
     if self.FCmdSQL.Trim = '' then
     begin
       self.FErrMsg := 'SQL语句为空';
@@ -966,7 +1010,7 @@ begin
       self.FCmdParams[iParam] := LParams[iParam];
     end;
     // 执行SQL语句
-    Result := True;
+    result := true;
   finally
     LParams.Clear;
     LParams.Free;
@@ -982,7 +1026,7 @@ var
   lOrmFieldRttis: TList<TOneFieldRtti>;
   lDataFields: TDictionary<string, TField>;
   lOneFieldRtti: TOneFieldRtti;
-  //lRttiField: TRttiField;
+  lRttiField: TRttiField;
   lRttiProperty: TRttiProperty;
   lTypeKind: TTypeKind;
   lField: TField;
@@ -991,7 +1035,7 @@ var
   tempStr: string;
   tempI: integer;
 begin
-  Result := TList<T>.Create;
+  result := TList<T>.Create;
   // system.TypeInfo(T)
   lDataFields := TDictionary<string, TField>.Create;
   lOrmFieldRttis := TList<TOneFieldRtti>.Create;
@@ -1016,10 +1060,10 @@ begin
       end;
     end;
     QDataSet.First;
-    while not QDataSet.EOF do
+    while not QDataSet.Eof do
     begin
       lTempT := T.Create;
-      Result.Add(lTempT);
+      result.Add(lTempT);
       // for  lRttiType.GetFields do
       for i := 0 to lOrmFieldRttis.Count - 1 do
       begin
@@ -1029,173 +1073,215 @@ begin
         // tkString, tkSet, tkClass, tkMethod, tkWChar, tkLString, tkWString,
         // tkVariant, tkArray, tkRecord, tkInterface, tkInt64, tkDynArray, tkUString,
         // tkClassRef, tkPointer, tkProcedure, tkMRecord
-        //lRttiField := lOneFieldRtti.FFieldRtti;
+        lRttiField := lOneFieldRtti.FFieldRtti;
         lRttiProperty := lOneFieldRtti.FPropertyRtti;
         lFieldNameLow := lOneFieldRtti.FDBFieldNameLow;
         if lDataFields.TryGetValue(lFieldNameLow, lField) then
         begin
-          if lRttiProperty <> nil then
+          if lRttiField <> nil then
+          begin
+            lTypeKind := lRttiField.FieldType.TypeKind;
+          end
+          else if lRttiProperty <> nil then
           begin
             if not lRttiProperty.IsWritable then
               continue;
             lTypeKind := lRttiProperty.PropertyType.TypeKind;
           end;
           case lTypeKind of
-            tkString, tkAString, tkChar, tkLString, tkUChar, tkUString:
-            begin
-              case lField.DataType of
-                ftString:
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsString);
-                end;
-                ftBlob, ftGraphic, ftTypedBinary:
-                begin
-                  //tempStr := TNetEncoding.Base64.EncodeBytesToString(lField.AsBytes);
-                  //if lOneFieldRtti.FIsProperty then
-                  //  lRttiProperty.SetValue(TObject(lTempT), tempStr)
-                  //else
-                  //  lRttiField.SetValue(TObject(lTempT), tempStr);
-                end;
+            tkString, tkLString, tkUString:
+              begin
+                case lField.DataType of
+                  ftString:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsString)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsString);
+                    end;
+                  ftBlob, ftGraphic, ftTypedBinary:
+                    begin
+                      tempStr := TNetEncoding.Base64.EncodeBytesToString(lField.AsBytes);
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), tempStr)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), tempStr);
+                    end;
                 else
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsString);
+                  begin
+                    if lOneFieldRtti.FIsProperty then
+                      lRttiProperty.SetValue(TObject(lTempT), lField.AsString)
+                    else
+                      lRttiField.SetValue(TObject(lTempT), lField.AsString);
+                  end;
                 end;
               end;
-            end;
             tkWString:
-            begin
-              if lOneFieldRtti.FIsProperty then
-                lRttiProperty.SetValue(TObject(lTempT), lField.AsWideString);
-            end;
+              begin
+                if lOneFieldRtti.FIsProperty then
+                  lRttiProperty.SetValue(TObject(lTempT), lField.AsWideString)
+                else
+                  lRttiField.SetValue(TObject(lTempT), lField.AsWideString);
+              end;
             tkInteger:
-            begin
-              case lField.DataType of
-                ftSmallint, ftInteger, ftWord, ftAutoInc:
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsInteger);
-                end;
-                ftLargeint:
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsLargeInt);
-                end;
+              begin
+                case lField.DataType of
+                  ftSmallint, ftInteger, ftWord, ftAutoInc, ftLongWord, ftShortint, ftByte:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsInteger)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsInteger);
+                    end;
+                  ftLargeint:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsLargeInt)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsLargeInt);
+                    end;
                 else
-                begin
+                  begin
 
+                  end;
                 end;
               end;
-            end;
             tkInt64:
-            begin
-              case lField.DataType of
-                ftLargeint:
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsLargeInt);
-                end;
-                ftSmallint, ftInteger, ftWord, ftAutoInc:
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsInteger);
-                end;
+              begin
+                case lField.DataType of
+                  ftLargeint:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsLargeInt)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsLargeInt);
+                    end;
+                  ftSmallint, ftInteger, ftWord, ftAutoInc, ftLongWord, ftShortint, ftByte:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsInteger)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsInteger);
+                    end;
                 else
-                begin
+                  begin
 
+                  end;
                 end;
               end;
-            end;
             tkFloat:
-            begin
-              case lField.DataType of
-                ftFloat, ftBCD, ftFMTBcd:
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsFloat);
+              begin
+                case lField.DataType of
+                  ftFloat, ftBCD, ftFMTBcd:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsFloat)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsFloat);
+                    end;
+                  ftLargeint:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsLargeInt)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsLargeInt);
+                    end;
+                  ftSmallint, ftInteger, ftWord, ftAutoInc, ftLongWord, ftShortint, ftByte:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsInteger)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsInteger);
+                    end;
+                  ftTimeStamp:
+                    begin
+                      if lOneFieldRtti.FIsProperty then
+                        lRttiProperty.SetValue(TObject(lTempT), lField.AsDateTime)
+                      else
+                        lRttiField.SetValue(TObject(lTempT), lField.AsDateTime);
+                    end;
+                else
+                  begin
+
+                  end;
                 end;
-                ftLargeint:
+              end;
+            tkEnumeration:
+              begin
+                if lOneFieldRtti.FIsBool then
                 begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsLargeInt);
-                end;
-                ftSmallint, ftInteger, ftWord, ftAutoInc:
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsInteger);
-                end;
-                ftTimeStamp:
-                begin
-                  if lOneFieldRtti.FIsProperty then
-                    lRttiProperty.SetValue(TObject(lTempT), lField.AsDateTime);
-                end;
+                  case lField.DataType of
+                    ftBoolean:
+                      begin
+                        if lOneFieldRtti.FIsProperty then
+                          lRttiProperty.SetValue(TObject(lTempT), lField.AsBoolean)
+                        else
+                          lRttiField.SetValue(TObject(lTempT), lField.AsBoolean);
+                      end;
+                    ftString:
+                      begin
+                        if lField.AsString.ToLower = 'true' then
+                        begin
+                          if lOneFieldRtti.FIsProperty then
+                            lRttiProperty.SetValue(TObject(lTempT), true)
+                          else
+                            lRttiField.SetValue(TObject(lTempT), true);
+                        end
+                        else
+                        begin
+                          if lOneFieldRtti.FIsProperty then
+                            lRttiProperty.SetValue(TObject(lTempT), false)
+                          else
+                            lRttiField.SetValue(TObject(lTempT), false);
+                        end;
+                      end;
+                    ftSmallint, ftInteger, ftWord, ftAutoInc, ftLongWord, ftShortint, ftByte:
+                      begin
+                        if lField.AsInteger = 1 then
+                        begin
+                          if lOneFieldRtti.FIsProperty then
+                            lRttiProperty.SetValue(TObject(lTempT), true)
+                          else
+                            lRttiField.SetValue(TObject(lTempT), true);
+                        end
+                        else
+                        begin
+                          if lOneFieldRtti.FIsProperty then
+                            lRttiProperty.SetValue(TObject(lTempT), false)
+                          else
+                            lRttiField.SetValue(TObject(lTempT), false);
+                        end;
+                      end;
+                  end;
+                end
                 else
                 begin
-
-                end;
-              end;
-            end;
-            tkEnumeration:
-            begin
-              if lOneFieldRtti.FIsBool then
-              begin
-                case lField.DataType of
-                  ftBoolean:
-                  begin
-                    if lOneFieldRtti.FIsProperty then
-                      lRttiProperty.SetValue(TObject(lTempT), lField.AsBoolean);
-                  end;
-                  ftString:
-                  begin
-                    if lField.AsString.ToLower = 'true' then
-                    begin
-                      if lOneFieldRtti.FIsProperty then
-                        lRttiProperty.SetValue(TObject(lTempT), True);
-                    end
-                    else
-                    begin
-                      if lOneFieldRtti.FIsProperty then
-                        lRttiProperty.SetValue(TObject(lTempT), False);
-                    end;
-                  end;
-                  ftSmallint, ftInteger, ftWord, ftAutoInc:
-                  begin
-                    if lField.AsInteger = 1 then
-                    begin
-                      if lOneFieldRtti.FIsProperty then
-                        lRttiProperty.SetValue(TObject(lTempT), True);
-                    end
-                    else
-                    begin
-                      if lOneFieldRtti.FIsProperty then
-                        lRttiProperty.SetValue(TObject(lTempT), False);
-                    end;
-                  end;
-                end;
-              end
-              else
-              begin
-                // 枚举型
-                case lField.DataType of
-                  ftSmallint, ftInteger:
-                  begin
-                    if lOneFieldRtti.FIsProperty then
-                      lRttiProperty.SetValue(TObject(lTempT), lField.AsInteger);
-                  end;
-                  ftString:
-                  begin
-                    if lOneFieldRtti.FIsProperty then
-                      lRttiProperty.SetValue(TObject(lTempT), GetEnumValue(lRttiProperty.PropertyType.Handle, lField.AsString));
+                  // 枚举型
+                  case lField.DataType of
+                    ftSmallint, ftInteger:
+                      begin
+                        if lOneFieldRtti.FIsProperty then
+                          lRttiProperty.SetValue(TObject(lTempT), lField.AsInteger)
+                        else
+                          lRttiField.SetValue(TObject(lTempT), lField.AsInteger);
+                      end;
+                    ftString:
+                      begin
+                        if lOneFieldRtti.FIsProperty then
+                          lRttiProperty.SetValue(TObject(lTempT), GetEnumValue(lRttiProperty.PropertyType.Handle, lField.AsString))
+                        else
+                          lRttiField.SetValue(TObject(lTempT), GetEnumValue(lRttiField.FieldType.Handle, lField.AsString));
+                      end;
                   end;
                 end;
               end;
-            end;
             tkVariant:
-            begin
-              if lOneFieldRtti.FIsProperty then
-                lRttiProperty.SetValue(TObject(lTempT), VarToStr(lField.AsVariant));
-            end;
+              begin
+                if lOneFieldRtti.FIsProperty then
+                  lRttiProperty.SetValue(TObject(lTempT), VarToStr(lField.AsVariant))
+                else
+                  lRttiField.SetValue(TObject(lTempT), VarToStr(lField.AsVariant));
+              end;
           end;
         end;
       end;

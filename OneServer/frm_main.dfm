@@ -24,6 +24,8 @@ object frmMain: TfrmMain
     ActivePage = tabHTTPServer
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 882
+    ExplicitHeight = 516
     object tabServerReamk: TTabSheet
       Caption = #20013#38388#20214#35828#26126
       object Memo1: TMemo
@@ -169,6 +171,7 @@ object frmMain: TfrmMain
         ParentColor = False
         ParentFont = False
         TabOrder = 0
+        ExplicitWidth = 874
         object Label1: TLabel
           Left = 3
           Top = 56
@@ -203,6 +206,13 @@ object frmMain: TfrmMain
           Width = 103
           Height = 15
           Caption = 'token'#22833#25928#38388#38548'('#31186')'
+        end
+        object Label13: TLabel
+          Left = 3
+          Top = 135
+          Width = 52
+          Height = 15
+          Caption = #36229#31649#23494#30721
         end
         object tbStart: TButton
           Left = 3
@@ -300,6 +310,14 @@ object frmMain: TfrmMain
           TabOrder = 10
           Text = '0'
         end
+        object edSuperAdminPass: TEdit
+          Left = 87
+          Top = 132
+          Width = 290
+          Height = 23
+          PasswordChar = '*'
+          TabOrder = 11
+        end
       end
       object groupWebSocket: TGroupBox
         Left = 0
@@ -309,6 +327,8 @@ object frmMain: TfrmMain
         Align = alClient
         Caption = #20854#23427#37197#32622
         TabOrder = 1
+        ExplicitWidth = 874
+        ExplicitHeight = 173
         object chWinTaskStart: TCheckBox
           Left = 15
           Top = 30
@@ -342,6 +362,7 @@ object frmMain: TfrmMain
         Align = alTop
         Caption = 'WebSocket(WS)'#37197#32622
         TabOrder = 2
+        ExplicitWidth = 874
       end
     end
     object tabZTManage: TTabSheet
@@ -994,6 +1015,7 @@ object frmMain: TfrmMain
     Height = 75
     Align = alTop
     TabOrder = 1
+    ExplicitWidth = 882
     object Image1: TImage
       Left = 1
       Top = 1
@@ -1084,6 +1106,7 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 0
       OnClick = BtnResClick
+      ExplicitLeft = 639
     end
     object btnClose: TBitBtn
       AlignWithMargins = True
@@ -1104,11 +1127,12 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 1
       OnClick = HookCloseMainClick
+      ExplicitLeft = 759
     end
   end
   object plZTSet: TPanel
-    Left = 213
-    Top = 206
+    Left = 218
+    Top = 178
     Width = 401
     Height = 232
     Color = clSkyBlue
@@ -1509,5 +1533,10 @@ object frmMain: TfrmMain
     DataSet = qryToken
     Left = 668
     Top = 373
+  end
+  object FDMetaInfoQuery1: TFDMetaInfoQuery
+    Connection = FDConnection1
+    Left = 476
+    Top = 500
   end
 end

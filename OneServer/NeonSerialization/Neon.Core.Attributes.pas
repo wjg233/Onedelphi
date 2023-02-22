@@ -1,12 +1,33 @@
+{******************************************************************************}
+{                                                                              }
+{  Neon: Serialization Library for Delphi                                      }
+{  Copyright (c) 2018-2021 Paolo Rossi                                         }
+{  https://github.com/paolo-rossi/neon-library                                 }
+{                                                                              }
+{******************************************************************************}
+{                                                                              }
+{  Licensed under the Apache License, Version 2.0 (the "License");             }
+{  you may not use this file except in compliance with the License.            }
+{  You may obtain a copy of the License at                                     }
+{                                                                              }
+{      http://www.apache.org/licenses/LICENSE-2.0                              }
+{                                                                              }
+{  Unless required by applicable law or agreed to in writing, software         }
+{  distributed under the License is distributed on an "AS IS" BASIS,           }
+{  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.    }
+{  See the License for the specific language governing permissions and         }
+{  limitations under the License.                                              }
+{                                                                              }
+{******************************************************************************}
 unit Neon.Core.Attributes;
-
-{$mode DELPHI}{$H+}
 
 interface
 
+{$SCOPEDENUMS ON}
 
 uses
-  Classes, SysUtils, Rtti, Neon.Core.Types;
+  System.Classes, System.SysUtils, System.Rtti,
+  Neon.Core.Types;
 
 type
   NeonAttribute = class(TCustomAttribute)
@@ -93,9 +114,8 @@ type
     ///   (default function is ShouldInclude)
     /// </summary>
     CustomFunction);
-
   TIncludeValue = record
-    Present: boolean;
+    Present: Boolean;
     Value: IncludeIf;
     IncludeFunction: string;
   end;
@@ -108,8 +128,7 @@ type
   private
     FIncludeValue: TIncludeValue;
   public
-    constructor Create(AIncludeValue: IncludeIf = IncludeIf.Always;
-      const AIncludeFunction: string = 'ShouldInclude');
+    constructor Create(AIncludeValue: IncludeIf = IncludeIf.Always; const AIncludeFunction: string = 'ShouldInclude');
 
     property IncludeValue: TIncludeValue read FIncludeValue write FIncludeValue;
   end;
@@ -214,6 +233,9 @@ type
 
 implementation
 
+uses
+  System.StrUtils, System.DateUtils;
+
 { NeonNamedAttribute }
 
 constructor NeonNamedAttribute.Create(const AValue: string);
@@ -247,8 +269,7 @@ end;
 
 { NeonIncludeAttribute }
 
-constructor NeonIncludeAttribute.Create(AIncludeValue: IncludeIf;
-  const AIncludeFunction: string);
+constructor NeonIncludeAttribute.Create(AIncludeValue: IncludeIf; const AIncludeFunction: string);
 begin
   FIncludeValue.Present := True;
   FIncludeValue.Value := AIncludeValue;

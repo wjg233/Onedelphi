@@ -28,6 +28,7 @@ type
     // 单个文件上传下载
     function UploadFile(): boolean;
     function DownloadFile(): boolean;
+    function DeleteFile(): boolean;
     // 单个文件上传下载异步
     procedure UploadFileAsync(QCallEven: EvenOKCallBack);
     procedure DownloadFileAsync(QCallEven: EvenOKCallBack);
@@ -139,6 +140,36 @@ begin
   end;
 end;
 
+function TOneVirtualFile.DeleteFile(): boolean;
+var
+  lVirtualInfo: TVirtualInfo;
+begin
+  Result := false;
+  if self.FConnection = nil then
+    self.FConnection := OneClientConnect.Unit_Connection;
+  if self.FConnection = nil then
+  begin
+    self.FErrMsg := '数据集Connection=nil';
+    exit;
+  end;
+  if not self.FConnection.Connected then
+  begin
+    self.ErrMsg := '服务器未连接';
+    exit;
+  end;
+  lVirtualInfo := TVirtualInfo.Create;
+  try
+    lVirtualInfo.VirtualCode := self.VirtualCode;
+    lVirtualInfo.RemoteFile := self.RemoteFile;
+    lVirtualInfo.LocalFile := self.LocalFile;
+    Result := self.FConnection.DeleteVirtualFile(lVirtualInfo);
+    self.ErrMsg := lVirtualInfo.ErrMsg;
+    self.ReturnFileName := lVirtualInfo.RemoteFileName;
+  finally
+    lVirtualInfo.Free;
+  end;
+end;
+
 procedure TOneVirtualFile.UploadFileAsync(QCallEven: EvenOKCallBack);
 var
   aTask: ITask;
@@ -242,7 +273,7 @@ begin
       lTask.LocalFile := lLoclFile;
       if self.FIsBatch then
       begin
-        if lTask.RemoteFile<>'' then        
+        if lTask.RemoteFile <> '' then
           lTask.RemoteFile := TPath.GetDirectoryName(lTask.RemoteFile);
         lTask.RemoteFile := lTask.RemoteFile + TPath.GetFileName(lTask.LocalFile);
       end;
