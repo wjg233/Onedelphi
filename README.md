@@ -1,4 +1,4 @@
-# Onedelphi
+# Onedelphi  是flm的开源代码  qq:378464060
 ## 环境是基于 D11的，其它低版本，可能系统库 部份不兼容
 ## 1.控件包mormot2下载，群文件里面也有直接到群下载也行
   https://github.com/synopse/mORMot2
