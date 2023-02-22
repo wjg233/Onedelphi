@@ -7,24 +7,24 @@
 ## 3.打开 OneService.dpr 工程
 ## 4.编译，运行 即可
 ## 5.目前做好了MVC基础功能看源码单元httpServer->Controller->Demo-> DemoController.pas
-   // 注册到路由 DemoController.initialization部份，路由如何注册
-   // 注意，路由名称 不要一样，否则会判定已注册过，跳过
-  // 多例模式注册
-  OneHttpRouterManage.GetInitRouterManage().AddHTTPPoolWork('DemoA',TDemoController, 100, CreateNewDemoController);
-  // 单例模式注册
+   # // 注册到路由 DemoController.initialization部份，路由如何注册
+   # // 注意，路由名称 不要一样，否则会判定已注册过，跳过
+  # // 多例模式注册
+ #  OneHttpRouterManage.GetInitRouterManage().AddHTTPPoolWork('DemoA',TDemoController, 100, CreateNewDemoController);
+ # // 单例模式注册
   OneHttpRouterManage.GetInitRouterManage().AddHTTPSingleWork('DemoB',TDemoController, 100, CreateNewDemoController);
-  // 方法注册
- OneHttpRouterManage.GetInitRouterManage().AddHTTPEvenWork('DemoEven',HelloWorldEven, 10);
+ # // 方法注册
+# OneHttpRouterManage.GetInitRouterManage().AddHTTPEvenWork('DemoEven',HelloWorldEven, 10);
 ## 6.直接用http页面输入地址请求相关url或者相关HTTP请求工具
   例:  http://127.0.0.1:9090/DemoA/GetPersonListT
 
 
 
 ## 目前传统客户端基本已完成;
-1.数据打开保存,执行DML执行存储过程-对应Demo->OneClientDemo.dproj
-2.客户端事务自由控制-对应Demo->OneCleintDemoCustTran.dproj
-3.多个数据批量打开，批量保存-对应Demo->OneCleintDemoDatas.dproj
-4.客户端post,get请求-对应Demo->OneCleintDemoPostGet.dproj
-5.异步打开数据及保存-对应Demo->OneCleintDemoAsync.dproj
-6.虚拟文件上传下载-对应Demo->OneClientDemoVirtualFile.dproj
-7.大文件上传下载-对应Demo->OneClientDemoVirtualFile.dproj
+# 1.数据打开保存,执行DML执行存储过程-对应Demo->OneClientDemo.dproj
+# 2.客户端事务自由控制-对应Demo->OneCleintDemoCustTran.dproj
+# 3.多个数据批量打开，批量保存-对应Demo->OneCleintDemoDatas.dproj
+# 4.客户端post,get请求-对应Demo->OneCleintDemoPostGet.dproj
+# 5.异步打开数据及保存-对应Demo->OneCleintDemoAsync.dproj
+# 6.虚拟文件上传下载-对应Demo->OneClientDemoVirtualFile.dproj
+# 7.大文件上传下载-对应Demo->OneClientDemoVirtualFile.dproj
