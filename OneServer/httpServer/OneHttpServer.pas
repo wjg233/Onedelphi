@@ -4,9 +4,9 @@ interface
 
 uses
   SysUtils, System.Net.URLClient, System.Classes, OneHttpCtxtResult,
-  System.Diagnostics, Web.HTTPApp,
+  System.Diagnostics, Web.HTTPApp, System.ZLib,
   mormot.Net.server, mormot.Net.http, mormot.Net.async, mormot.core.os,
-  mormot.Net.sock, mormot.core.buffers, oneILog, OneFileHelper;
+  mormot.Net.sock, mormot.core.buffers, oneILog, OneFileHelper, mormot.core.zip, mormot.core.base;
 
 type
   TOneHttpServer = class
@@ -85,7 +85,7 @@ var
   // 静态文件输出
   lFileName, lFileCode, lPhy: string;
   tempI: integer;
-  lTThreadID:string;
+  lTThreadID: string;
 begin
   lErrMsg := '';
   lIsErr := False;
@@ -227,7 +227,7 @@ begin
           end;
           lFileName := HTTPDecode(lFileName);
           lFileName := OneFileHelper.CombinePath(lPhy, lFileName);
-          Ctxt.OutContent :=UTF8Encode( lFileName);
+          Ctxt.OutContent := UTF8Encode(lFileName);
           Ctxt.OutContentType := STATICFILE_CONTENT_TYPE;
           Ctxt.OutCustomHeaders := GetMimeContentTypeHeader('', Ctxt.OutContent) + #13#10 + 'OneOutMode: OUTFILE';
           Result := HTTP_SUCCESS;
@@ -351,6 +351,10 @@ begin
     self.FHttpServer := THttpAsyncServer.Create(self.FPort.ToString(), nil, nil, 'oneDelphi', self.FThreadPoolCount, self.FKeepAliveTimeOut, [hsoNoXPoweredHeader]);
     self.FHttpServer.HttpQueueLength := self.FHttpQueueLength;
     self.FHttpServer.OnRequest := self.OnRequest;
+    self.FHttpServer.RegisterCompress(CompressDeflate);
+    self.FHttpServer.RegisterCompress(CompressGZip);
+    self.FHttpServer.RegisterCompress(CompressZLib);
+    self.FHttpServer.RegisterCompress(CompressSynLZ);
     // CertificateFile :=
     // 'D:\devTool\delphi\project\OneDelphi\OneServer\Win64\Debug\callbaba.cn_bundle.crt';
     // PrivateKeyFile :=

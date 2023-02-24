@@ -27,6 +27,7 @@ type
     function ClientConnect(QCleintConnect: TClientConnect): TActionResult<TClientConnect>;
     function ClientDisConnect(TokenID: string): TActionResult<string>;
     function ClientPing(): TActionResult<string>;
+    function ClientConnectPing(QCleintConnect: TClientConnect): TActionResult<string>;
   end;
 
 function CreateNewOneTokenController(QRouterItem: TOneRouterItem): TObject;
@@ -87,6 +88,23 @@ end;
 function TOneTokenController.ClientPing(): TActionResult<string>;
 begin
   result := TActionResult<string>.Create(false, false);
+  result.ResultData := '';
+  result.SetResultTrue();
+end;
+
+function TOneTokenController.ClientConnectPing(QCleintConnect: TClientConnect): TActionResult<string>;
+var
+  lOneGlobal: TOneGlobal;
+  lTokenItem: IOneTokenItem;
+begin
+  result := TActionResult<string>.Create(false, false);
+  lOneGlobal := TOneGlobal.GetInstance();
+  if lOneGlobal.ServerSet.ConnectSecretkey <> QCleintConnect.ConnectSecretkey then
+  begin
+    // 安全密钥不一至
+    result.ResultMsg := '安全密钥不一至,无法连接服务端!!!';
+    exit;
+  end;
   result.ResultData := '';
   result.SetResultTrue();
 end;

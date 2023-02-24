@@ -600,7 +600,7 @@ begin
           end
           else
           begin
-            lJSonValue := TJsonObject.ParseJSONValue(QHTTPCtxt.RequestInContent);
+            lJSonValue := TJsonObject.ParseJSONValue(string(QHTTPCtxt.RequestInContent));
             if lJSonValue = nil then
             begin
               QErrMsg := '提交的数据不是合法JSON格式';

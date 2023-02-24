@@ -100,7 +100,7 @@ type
     FRequestContentType: string;
     FRequestContentTypeCharset: String;
     // 请求的数据
-    FRequestInContent: String;
+    FRequestInContent: RawByteString;
     // 请求的头部
     FRequestInHeaders: RawByteString;
     // HTTP请求的内容
@@ -125,7 +125,7 @@ type
     property HeadParamList: TStringList read FHeadParamList write FHeadParamList;
     property RequestContentType: String read FRequestContentType write FRequestContentType;
     property RequestContentTypeCharset: String read FRequestContentTypeCharset write FRequestContentTypeCharset;
-    property RequestInContent: String read FRequestInContent write FRequestInContent;
+    property RequestInContent: RawByteString read FRequestInContent write FRequestInContent;
     property RequestInHeaders: RawByteString read FRequestInHeaders write FRequestInHeaders;
     property OutContent: RawByteString read FOutContent write FOutContent;
     property RequestAccept: String read FRequestAccept write FRequestAccept;

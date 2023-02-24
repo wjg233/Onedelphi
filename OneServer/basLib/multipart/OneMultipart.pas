@@ -50,6 +50,7 @@ function MultipartFormDeCode(QContentType: string; QContent: RawByteString; var 
 var
   lContentBuffer: TBytes;
   lMultipartDecode: TOneMultipartDecode;
+  lStremStream: TStringStream;
 begin
   Result := nil;
   QErrMsg := '';
@@ -58,7 +59,16 @@ begin
     QErrMsg := '不是表单[multipart/form-data]数据，当前格式为[' + QContentType + ']';
     exit;
   end;
-  lContentBuffer := TEncoding.UTF8.GetBytes(QContent);
+  lStremStream := TStringStream.Create(QContent);
+  try
+    lStremStream.Position := 0;
+    setlength(lContentBuffer, lStremStream.Size);
+    lStremStream.Read(lContentBuffer, lStremStream.Size);
+  finally
+    lStremStream.Clear;
+    lStremStream.Free;
+  end;
+  // lContentBuffer := TEncoding.ANSI.GetBytes(QContent);
   lMultipartDecode := TOneMultipartDecode.Create;
   try
     lMultipartDecode.FContentType := QContentType;
@@ -136,7 +146,7 @@ procedure TOneMultipartDecode.ParseMultiPartContent;
     while P1 >= 0 do
     begin
       Inc(Count);
-      SetLength(Boundaries, Count);
+      setlength(Boundaries, Count);
       Boundaries[Count - 1] := P1;
       P1 := IndexOfPattern(Boundary, FContentBuffer, P1 + Length(Boundary));
     end;
@@ -151,7 +161,7 @@ var
   I: Integer;
   P: Integer;
 begin
-  SetLength(Boundaries, 0);
+  setlength(Boundaries, 0);
   ContentTypeFields := TStringList.Create;
   try
     ExtractContentTypeFields(ContentTypeFields);

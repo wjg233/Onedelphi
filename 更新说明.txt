@@ -2,6 +2,23 @@
 ------OneLaz基于Lazarus+fpc相当于D7开发的
 ------OneUniApp基于uniApp开发的快速对接OneDelphi与OneLaz
 
+************2020-03-24***********
+服务端:
+	1.优化 OneMultipart 对multipart/form-data解析，以及BUG，
+	   此单元值得你拥有, 解析multipart函数,D基本没有
+	2.优化 THTTPCtxt.FRequestInContent: RawByteString; 由string改成RawByteString保持原本接收到的字符串
+	3.UniGoodsController增加
+                //文件上传示例
+    	function PostGoodsImg(QFormData: TOneMultipartDecode): TActionResult<string>;
+ 	//获取文件示例
+    	function OneGetGoodsImg(imgid: string): TActionResult<string>;
+	4.以及一些BUG和优化
+客户端:
+
+oneuniapp客户端:
+	1.增加商品编辑,文件上传
+	2.优化一些函数
+
 ************2023-02-17***********
 服务端:
 	1.增加OneUniDemo与oneUniapp相关单元对接
@@ -14,7 +31,8 @@
 OneUniApp客户端:
 	1.增加制作订单交互流程Demo
 	 在线地址:http://house.callbaba.cn/#/
-	或者下载Apk
+	或者下载Apk,去开源群下载
+QQ群：193878346
 	
 
 *************2023-02-09**************

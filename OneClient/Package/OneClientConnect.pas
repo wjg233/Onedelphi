@@ -18,6 +18,8 @@ const
   HTTP_URL_TokenSign = 'sign';
   // token相关
   URL_HTTP_HTTPServer_TOKEN_ClientConnect = 'OneServer/Token/ClientConnect';
+  URL_HTTP_HTTPServer_TOKEN_ClientConnectPing = 'OneServer/Token/ClientConnectPing';
+
   URL_HTTP_HTTPServer_TOKEN_ClientDisConnect = 'OneServer/Token/ClientDisConnect';
   URL_HTTP_HTTPServer_TOKEN_ClientPing = 'OneServer/Token/ClientPing';
   // 操作数据相关
@@ -95,6 +97,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     function DoConnect(qForceConnect: boolean = false): boolean;
+    function DoConnectPing(): boolean;
     function DoPing(): boolean;
     procedure DisConnect; overload;
     // 提交bytes返回Bytes
@@ -275,6 +278,49 @@ begin
   end;
 end;
 
+function TOneConnection.DoConnectPing(): boolean;
+var
+  lJsonObj: TJsonObject;
+  lResultJsonValue: TJsonValue;
+  lErrMsg: string;
+  lClientConnect: TClientConnect;
+  lServerResult: TActionResult<string>;
+begin
+  Result := false;
+  lResultJsonValue := nil;
+  lServerResult := TActionResult<string>.Create;
+  lJsonObj := TJsonObject.Create;
+  try
+    lJsonObj.AddPair('ConnectSecretkey', self.ConnectSecretkey);
+    lResultJsonValue := self.PostResultJsonValue(URL_HTTP_HTTPServer_TOKEN_ClientConnectPing, lJsonObj.ToJSON(), lErrMsg);
+    if not self.IsErrTrueResult(lErrMsg) then
+    begin
+      self.FErrMsg := lErrMsg;
+      exit;
+    end;
+
+    if not OneNeonHelper.JsonToObject(lServerResult, lResultJsonValue, lErrMsg) then
+    begin
+      self.FErrMsg := '返回的数据解析成TResult<string>出错,无法知道结果,数据:' + lResultJsonValue.ToJSON;
+      exit;
+    end;
+    if not lServerResult.ResultSuccess then
+    begin
+      self.FErrMsg := '服务端消息:' + lServerResult.ResultMsg;
+      exit;
+    end;
+    self.FConnected := true;
+    Result := true;
+  finally
+    lJsonObj.Free;
+    if lResultJsonValue <> nil then
+    begin
+      lResultJsonValue.Free;
+    end;
+    lServerResult.Free;
+  end;
+end;
+
 function TOneConnection.DoPing(): boolean;
 var
   lResultJsonValue: TJsonValue;
@@ -382,7 +428,14 @@ begin
     begin
       tempStr := tempStr + ':' + self.FHTTPPort.ToString();
     end;
-    tempStr := tempStr + '/' + QUrl;
+    if QUrl.StartsWith('/') then
+    begin
+      tempStr := tempStr + QUrl;
+    end
+    else
+    begin
+      tempStr := tempStr + '/' + QUrl;
+    end;
   end
   else
   begin

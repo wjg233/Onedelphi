@@ -235,7 +235,7 @@ end;
 initialization
 
 // 单例模式注册
-OneHttpRouterManage.GetInitRouterManage().AddHTTPSingleWork('FastLogin', TFastLoginController, 0, CreateNewFastLoginController);
+OneHttpRouterManage.GetInitRouterManage().AddHTTPSingleWork('/FastClient/Login', TFastLoginController, 0, CreateNewFastLoginController);
 
 finalization
 

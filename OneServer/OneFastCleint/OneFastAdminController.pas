@@ -11,11 +11,28 @@ uses
 type
   TFastMenu = class(Tobject)
   private
-    FMenuID: string;
-    FChilds: TList<TFastMenu>;
+    FMenuID_: string;
+    FPMenuID_: string;
+    FMenuTreeCode_: string;
+    FMenuCaption_: string;
+    FMenuImgIndex_: integer;
+    FMenuOpenMode_: string;
+    FMenuModuleCode_: string;
+    FMenuScript_: string;
+    FChilds_: TList<TFastMenu>;
   public
     constructor Create;
     destructor Destroy; override;
+  published
+    property FMenuID: string read FMenuID_ write FMenuID_;
+    property FPMenuID: string read FPMenuID_ write FPMenuID_;
+    property FMenuTreeCode: string read FMenuTreeCode_ write FMenuTreeCode_;
+    property FMenuCaption: string read FMenuCaption_ write FMenuCaption_;
+    property FMenuImgIndex: integer read FMenuImgIndex_ write FMenuImgIndex_;
+    property FMenuOpenMode: string read FMenuOpenMode_ write FMenuOpenMode_;
+    property FMenuModuleCode: string read FMenuModuleCode_ write FMenuModuleCode_;
+    property FMenuScript: string read FMenuScript_ write FMenuScript_;
+    property FChilds: TList<TFastMenu> read FChilds_ write FChilds_;
   end;
 
   TFastAdminController = class(TOneControllerBase)
@@ -36,7 +53,7 @@ end;
 
 destructor TFastMenu.Destroy;
 var
-  i: Integer;
+  i: integer;
 begin
   for i := 0 to self.FChilds.Count - 1 do
   begin
@@ -47,18 +64,30 @@ begin
   inherited Destroy;
 end;
 
+function CreateNewFastAdminController(QRouterItem: TOneRouterItem): Tobject;
+var
+  lController: TFastAdminController;
+begin
+  // 自定义创建控制器类，否则会按 TPersistentclass.create
+  // 最好自定义一个好
+  lController := TFastAdminController.Create;
+  // 挂载RTTI信息
+  lController.RouterItem := QRouterItem;
+  result := lController;
+end;
+
 function TFastAdminController.MenuRemoveByID(QMenu: TFastMenu; QMenuID: string): boolean;
 var
-  i: Integer;
+  i: integer;
 begin
-  Result := false;
+  result := false;
   for i := 0 to QMenu.FChilds.Count - 1 do
   begin
     if QMenu.FChilds[i].FMenuID = QMenuID then
     begin
       // 明细child.child由child释放
       QMenu.FChilds[i].Free;
-      Result := false;
+      result := false;
       exit;
     end
     else
@@ -86,12 +115,12 @@ var
   lTempMenu, lPMenu: TFastMenu;
   lFMenuID, lFPMenuID, lStatus: string;
 begin
-  Result := TActionResult<TFastMenu>.Create(true, false);
+  result := TActionResult<TFastMenu>.Create(true, false);
   lDictMenus := nil;
   LTokenItem := self.GetCureentToken(lErrMsg);
   if LTokenItem = nil then
   begin
-    Result.SetTokenFail();
+    result.SetTokenFail();
     exit;
   end;
   // 验证账号密码,比如数据库
@@ -100,12 +129,12 @@ begin
   lZTItem := lOneZTMange.LockZTItem(LTokenItem.ZTCode, lErrMsg);
   if lZTItem = nil then
   begin
-    Result.resultMsg := lErrMsg;
+    result.resultMsg := lErrMsg;
     exit;
   end;
   try
     lDictMenus := TDictionary<string, TFastMenu>.Create;
-    Result.ResultData := TFastMenu.Create;
+    result.ResultData := TFastMenu.Create;
     // 从账套获取现成的FDQuery,已绑定好 connetion,也无需释放
     lFDQuery := lZTItem.ADQuery;
     // 这边改成你的用户表
@@ -117,10 +146,18 @@ begin
       lFMenuID := lFDQuery.FieldByName('FMenuID').AsString;
       lFPMenuID := lFDQuery.FieldByName('FPMenuID').AsString;
       lTempMenu := TFastMenu.Create;
+      lTempMenu.FMenuID := lFMenuID;
+      lTempMenu.FPMenuID := lFPMenuID;
+      lTempMenu.FMenuTreeCode := lFDQuery.FieldByName('FMenuTreeCode').AsString;
+      lTempMenu.FMenuCaption := lFDQuery.FieldByName('FMenuCaption').AsString;
+      lTempMenu.FMenuImgIndex := lFDQuery.FieldByName('FMenuImgIndex').AsInteger;
+      lTempMenu.FMenuOpenMode := lFDQuery.FieldByName('FMenuOpenMode').AsString;
+      lTempMenu.FMenuModuleCode := lFDQuery.FieldByName('FMenuModuleCode').AsString;
+      lTempMenu.FMenuScript := lFDQuery.FieldByName('FMenuScript').AsString;
       if lFPMenuID = '' then
       begin
         lDictMenus.Add(lFMenuID, lTempMenu);
-        Result.ResultData.FChilds.Add(lTempMenu);
+        result.ResultData.FChilds.Add(lTempMenu);
       end
       else
       begin
@@ -131,7 +168,7 @@ begin
         end
         else
         begin
-          Result.ResultData.FChilds.Add(lTempMenu);
+          result.ResultData.FChilds.Add(lTempMenu);
         end;
       end;
       lFDQuery.Next;
@@ -172,9 +209,9 @@ begin
     // 删除禁用的
     for lFMenuID in lDictMenus.Keys do
     begin
-      self.MenuRemoveByID(Result.ResultData, lFMenuID);
+      self.MenuRemoveByID(result.ResultData, lFMenuID);
     end;
-    Result.SetResultTrue;
+    result.SetResultTrue;
   finally
     // 解锁,归还池很重要
     lZTItem.UnLockWork;
@@ -182,5 +219,12 @@ begin
     lDictMenus.Free;
   end;
 end;
+
+initialization
+
+// 单例模式注册
+OneHttpRouterManage.GetInitRouterManage().AddHTTPSingleWork('/FastClient/Admin', TFastAdminController, 0, CreateNewFastAdminController);
+
+finalization
 
 end.

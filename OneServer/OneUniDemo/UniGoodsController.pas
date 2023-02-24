@@ -6,7 +6,7 @@ uses
   system.StrUtils, system.SysUtils, Math, system.JSON, system.Threading, system.Classes,
   OneHttpController, OneHttpRouterManage, OneHttpCtxtResult, OneTokenManage, OneHttpConst,
   system.Generics.Collections, OneControllerResult, FireDAC.Comp.Client, Data.DB, OneGuID,
-  OneMultipart, UniClass;
+  OneMultipart, UniClass, system.IOUtils;
 
 type
 
@@ -28,14 +28,15 @@ type
     function SaveGoods(QGoods: TGoodsDemo): TActionResult<string>;
 
     // 文件上传
-    function PostFile(QFormData: TOneMultipartDecode): TActionResult<string>;
+    function PostGoodsImg(QFormData: TOneMultipartDecode): TActionResult<string>;
+    function OneGetGoodsImg(imgid: string): TActionResult<string>;
   end;
 
 function CreateNewGoodsController(QRouterItem: TOneRouterItem): TObject;
 
 implementation
 
-uses OneGlobal, OneZTManage;
+uses OneGlobal, OneZTManage, OneFileHelper;
 
 function CreateNewGoodsController(QRouterItem: TOneRouterItem): TObject;
 var
@@ -425,7 +426,10 @@ begin
         lFDQuery.FieldByName('FGoodsName').AsString := QGoods.FGoodsName;
         lFDQuery.FieldByName('FGoodsPrice').AsFloat := QGoods.FGoodsPrice;
         lFDQuery.FieldByName('FGoodsRemark').AsString := QGoods.FGoodsRemark;
-        lFDQuery.FieldByName('FGoodsImgUrl').ProviderFlags := []; // 设定此字段不参与任何更新
+        if QGoods.FGoodsImgUrl <> '' then
+        begin
+          lFDQuery.FieldByName('FGoodsImgUrl').AsString := QGoods.FGoodsImgUrl; // 设定此字段不参与任何更新
+        end;
         // lFDQuery.FieldByName('FGoodsImgUrl').
         lFDQuery.post;
       end;
@@ -435,12 +439,12 @@ begin
         result.resultMsg := '更新数据有误,错误行数' + iErr.ToString;
         exit;
       end;
-//      iCommit := lFDQuery.RowsAffected;
-//      if iCommit <> 1 then
-//      begin
-//        result.resultMsg := '更新数据有误,影响行数不为1,当前影响行数' + iCommit.ToString;
-//        exit;
-//      end;
+      // iCommit := lFDQuery.RowsAffected;
+      // if iCommit <> 1 then
+      // begin
+      // result.resultMsg := '更新数据有误,影响行数不为1,当前影响行数' + iCommit.ToString;
+      // exit;
+      // end;
       lZTItem.ADConnection.Commit;
       isCommit := true;
       result.resultData := QGoods.FGoodsID;
@@ -462,27 +466,88 @@ begin
   end;
 end;
 
-function TUniGoodsController.PostFile(QFormData: TOneMultipartDecode): TActionResult<string>;
+function TUniGoodsController.PostGoodsImg(QFormData: TOneMultipartDecode): TActionResult<string>;
 var
   i: integer;
   lWebRequestFile: TOneRequestFile;
   tempStream: TCustomMemoryStream;
+  tempFileStream: TFileStream;
+  lFileName, tempPath: string;
+  lFileID: string;
+  lExten: string;
+  lOldImgUrl: string;
 begin
   result := TActionResult<string>.Create(false, false);
-  // 接收到的文件
-  for i := 0 to QFormData.Files.count - 1 do
+  lExten := '';
+  lOldImgUrl := '';
+  if QFormData.Files.Count = 0 then
   begin
-    lWebRequestFile := TOneRequestFile(QFormData.Files.items[i]);
-    result.resultData := result.resultData + '当前接收到文件参数[' + lWebRequestFile.FieldName + ']' + '文件名称[' + lWebRequestFile.fileName + ']' + #10#13;
-    // 文件流 ,至于要咱样是业务问题
-    tempStream := TCustomMemoryStream(lWebRequestFile.Stream);
+    result.resultMsg := '无任何上传文件';
+    exit;
   end;
-  // 接收到的参数,自已的业务自已分析
-  for i := 0 to QFormData.ContentFields.count - 1 do
+  for i := 0 to QFormData.ContentFields.Count - 1 do
   begin
+    if QFormData.ContentFields.Names[i] = 'oldImgUrl' then
+    begin
+      lOldImgUrl := QFormData.ContentFields.ValueFromIndex[i];
+    end;
     result.resultData := result.resultData + '当前接收到参数[' + QFormData.ContentFields[i] + ']' + #10#13;
   end;
+
+  lWebRequestFile := TOneRequestFile(QFormData.Files.items[0]);
+  tempStream := TCustomMemoryStream(lWebRequestFile.Stream);
+  lFileName := lWebRequestFile.FileName;
+  if TPath.HasExtension(lFileName) then
+  begin
+    lExten := TPath.GetExtension(lFileName)
+  end;
+  lFileID := OneGuID.GetGUID32;
+  if lExten <> '' then
+    lFileID := lFileID + lExten;
+  // 创建目录
+  tempPath := OneFileHelper.CombinePathC(OneFileHelper.GetExeRunPath, const_OnePlatform, 'UniGoods');
+  if not DirectoryExists(tempPath) then
+    ForceDirectories(tempPath);
+  //
+  tempStream.Position := 0;
+  lFileName := OneFileHelper.CombinePath(tempPath, lFileID);
+  tempFileStream := TFileStream.Create(lFileName, fmcreate);
+  try
+    tempFileStream.CopyFrom(tempStream, tempStream.Size)
+  finally
+    tempFileStream.free;
+  end;
+  // tempStream.Position := 0;
+  // tempStream.SaveToFile(lFileName);
+  if lOldImgUrl <> '' then
+  begin
+    // 删除旧文件
+    lFileName := OneFileHelper.CombinePath(tempPath, lOldImgUrl);
+    if TFile.Exists(lFileName) then
+    begin
+      TFile.Delete(lFileName);
+    end;
+  end;
+  result.resultData := lFileID;
+  // 保存在某个目录
   result.SetResultTrue();
+end;
+
+function TUniGoodsController.OneGetGoodsImg(imgid: string): TActionResult<string>;
+var
+  lFileName, tempPath: string;
+begin
+  result := TActionResult<string>.Create(false, false);
+  tempPath := OneFileHelper.CombinePathC(OneFileHelper.GetExeRunPath, const_OnePlatform, 'UniGoods');
+  lFileName := OneFileHelper.CombinePath(tempPath, imgid);
+  if not TFile.Exists(lFileName) then
+  begin
+    result.resultMsg := '文件不存在';
+    exit;
+  end;
+  // 返回的文件物理路径放在这
+  result.resultData := lFileName;
+  result.SetResultTrueFile();
 end;
 
 initialization

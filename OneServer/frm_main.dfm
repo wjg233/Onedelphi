@@ -11,7 +11,7 @@ object frmMain: TfrmMain
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  Position = poDesktopCenter
+  Position = poOwnerFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -21,7 +21,7 @@ object frmMain: TfrmMain
     Top = 75
     Width = 886
     Height = 517
-    ActivePage = tabHTTPServer
+    ActivePage = tabServerReamk
     Align = alClient
     TabOrder = 0
     ExplicitWidth = 882
